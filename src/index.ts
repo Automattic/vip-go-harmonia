@@ -1,4 +1,5 @@
-const hello: string = "Hello World";
-console.log(hello);
+import Harmonia from "./harmonia";
 
-export {}
+const harmonia = new Harmonia();
+harmonia.bootstrap();
+harmonia.run();
