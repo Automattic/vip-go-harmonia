@@ -1,18 +1,17 @@
 export default class Harmonia {
+	public constructor() {
+		console.log( 'Hello World!' );
+	}
 
-    public constructor() {
-        console.log( "Hello World!" );
-    }
+	public bootstrap() {
 
-    public bootstrap() {
+	}
 
-    }
+	public run() {
 
-    public run() {
+	}
 
-    }
+	public results() {
 
-    public results() {
-
-    }
+	}
 }

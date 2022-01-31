@@ -1,4 +1,4 @@
-import Harmonia from "./harmonia";
+import Harmonia from './harmonia';
 
 const harmonia = new Harmonia();
 harmonia.bootstrap();
