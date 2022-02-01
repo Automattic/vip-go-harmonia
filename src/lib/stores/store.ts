@@ -27,6 +27,7 @@ export default class Store<TYPE=any> {
 		}
 
 		this.set( key, value );
+		return this;
 	}
 
 	/**
@@ -49,6 +50,7 @@ export default class Store<TYPE=any> {
 	 */
 	set( key: string, value: TYPE ) {
 		this.store[ key ] = value;
+		return this;
 	}
 
 	/**
@@ -57,6 +59,7 @@ export default class Store<TYPE=any> {
 	 */
 	merge( object: { [key: string]: TYPE } ) {
 		this.store = { ...( this.store ), ...object };
+		return this;
 	}
 
 	length() {
