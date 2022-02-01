@@ -11,36 +11,27 @@ export enum TestResultType {
 export type IssuesList = { [key in IssueType]: Issue[]; }
 
 export default class TestResult {
-	private readonly issuesList: IssuesList;
+	private readonly issuesList: Issue[];
 	private testResult: TestResultType;
 
 	constructor() {
-		this.issuesList = {
-			[ IssueType.Blocker ]: [],
-			[ IssueType.Error ]: [],
-			[ IssueType.Warning ]: [],
-			[ IssueType.Notice ]: [],
-		};
+		this.issuesList = [];
 		this.testResult = TestResultType.NotStarted;
 	}
 
-	issues(): IssuesList {
+	issues(): Issue[] {
 		return this.issuesList;
 	}
 
-	issuesFlat(): Issue[] {
-		return Object.values( this.issuesList ).flat();
-	}
-
 	addIssue( issue: Issue ) {
-		this.issuesList[ issue.type ].push( issue );
+		this.issuesList.push( issue );
 	}
 
 	hasIssues(): boolean {
-		return this.issuesFlat().length > 0;
+		return this.issues().length > 0;
 	}
 
-	result(): TestResultType {
+	getType(): TestResultType {
 		return this.testResult;
 	}
 
@@ -49,18 +40,18 @@ export default class TestResult {
 	}
 
 	getBlockers(): Issue[] {
-		return this.issuesList[ IssueType.Blocker ];
+		return this.issuesList.filter( el => el.type === IssueType.Blocker );
 	}
 
 	getErrors(): Issue[] {
-		return this.issuesList[ IssueType.Error ];
+		return this.issuesList.filter( el => el.type === IssueType.Error );
 	}
 
 	getWarnings(): Issue[] {
-		return this.issuesList[ IssueType.Warning ];
+		return this.issuesList.filter( el => el.type === IssueType.Warning );
 	}
 
 	getNotices(): Issue[] {
-		return this.issuesList[ IssueType.Notice ];
+		return this.issuesList.filter( el => el.type === IssueType.Notice );
 	}
 }
