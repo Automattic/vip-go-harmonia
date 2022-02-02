@@ -12,6 +12,7 @@ export default abstract class Test {
 		this._description = description;
 
 		this.testResult = new TestResult( this );
+		this.log( `${ this.constructor.name } has been initialized` );
 	}
 
 	protected prepare() { /* Empty on purpose */ }
@@ -19,6 +20,8 @@ export default abstract class Test {
 
 	public async execute(): Promise<TestResult> {
 		try {
+			this.log( 'Executing test' );
+
 			// Prepare the test
 			await this.prepare();
 
@@ -35,7 +38,7 @@ export default abstract class Test {
 			}
 
 			// Handle the issue
-			console.log( 'Execution aborted' );
+			this.log( 'Execution aborted' );
 			this.testResult.setResult( TestResultType.Aborted );
 		}
 
@@ -55,6 +58,8 @@ export default abstract class Test {
 	}
 
 	private processResult() {
+		this.log( 'Processing the test results' );
+
 		// If there is at least an Error, the test is considered as failed
 		if ( this.testResult.getErrors().length > 0 ) {
 			this.testResult.setResult( TestResultType.Failed );
@@ -114,5 +119,9 @@ export default abstract class Test {
 			name: this._name,
 			description: this._description,
 		};
+	}
+
+	private log( message ) {
+		require( 'debug' )( `test:${ this.constructor.name }` )( message );
 	}
 }

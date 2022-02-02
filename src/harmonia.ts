@@ -4,6 +4,8 @@ import EnvironmentVariables from './lib/configs/envvars.config';
 import Test from './lib/test';
 import TestResult, { TestResultType } from './lib/testresult';
 
+const log = require( 'debug' )( 'harmonia' );
+
 export default class Harmonia {
 	private options: Store<any>;
 	private tests: Test[];
@@ -12,7 +14,7 @@ export default class Harmonia {
 		this.options = new Store();
 		this.tests = [];
 
-		console.log( 'Hello World!' );
+		log( 'Harmonia class initialized' );
 	}
 
 	public bootstrap( siteOptions: SiteConfig, envVars: EnvironmentVariables ) {
@@ -20,20 +22,23 @@ export default class Harmonia {
 			.add( 'env', envVars );
 
 		this.setupTests();
+
+		log( 'Harmonia bootstrap finished' );
 	}
 
 	public async run() {
+		log( 'Starting the tests execution' );
 		for ( const test of this.tests ) {
-			console.log( `Executing test ${ test.name } - ${ test.description }` );
 			// Execute the test
 			const testResult: TestResult = await test.execute();
 
 			// If any of the tests abort, there is no point of keeping running them.
 			if ( testResult.getType() === TestResultType.Aborted ) {
-				console.error( `${ test.name } has returned an Aborted state. Halting all the tests` );
-				break;
+				log( `${ test.name } has returned an Aborted state. Halting all the tests` );
+				return;
 			}
 		}
+		log( 'All tests have been executed' );
 	}
 
 	public results() {
@@ -46,6 +51,7 @@ export default class Harmonia {
 	}
 
 	private setupTests() {
+		log( 'Setting up the tests' );
 		// Register all the necessary tests
 	}
 
