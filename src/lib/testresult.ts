@@ -1,4 +1,5 @@
 import Issue, { IssueType } from './issue';
+import Test from './test';
 
 export enum TestResultType {
 	NotStarted,
@@ -8,15 +9,15 @@ export enum TestResultType {
 	Aborted
 }
 
-export type IssuesList = { [key in IssueType]: Issue[]; }
-
 export default class TestResult {
 	private readonly issuesList: Issue[];
 	private testResult: TestResultType;
+	private test: Test;
 
-	constructor() {
+	constructor( test: Test ) {
 		this.issuesList = [];
 		this.testResult = TestResultType.NotStarted;
+		this.test = test;
 	}
 
 	issues(): Issue[] {
@@ -53,5 +54,13 @@ export default class TestResult {
 
 	getNotices(): Issue[] {
 		return this.issuesList.filter( el => el.type === IssueType.Notice );
+	}
+
+	public toJSON() {
+		return {
+			test: this.test,
+			result: TestResultType[ this.testResult ],
+			issues: this.issuesList,
+		};
 	}
 }

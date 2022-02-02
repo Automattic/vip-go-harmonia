@@ -11,13 +11,13 @@ export default abstract class Test {
 		this._name = name;
 		this._description = description;
 
-		this.testResult = new TestResult();
+		this.testResult = new TestResult( this );
 	}
 
 	protected prepare() { /* Empty on purpose */ }
 	protected abstract run();
 
-	public async execute() {
+	public async execute(): Promise<TestResult> {
 		try {
 			// Prepare the test
 			await this.prepare();
@@ -28,9 +28,9 @@ export default abstract class Test {
 			// Handle the results
 			this.processResult();
 		} catch ( error ) {
+			// Since we only want to process exceptions that are Issues, rethrow the error,
+			// so it can be handled outside this class.
 			if ( ! ( error instanceof Issue ) ) {
-				// Since we only want to process exceptions that are Issues, rethrow the error,
-				// so it can be handled outside this class.
 				throw error;
 			}
 
@@ -38,6 +38,8 @@ export default abstract class Test {
 			console.log( 'Execution aborted' );
 			this.testResult.setResult( TestResultType.Aborted );
 		}
+
+		return this.testResult;
 	}
 
 	get name(): string {
@@ -102,5 +104,12 @@ export default abstract class Test {
 		this.testResult.addIssue( issue );
 
 		return issue;
+	}
+
+	public toJSON() {
+		return {
+			name: this._name,
+			description: this._description,
+		};
 	}
 }

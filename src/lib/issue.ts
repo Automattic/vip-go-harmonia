@@ -35,4 +35,12 @@ export default class Issue {
 		this.documentation = documentation;
 		return this;
 	}
+
+	public toJSON() {
+		return {
+			type: IssueType[ this.type ],
+			message: this.message,
+			documentation: this.documentation,
+		};
+	}
 }

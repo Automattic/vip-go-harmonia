@@ -2,6 +2,7 @@ import Store from './lib/stores/store';
 import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
 import Test from './lib/test';
+import TestResult, { TestResultType } from './lib/testresult';
 
 export default class Harmonia {
 	private options: Store<any>;
@@ -24,13 +25,24 @@ export default class Harmonia {
 	public async run() {
 		for ( const test of this.tests ) {
 			console.log( `Executing test ${ test.name } - ${ test.description }` );
-			await test.execute(); // Execute the test
-			console.log( test.result() );
+			// Execute the test
+			const testResult: TestResult = await test.execute();
+
+			// If any of the tests abort, there is no point of keeping running them.
+			if ( testResult.getType() === TestResultType.Aborted ) {
+				console.error( `${ test.name } has returned an Aborted state. Halting all the tests` );
+				break;
+			}
 		}
 	}
 
 	public results() {
-
+		return this.tests.reduce( ( results: TestResult[], test: Test ) => {
+			if ( test.result().getType() !== TestResultType.NotStarted ) {
+				results.push( test.result() );
+			}
+			return results;
+		}, [] );
 	}
 
 	private setupTests() {

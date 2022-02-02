@@ -15,5 +15,9 @@ const envVars: EnvironmentVariables = new EnvironmentVariables( {
 harmonia.bootstrap( siteOptions, envVars );
 
 harmonia.registerTest( new ExampleTest() );
+harmonia.registerTest( new ExampleTest() );
+harmonia.registerTest( new ExampleTest() );
 
-harmonia.run();
+harmonia.run().then( () => {
+	console.log( JSON.stringify( harmonia.results(), null, 2 ) );
+} );
