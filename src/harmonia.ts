@@ -21,10 +21,10 @@ export default class Harmonia {
 		this.setupTests();
 	}
 
-	public run() {
+	public async run() {
 		for ( const test of this.tests ) {
 			console.log( `Executing test ${ test.name } - ${ test.description }` );
-			test.execute(); // Execute the test
+			await test.execute(); // Execute the test
 			console.log( test.result() );
 		}
 	}

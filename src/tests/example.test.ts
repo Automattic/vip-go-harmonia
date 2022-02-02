@@ -9,7 +9,7 @@ export default class ExampleTest extends Test {
 		console.log( 'This is the test preparation' );
 	}
 
-	run() {
+	async run() {
 		console.log( 'The test is running.' );
 		this.warning( 'Oops, a warning', 'https://example.com' );
 		this.blocker( 'A blocker!', 'https://oops.com' );

@@ -23,7 +23,7 @@ describe( 'harmonia test', () => {
 		expect( test.description ).toBe( 'This is a simple example' );
 	} );
 
-	it( 'should execute and call methods', () => {
+	it( 'should execute and call methods', async () => {
 		const test = new ExampleTest();
 		jest.spyOn( test, 'prepare' );
 		jest.spyOn( test, 'run' );
@@ -32,7 +32,7 @@ describe( 'harmonia test', () => {
 		processResultSpy.mockImplementation( () => {} );
 
 		// Execute
-		test.execute();
+		await test.execute();
 
 		expect( test.prepare ).toHaveBeenCalled();
 		expect( test.run ).toHaveBeenCalled();
@@ -41,7 +41,7 @@ describe( 'harmonia test', () => {
 		processResultSpy.mockRestore();
 	} );
 
-	it( 'should abort when Test throws a blocker issue', () => {
+	it( 'should abort when Test throws a blocker issue', async () => {
 		class TestWithBlocker extends Test {
 			constructor() {
 				super( 'Test', "It's a test" );
@@ -55,7 +55,7 @@ describe( 'harmonia test', () => {
 		}
 
 		const test = new TestWithBlocker();
-		test.execute();
+		await test.execute();
 
 		expect( test.result().getType() ).toBe( TestResultType.Aborted );
 		expect( test.result().getBlockers() ).toHaveLength( 1 );

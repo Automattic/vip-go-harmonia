@@ -17,13 +17,13 @@ export default abstract class Test {
 	protected prepare() { /* Empty on purpose */ }
 	protected abstract run();
 
-	public execute() {
+	public async execute() {
 		try {
 			// Prepare the test
-			this.prepare();
+			await this.prepare();
 
 			// Execute the test
-			this.run();
+			await this.run();
 
 			// Handle the results
 			this.processResult();
