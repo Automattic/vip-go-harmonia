@@ -71,34 +71,37 @@ export default abstract class Test {
 		this.testResult.setResult( TestResultType.Success );
 	}
 
-	protected blocker( message: string, docUrl: string ) {
+	protected blocker( message: string, docUrl?: string ) {
 		// If the issue is a blocker, the test should abort by throwing the issue.
 		throw this.createIssue( message, docUrl )
 			.setType( IssueType.Blocker );
 	}
 
-	protected error( message: string, docUrl: string ) {
+	protected error( message: string, docUrl?: string ) {
 		// If there is an error, the test should be considered as failed
 		this.testResult.setResult( TestResultType.Failed );
 		return this.createIssue( message, docUrl )
 			.setType( IssueType.Error );
 	}
 
-	protected warning( message: string, docUrl: string ) {
+	protected warning( message: string, docUrl?: string ) {
 		return this.createIssue( message, docUrl )
 			.setType( IssueType.Warning );
 	}
 
-	protected notice( message: string, docUrl: string ) {
+	protected notice( message: string, docUrl?: string ) {
 		return this.createIssue( message, docUrl )
 			.setType( IssueType.Notice );
 	}
 
-	private createIssue( message: string, docUrl: string ) {
+	private createIssue( message: string, docUrl?: string ) {
 		const issue: Issue = Issue.build();
 
-		issue.setDocumentation( docUrl )
-			.setMessage( message );
+		issue.setMessage( message );
+
+		if ( docUrl ) {
+			issue.setDocumentation( docUrl );
+		}
 
 		// Store the issue
 		this.testResult.addIssue( issue );

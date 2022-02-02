@@ -7,13 +7,12 @@ export enum IssueType {
 
 export default class Issue {
 	public message: string;
-	public documentation: string;
+	public documentation?: string;
 
 	public type: IssueType;
 
 	private constructor() {
 		this.message = '';
-		this.documentation = '';
 		this.type = IssueType.Notice;
 	}
 
@@ -40,7 +39,7 @@ export default class Issue {
 		return {
 			type: IssueType[ this.type ],
 			message: this.message,
-			documentation: this.documentation,
+			documentation: this.documentation ?? false,
 		};
 	}
 }
