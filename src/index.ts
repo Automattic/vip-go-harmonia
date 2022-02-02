@@ -1,6 +1,7 @@
 import Harmonia from './harmonia';
 import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
+import ExampleTest from './tests/example.test';
 
 const harmonia = new Harmonia();
 
@@ -12,4 +13,11 @@ const envVars: EnvironmentVariables = new EnvironmentVariables( {
 } );
 
 harmonia.bootstrap( siteOptions, envVars );
-harmonia.run();
+
+harmonia.registerTest( new ExampleTest() );
+harmonia.registerTest( new ExampleTest() );
+harmonia.registerTest( new ExampleTest() );
+
+harmonia.run().then( () => {
+	console.log( JSON.stringify( harmonia.results(), null, 2 ) );
+} );
