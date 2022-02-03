@@ -1,5 +1,6 @@
 import TestResult, { TestResultType } from './testresult';
 import Issue, { IssueType } from './issue';
+import eventEmitter from './events';
 
 export default abstract class Test {
 	private _name: string;
@@ -77,26 +78,36 @@ export default abstract class Test {
 	}
 
 	protected blocker( message: string, docUrl?: string ) {
-		// If the issue is a blocker, the test should abort by throwing the issue.
-		throw this.createIssue( message, docUrl )
+		const issue = this.createIssue( message, docUrl )
 			.setType( IssueType.Blocker );
+		this.emit( 'issue', issue );
+		// If the issue is a blocker, the test should abort by throwing the issue.
+		throw issue;
 	}
 
 	protected error( message: string, docUrl?: string ) {
+		const issue = this.createIssue( message, docUrl )
+			.setType( IssueType.Error );
+
 		// If there is an error, the test should be considered as failed
 		this.testResult.setResult( TestResultType.Failed );
-		return this.createIssue( message, docUrl )
-			.setType( IssueType.Error );
+
+		this.emit( 'issue', issue );
+		return issue;
 	}
 
 	protected warning( message: string, docUrl?: string ) {
-		return this.createIssue( message, docUrl )
+		const issue = this.createIssue( message, docUrl )
 			.setType( IssueType.Warning );
+		this.emit( 'issue', issue );
+		return issue;
 	}
 
 	protected notice( message: string, docUrl?: string ) {
-		return this.createIssue( message, docUrl )
+		const issue = this.createIssue( message, docUrl )
 			.setType( IssueType.Notice );
+		this.emit( 'issue', issue );
+		return issue;
 	}
 
 	private createIssue( message: string, docUrl?: string ) {
@@ -123,5 +134,9 @@ export default abstract class Test {
 
 	private log( message ) {
 		require( 'debug' )( `test:${ this.constructor.name }` )( message );
+	}
+
+	private emit( eventName: string, ...args: any[] ): boolean {
+		return eventEmitter.emit( `harmonia:${ eventName }`, ...args );
 	}
 }

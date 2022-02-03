@@ -35,6 +35,10 @@ export default class Issue {
 		return this;
 	}
 
+	getTypeString(): string {
+		return IssueType[ this.type ];
+	}
+
 	public toJSON() {
 		return {
 			type: IssueType[ this.type ],

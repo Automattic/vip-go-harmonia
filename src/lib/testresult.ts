@@ -36,6 +36,10 @@ export default class TestResult {
 		return this.testResult;
 	}
 
+	getTypeString(): string {
+		return TestResultType[ this.testResult ];
+	}
+
 	setResult( result: TestResultType ) {
 		this.testResult = result;
 	}
