@@ -1,4 +1,6 @@
-import Store from '../stores/store';
+import Store, { KeyDontExistError } from '../stores/store';
+
+export class InvalidArgumentsConfig extends Error {}
 
 export default abstract class BaseConfig<TYPE> {
 	private store: Store<TYPE>;
@@ -7,8 +9,27 @@ export default abstract class BaseConfig<TYPE> {
 		this.store = new Store<TYPE>();
 	}
 
-	get( key: string ) {
-		this.store.get( key );
+	public runValidation() {
+		try {
+			this.validate();
+		} catch ( error ) {
+			if ( error instanceof KeyDontExistError ) {
+				throw new InvalidArgumentsConfig( `Missing mandatory key ${ error.key }` );
+			}
+			throw error; // Pass the error to be handled elsewhere
+		}
+	}
+
+	protected validate() {
+		return true;
+	}
+
+	exists( key: string ): boolean {
+		return this.store.exists( key );
+	}
+
+	get( key: string ): TYPE {
+		return this.store.get( key );
 	}
 
 	set( key: string, value: TYPE ) {

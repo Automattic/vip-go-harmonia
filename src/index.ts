@@ -6,7 +6,12 @@ import ExampleTest from './tests/example.test';
 const harmonia = new Harmonia();
 
 // Create dummy site option
-const siteOptions: SiteConfig = new SiteConfig( 1, '14.15', 'wpcomvip/test' );
+const siteOptions: SiteConfig = new SiteConfig( {
+	siteID: 1,
+	nodejsVersion: '14.15',
+	repository: 'wpcomvip/test',
+} );
+
 const envVars: EnvironmentVariables = new EnvironmentVariables( {
 	THIS_IS_A_TEST: 'true',
 	HELLO: 123,

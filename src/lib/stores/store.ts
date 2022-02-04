@@ -1,5 +1,13 @@
-export class KeyDontExistError extends Error {}
-export class KeyAlreadyExistsError extends Error {}
+export class KeyDontExistError extends Error {
+	constructor( public key ) {
+		super();
+	}
+}
+export class KeyAlreadyExistsError extends Error {
+	constructor( public key ) {
+		super();
+	}
+}
 
 export default class Store<TYPE=any> {
 	private store: { [key: string]: TYPE };
@@ -23,7 +31,7 @@ export default class Store<TYPE=any> {
 	 */
 	add( key: string, value: TYPE ) {
 		if ( this.exists( key ) ) {
-			throw new KeyAlreadyExistsError;
+			throw new KeyAlreadyExistsError( key );
 		}
 
 		this.set( key, value );
@@ -36,7 +44,7 @@ export default class Store<TYPE=any> {
 	 */
 	get( key: string ) {
 		if ( ! this.exists( key ) ) {
-			throw new KeyDontExistError;
+			throw new KeyDontExistError( key );
 		}
 
 		return this.store[ key ];
@@ -58,6 +66,8 @@ export default class Store<TYPE=any> {
 	 * @param object
 	 */
 	merge( object: { [key: string]: TYPE } ) {
+		// Remove undefined values
+		Object.keys( object ).forEach( key => object[ key ] === undefined && delete object[ key ] );
 		this.store = { ...( this.store ), ...object };
 		return this;
 	}

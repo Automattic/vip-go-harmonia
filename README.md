@@ -8,10 +8,19 @@
 $ npm run build 
 ```
 
-## Executing
+## Running the CLI
+
+After building Harmonia, it should be possible to run the CLI directly using the following command:
 
 ```bash
-$ node dist/index.js
+$ node dist/cli.js
+```
+
+The command can be linked and installed on the environment using `npm link`:
+
+```bash
+$ npm link
+$ harmonia --help
 ```
 
 ## Links & References
