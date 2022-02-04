@@ -3,8 +3,14 @@ import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
 import Test from './lib/test';
 import TestResult, { TestResultType } from './lib/testresult';
-import ExampleTest from './tests/example.test';
 import eventEmitter from './lib/events';
+import stripAnsi from 'strip-ansi';
+/**
+ * Test imports
+ */
+import ExampleTest from './tests/example.test';
+import NpmScriptsTest from './tests/npm-scripts.test';
+import PackageValidationTest from './tests/package-validation.test';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -63,14 +69,26 @@ export default class Harmonia {
 		}, [] );
 	}
 
+	public resultsJSON( strip: boolean = true ) {
+		return JSON.stringify( this.results(), ( key, value ) => {
+			if ( strip && typeof value === 'string' ) {
+				return stripAnsi( value );
+			}
+			return value;
+		} );
+	}
+
 	private setupTests() {
 		log( 'Setting up the tests' );
-		this.registerTest( new ExampleTest() );
 		// Register all the necessary tests
+		this.registerTest( new NpmScriptsTest() );
+		this.registerTest( new PackageValidationTest() );
 	}
 
 	public registerTest( test: Test ) {
-		this.tests.push( test );
+		log( `Registering test ${ test.name } (${ test.constructor.name })` );
+		test.setOptions( this.options );	// Set the test options
+		this.tests.push( test );			// Store the test
 	}
 
 	public on( eventName: string, listener: ( ...args: any[] ) => void ) {

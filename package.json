@@ -59,6 +59,7 @@
     "command-line-usage": "^6.1.1",
     "debug": "^4.3.3",
     "semver": "^7.3.5",
+    "strip-ansi": "^6.0.1",
     "supports-color": "^9.2.1"
   }
 }
