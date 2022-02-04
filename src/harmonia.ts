@@ -13,8 +13,6 @@ import PackageValidationTest from './tests/package-validation.test';
 
 const log = require( 'debug' )( 'harmonia' );
 
-export class HarmoniaError extends Error {}
-
 export default class Harmonia {
 	private options: Store<any>;
 	private tests: Test[];

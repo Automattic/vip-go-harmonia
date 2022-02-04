@@ -1,4 +1,4 @@
-import { HarmoniaError } from '../../harmonia';
+import { HarmoniaError } from '../errors';
 
 export class KeyDontExistError extends HarmoniaError {
 	constructor( public key ) {

@@ -1,5 +1,5 @@
 import Store, { KeyDontExistError } from '../stores/store';
-import { HarmoniaError } from '../../harmonia';
+import { HarmoniaError } from '../errors';
 
 export class InvalidArgumentsConfig extends HarmoniaError {}
 
