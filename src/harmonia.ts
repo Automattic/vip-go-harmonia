@@ -8,11 +8,12 @@ import stripAnsi from 'strip-ansi';
 /**
  * Test imports
  */
-import ExampleTest from './tests/example.test';
 import NpmScriptsTest from './tests/npm-scripts.test';
 import PackageValidationTest from './tests/package-validation.test';
 
 const log = require( 'debug' )( 'harmonia' );
+
+export class HarmoniaError extends Error {}
 
 export default class Harmonia {
 	private options: Store<any>;
@@ -100,3 +101,4 @@ export default class Harmonia {
 		return eventEmitter.emit( `harmonia:${ eventName }`, ...args );
 	}
 }
+

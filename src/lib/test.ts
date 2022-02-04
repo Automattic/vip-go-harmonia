@@ -3,8 +3,6 @@ import Issue, { IssueType } from './issue';
 import eventEmitter from './events';
 import Store from './stores/store';
 
-export class HarmoniaError extends Error {}
-
 export default abstract class Test {
 	private readonly _name: string;
 	private readonly _description: string;
