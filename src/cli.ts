@@ -7,8 +7,8 @@ import EnvironmentVariables from './lib/configs/envvars.config';
 import chalk from 'chalk';
 import path from 'path';
 import Test from './lib/test';
-import TestResult from './lib/testresult';
-import Issue from './lib/issue';
+import TestResult, { TestResultType } from './lib/testresult';
+import Issue, { IssueType } from './lib/issue';
 
 let consolelog;
 function supressOutput() {
@@ -163,11 +163,41 @@ harmonia.on( 'beforeTest', ( test: Test ) => {
 
 harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
 	const issues = result.issues();
-	console.log( `  Test finished. Test finished with ${ result.getTypeString() } and ${ issues.length } issues` );
+	switch ( result.getType() ) {
+		case TestResultType.Success:
+			console.log( `  ${ chalk.bgGreen( 'Test passed with no errors' ) }` );
+			break;
+		case TestResultType.Failed:
+			console.log( `  ${ chalk.bgRed( 'Test failed.' ) } - There were ${ result.getErrors().length } errors.` );
+			break;
+		case TestResultType.PartialSuccess:
+			console.log( `  ${ chalk.bgYellow( 'Test partially failed.' ) } - There were ${ result.issues().length } issues found.` );
+			break;
+		case TestResultType.Aborted:
+			console.log( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
+				'the application fully incompatible with VIP Go.' );
+			break;
+	}
 } );
 
 harmonia.on( 'issue', ( issue: Issue ) => {
-	console.log( `    [${ issue.getTypeString() }] ${ issue.message } (${ issue.documentation })` );
+	let issueTypeString = issue.getTypeString();
+	switch ( issue.type ) {
+		case IssueType.Blocker:
+			issueTypeString = chalk.bgRedBright.underline.bold( issueTypeString );
+			break;
+		case IssueType.Error:
+			issueTypeString = chalk.bgRed.bold( issueTypeString );
+			break;
+		case IssueType.Warning:
+			issueTypeString = chalk.bgYellow.bold( issueTypeString );
+			break;
+		case IssueType.Notice:
+			issueTypeString = chalk.bgGray.bold( issueTypeString );
+			break;
+	}
+
+	console.log( `    ${ issueTypeString } \t ${ issue.message } (${ issue.documentation })` );
 } );
 
 harmonia.run().then( ( results: TestResult[] ) => {
