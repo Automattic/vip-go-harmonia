@@ -29,6 +29,7 @@ const optionDefinitions = [
 	{ name: 'wait', alias: 'w', type: Number, defaultValue: 3000 },
 	{ name: 'verbose', type: Boolean, defaultValue: false },
 	{ name: 'json', type: Boolean, defaultValue: false },
+	{ name: 'path', type: String, defaultValue: process.cwd() },
 	{ name: 'help', alias: 'h', type: Boolean },
 ];
 
@@ -76,9 +77,14 @@ const optionsSections = [
 			},
 			{
 				name: 'json',
-				typeLabel: '{underline Boolean}',
 				defaultOption: 'false',
 				description: 'Output only the JSON results of the tests',
+			},
+			{
+				name: 'path',
+				typeLabel: '{underline Path}',
+				defaultOption: process.cwd(),
+				description: `Path for the project where tests should execute (${ process.cwd() })`,
 			},
 			{
 				name: 'help',
@@ -122,14 +128,14 @@ const siteOptions = new SiteConfig( {
 const envVars = new EnvironmentVariables( {} );
 
 // Get package.json
-const packageJSONfile = path.join( process.cwd(), 'package.json' );
+const packageJSONfile = path.resolve( options.path, 'package.json' );
 let packageJSON;
 try {
 	packageJSON = require( packageJSONfile );
 	siteOptions.setPackageJSON( packageJSON );
 } catch ( error ) {
 	console.error( chalk.bold.redBright( 'Error:' ),
-		`Could not find a ${ chalk.yellow( 'package.json' ) } in the current folder (${ process.cwd() }).` );
+		`Could not find a ${ chalk.yellow( 'package.json' ) } in the current folder (${ options.path }).` );
 	process.exit( 1 );
 }
 
@@ -168,7 +174,7 @@ harmonia.run().then( ( results: TestResult[] ) => {
 	// Re-enable the output
 	if ( options.json ) {
 		enableOutput();
-		console.log( JSON.stringify( results ) );
+		console.log( harmonia.resultsJSON() );
 	}
 	process.exit( 0 );
 } );
