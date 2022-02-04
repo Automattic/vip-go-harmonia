@@ -34,7 +34,7 @@ export default class Harmonia {
 		this.emit( 'harmonia:ready', this );
 	}
 
-	public async run() {
+	public async run(): Promise< TestResult[] > {
 		this.emit( 'startingTests' );
 		log( 'Starting the tests execution' );
 		for ( const test of this.tests ) {
@@ -46,14 +46,15 @@ export default class Harmonia {
 			if ( testResult.getType() === TestResultType.Aborted ) {
 				this.emit( 'testAborted', test, testResult );
 				log( `${ test.name } has returned an Aborted state. Halting all the tests` );
-				return;
+				return this.results();
 			}
 		}
 		this.emit( 'testsDone' );
 		log( 'All tests have been executed' );
+		return this.results();
 	}
 
-	public results() {
+	public results(): TestResult[] {
 		return this.tests.reduce( ( results: TestResult[], test: Test ) => {
 			if ( test.result().getType() !== TestResultType.NotStarted ) {
 				results.push( test.result() );

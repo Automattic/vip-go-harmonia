@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#! /usr/bin/env node
 import Harmonia from './harmonia';
 import commandLineArgs from 'command-line-args';
 import commandLineUsage from 'command-line-usage';
@@ -10,12 +10,15 @@ import Test from './lib/test';
 import TestResult from './lib/testresult';
 import Issue from './lib/issue';
 
-console.log( '  /\\  /\\__ _ _ __ _ __ ___   ___  _ __ (_) __ _ ' );
-console.log( ' / /_/ / _` | \'__| \'_ ` _ \\ / _ \\| \'_ \\| |/ _` |' );
-console.log( '/ __  / (_| | |  | | | | | | (_) | | | | | (_| |' );
-console.log( '\\/ /_/ \\__,_|_|  |_| |_| |_|\\___/|_| |_|_|\\__,_|' );
-console.log( 'VIP Harmonia - Application testing made easy' );
-console.log();
+let consolelog;
+function supressOutput() {
+	consolelog = console.log;
+	console.log = () => {};
+}
+
+function enableOutput() {
+	console.log = consolelog;
+}
 
 const randomPort = Math.floor( Math.random() * 1000 ) + 3001; // Get a PORT from 3001 and 3999
 
@@ -25,6 +28,7 @@ const optionDefinitions = [
 	{ name: 'port', alias: 'p', type: Number, defaultValue: randomPort },
 	{ name: 'wait', alias: 'w', type: Number, defaultValue: 3000 },
 	{ name: 'verbose', type: Boolean, defaultValue: false },
+	{ name: 'json', type: Boolean, defaultValue: false },
 	{ name: 'help', alias: 'h', type: Boolean },
 ];
 
@@ -71,12 +75,30 @@ const optionsSections = [
 				description: 'Increase logging level to include app build and server boot up messages',
 			},
 			{
+				name: 'json',
+				typeLabel: '{underline Boolean}',
+				defaultOption: 'false',
+				description: 'Output only the JSON results of the tests',
+			},
+			{
 				name: 'help',
 				description: 'Print this usage guide',
 			},
 		],
 	},
 ];
+
+// If the JSON option is enabled, all the stdout should be suppressed to prevent polluting the output.
+if ( options.json ) {
+	supressOutput();
+}
+
+console.log( '  /\\  /\\__ _ _ __ _ __ ___   ___  _ __ (_) __ _ ' );
+console.log( ' / /_/ / _` | \'__| \'_ ` _ \\ / _ \\| \'_ \\| |/ _` |' );
+console.log( '/ __  / (_| | |  | | | | | | (_) | | | | | (_| |' );
+console.log( '\\/ /_/ \\__,_|_|  |_| |_| |_|\\___/|_| |_|_|\\__,_|' );
+console.log( 'VIP Harmonia - Application testing made easy' );
+console.log();
 
 if ( options.help ) {
 	console.log( commandLineUsage( optionsSections ) );
@@ -142,7 +164,12 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 	console.log( `    [${ issue.getTypeString() }] ${ issue.message } (${ issue.documentation })` );
 } );
 
-harmonia.run().then( () => {
-	console.log( chalk.green( 'Yaay.' ) );
+harmonia.run().then( ( results: TestResult[] ) => {
+	// Re-enable the output
+	if ( options.json ) {
+		enableOutput();
+		console.log( JSON.stringify( results ) );
+	}
 	process.exit( 0 );
 } );
+

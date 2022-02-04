@@ -11,7 +11,7 @@
     "exec:debug": "DEBUG=* npm run exec",
     "test": "npm run check-types && npm run lint && jest",
     "check-types": "tsc",
-    "build": "babel src -d dist --extensions '.ts,.js'",
+    "build": "babel src -d dist --extensions '.ts,.js' && chmod +x dist/cli.js",
     "build:watch": "babel src -d dist --watch",
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .ts"
