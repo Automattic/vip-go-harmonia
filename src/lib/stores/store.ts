@@ -1,9 +1,11 @@
-export class KeyDontExistError extends Error {
+import { HarmoniaError } from '../errors';
+
+export class KeyDontExistError extends HarmoniaError {
 	constructor( public key ) {
 		super();
 	}
 }
-export class KeyAlreadyExistsError extends Error {
+export class KeyAlreadyExistsError extends HarmoniaError {
 	constructor( public key ) {
 		super();
 	}

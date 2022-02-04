@@ -1,17 +1,20 @@
 import TestResult, { TestResultType } from './testresult';
 import Issue, { IssueType } from './issue';
 import eventEmitter from './events';
+import Store from './stores/store';
 
 export default abstract class Test {
-	private _name: string;
-	private _description: string;
+	private readonly _name: string;
+	private readonly _description: string;
 
 	private readonly testResult: TestResult;
+	private _options: Store<any>;
 
 	protected constructor( name: string, description: string ) {
 		this._name = name;
 		this._description = description;
 
+		this._options = new Store<any>();
 		this.testResult = new TestResult( this );
 		this.log( `${ this.constructor.name } has been initialized` );
 	}
@@ -32,15 +35,15 @@ export default abstract class Test {
 			// Handle the results
 			this.processResult();
 		} catch ( error ) {
-			// Since we only want to process exceptions that are Issues, rethrow the error,
-			// so it can be handled outside this class.
-			if ( ! ( error instanceof Issue ) ) {
-				throw error;
+			if ( error instanceof Issue ) {
+				this.log( 'Execution aborted' );
+				this.testResult.setResult( TestResultType.Aborted );
+				return this.testResult;
 			}
 
-			// Handle the issue
-			this.log( 'Execution aborted' );
-			this.testResult.setResult( TestResultType.Aborted );
+			// Since we only want to process exceptions that are Issues, rethrow the error,
+			// so it can be handled outside this class.
+			throw error;
 		}
 
 		return this.testResult;
@@ -52,6 +55,18 @@ export default abstract class Test {
 
 	get description(): string {
 		return this._description;
+	}
+
+	public setOptions( value: Store<any> ) {
+		this._options = value;
+	}
+
+	protected getOption( name ): any {
+		return this._options.get( 'site' ).get( name );
+	}
+
+	protected getEnvVar( name ): string|boolean|number {
+		return this._options.get( 'env' ).get( name );
 	}
 
 	public result() {

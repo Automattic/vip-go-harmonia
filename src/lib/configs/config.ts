@@ -1,6 +1,7 @@
 import Store, { KeyDontExistError } from '../stores/store';
+import { HarmoniaError } from '../errors';
 
-export class InvalidArgumentsConfig extends Error {}
+export class InvalidArgumentsConfig extends HarmoniaError {}
 
 export default abstract class BaseConfig<TYPE> {
 	private store: Store<TYPE>;
