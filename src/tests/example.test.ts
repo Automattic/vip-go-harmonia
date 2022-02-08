@@ -6,13 +6,13 @@ export default class ExampleTest extends Test {
 	}
 
 	prepare() {
-		console.log( 'This is the test preparation' );
+		this.log( 'This is the test preparation' );
 	}
 
 	async run() {
-		console.log( 'The test is running.' );
+		this.log( 'The test is running.' );
 		this.warning( 'Oops, a warning', 'https://example.com' );
 		this.error( 'Oops, a error without documentation' );
-		this.blocker( 'A blocker!', 'https://oops.com' );
+		// this.blocker( 'A blocker!', 'https://oops.com' );
 	}
 }

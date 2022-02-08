@@ -10,6 +10,8 @@ import stripAnsi from 'strip-ansi';
  */
 import NpmScriptsTest from './tests/npm-scripts.test';
 import PackageValidationTest from './tests/package-validation.test';
+import TestSuite from './lib/testsuite';
+import ExampleTest from './tests/example.test';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -44,17 +46,15 @@ export default class Harmonia {
 		log( 'Starting the tests execution' );
 		for ( const test of this.tests ) {
 			// Execute the test
-			this.emit( 'beforeTest', test );
 			const testResult: TestResult = await test.execute();
-			this.emit( 'afterTest', test, testResult );
+
 			// If any of the tests abort, there is no point of keeping running them.
 			if ( testResult.getType() === TestResultType.Aborted ) {
-				this.emit( 'testAborted', test, testResult );
 				log( `${ test.name } has returned an Aborted state. Halting all the tests` );
-				return this.results();
+				break;
 			}
 		}
-		this.emit( 'testsDone' );
+		this.emit( 'testsDone', this.results() );
 		log( 'All tests have been executed' );
 		return this.results();
 	}
@@ -80,8 +80,15 @@ export default class Harmonia {
 	private setupTests() {
 		log( 'Setting up the tests' );
 		// Register all the necessary tests
-		this.registerTest( new NpmScriptsTest() );
-		this.registerTest( new PackageValidationTest() );
+		// this.registerTest( new NpmScriptsTest() );
+		// this.registerTest( new PackageValidationTest() );
+
+		const testSuite = new TestSuite( 'Node.JS', 'Test a node.JS site' )
+			.addTest( new NpmScriptsTest() )
+			.addTest( new PackageValidationTest() )
+			.addTest( new ExampleTest() );
+
+		this.registerTest( testSuite );
 	}
 
 	public registerTest( test: Test ) {

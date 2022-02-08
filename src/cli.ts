@@ -9,6 +9,7 @@ import path from 'path';
 import Test from './lib/test';
 import TestResult, { TestResultType } from './lib/testresult';
 import Issue, { IssueType } from './lib/issue';
+import TestSuite, { TestSuiteResult } from './lib/testsuite';
 
 let consolelog;
 function supressOutput() {
@@ -157,6 +158,17 @@ console.log( ` * Running tests for the ${ packageJSON.name } app (@${ options.si
 console.log();
 
 // Register the event handlers to output some information during the execution
+
+harmonia.on( 'beforeTestSuite', ( suite: TestSuite ) => {
+	console.log( ` >> Running test suite ${ chalk.bold( suite.name ) } - ${ chalk.italic( suite.description ) } ` );
+	console.log();
+} );
+
+harmonia.on( 'afterTestSuite', ( suite: TestSuite, result: TestSuiteResult ) => {
+	console.log( ` >> Finished running ${ chalk.bold( suite.name ) } suite` );
+	console.log();
+} );
+
 harmonia.on( 'beforeTest', ( test: Test ) => {
 	console.log( `  [ ${ chalk.bold( test.name ) } ] - ${ test.description }` );
 } );
@@ -178,6 +190,7 @@ harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
 				'the application fully incompatible with VIP Go.' );
 			break;
 	}
+	console.log();
 } );
 
 harmonia.on( 'issue', ( issue: Issue ) => {

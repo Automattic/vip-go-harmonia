@@ -7,8 +7,8 @@ export default abstract class Test {
 	private readonly _name: string;
 	private readonly _description: string;
 
-	private readonly testResult: TestResult;
-	private _options: Store<any>;
+	protected readonly testResult: TestResult;
+	protected _options: Store<any>;
 
 	protected constructor( name: string, description: string ) {
 		this._name = name;
@@ -24,8 +24,8 @@ export default abstract class Test {
 
 	public async execute(): Promise<TestResult> {
 		try {
+			this.emit( 'beforeTest', this );
 			this.log( 'Executing test' );
-
 			// Prepare the test
 			await this.prepare();
 
@@ -34,10 +34,16 @@ export default abstract class Test {
 
 			// Handle the results
 			this.processResult();
+
+			this.emit( 'afterTest', this, this.testResult );
 		} catch ( error ) {
 			if ( error instanceof Issue ) {
 				this.log( 'Execution aborted' );
 				this.testResult.setResult( TestResultType.Aborted );
+
+				this.emit( 'testAborted', this, this.testResult );
+				this.emit( 'afterTest', this, this.testResult );
+
 				return this.testResult;
 			}
 
@@ -73,7 +79,7 @@ export default abstract class Test {
 		return this.testResult;
 	}
 
-	private processResult() {
+	protected processResult() {
 		this.log( 'Processing the test results' );
 
 		// If there is at least an Error, the test is considered as failed
@@ -147,11 +153,11 @@ export default abstract class Test {
 		};
 	}
 
-	private log( message ) {
+	protected log( message ) {
 		require( 'debug' )( `test:${ this.constructor.name }` )( message );
 	}
 
-	private emit( eventName: string, ...args: any[] ): boolean {
+	protected emit( eventName: string, ...args: any[] ): boolean {
 		return eventEmitter.emit( `harmonia:${ eventName }`, ...args );
 	}
 }
