@@ -1,8 +1,8 @@
 import Store from './lib/stores/store';
 import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
-import Test from './lib/test';
-import TestResult, { TestResultType } from './lib/testresult';
+import Test from './lib/tests/test';
+import TestResult, { TestResultType } from './lib/results/testresult';
 import eventEmitter from './lib/events';
 import stripAnsi from 'strip-ansi';
 /**
@@ -10,7 +10,7 @@ import stripAnsi from 'strip-ansi';
  */
 import NpmScriptsTest from './tests/npm-scripts.test';
 import PackageValidationTest from './tests/package-validation.test';
-import TestSuite from './lib/testsuite';
+import TestSuite from './lib/tests/testsuite';
 import ExampleTest from './tests/example.test';
 
 const log = require( 'debug' )( 'harmonia' );
@@ -85,8 +85,7 @@ export default class Harmonia {
 
 		const testSuite = new TestSuite( 'Node.JS', 'Test a node.JS site' )
 			.addTest( new NpmScriptsTest() )
-			.addTest( new PackageValidationTest() )
-			.addTest( new ExampleTest() );
+			.addTest( new PackageValidationTest() );
 
 		this.registerTest( testSuite );
 	}

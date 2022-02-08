@@ -1,5 +1,5 @@
-import Test from '../../src/lib/test';
-import { TestResultType } from '../../src/lib/testresult';
+import Test from '../../src/lib/tests/test';
+import { TestResultType } from '../../src/lib/results/testresult';
 
 class ExampleTest extends Test {
 	constructor() {

@@ -1,7 +1,7 @@
-import TestResult, { TestResultType } from './testresult';
-import Issue, { IssueType } from './issue';
-import eventEmitter from './events';
-import Store from './stores/store';
+import TestResult, { TestResultType } from '../results/testresult';
+import Issue, { IssueType } from '../issue';
+import eventEmitter from '../events';
+import Store from '../stores/store';
 
 export default abstract class Test {
 	private readonly _name: string;

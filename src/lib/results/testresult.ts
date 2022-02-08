@@ -1,5 +1,5 @@
-import Issue, { IssueType } from './issue';
-import Test from './test';
+import Issue, { IssueType } from '../issue';
+import Test from '../tests/test';
 
 export enum TestResultType {
 	NotStarted,

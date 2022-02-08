@@ -1,65 +1,7 @@
 import Test from './test';
-import TestResult, { TestResultType } from './testresult';
-import Issue from './issue';
-import Store from './stores/store';
-
-export class TestSuiteResult extends TestResult {
-	private _tests: Test[];
-
-	constructor( test: TestSuite ) {
-		super( test );
-		this._tests = test.tests();
-	}
-
-	getBlockers(): Issue[] {
-		let issues: Issue[] = [];
-		for ( const test of this._tests ) {
-			issues = [ ...issues, ...test.result().getBlockers() ];
-		}
-		return issues;
-	}
-
-	getErrors(): Issue[] {
-		let issues: Issue[] = [];
-		for ( const test of this._tests ) {
-			issues = [ ...issues, ...test.result().getErrors() ];
-		}
-		return issues;
-	}
-
-	getWarnings(): Issue[] {
-		let issues: Issue[] = [];
-		for ( const test of this._tests ) {
-			issues = [ ...issues, ...test.result().getWarnings() ];
-		}
-		return issues;
-	}
-
-	getNotices(): Issue[] {
-		let issues: Issue[] = [];
-		for ( const test of this._tests ) {
-			issues = [ ...issues, ...test.result().getNotices() ];
-		}
-		return issues;
-	}
-
-	public results(): TestResult[] {
-		return this._tests.reduce( ( results: TestResult[], test: Test ) => {
-			if ( test.result().getType() !== TestResultType.NotStarted ) {
-				results.push( test.result() );
-			}
-			return results;
-		}, [] );
-	}
-
-	toJSON(): object {
-		return {
-			testSuite: this.test(),
-			result: this.getTypeString(),
-			tests: this.results(),
-		};
-	}
-}
+import TestResult, { TestResultType } from '../results/testresult';
+import Store from '../stores/store';
+import TestSuiteResult from '../results/testsuiteresult';
 
 export default class TestSuite extends Test {
 	private readonly _tests: Test[];

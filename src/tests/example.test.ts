@@ -1,4 +1,4 @@
-import Test from '../lib/test';
+import Test from '../lib/tests/test';
 
 export default class ExampleTest extends Test {
 	constructor() {

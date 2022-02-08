@@ -6,10 +6,11 @@ import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
 import chalk from 'chalk';
 import path from 'path';
-import Test from './lib/test';
-import TestResult, { TestResultType } from './lib/testresult';
+import Test from './lib/tests/test';
+import TestResult, { TestResultType } from './lib/results/testresult';
 import Issue, { IssueType } from './lib/issue';
-import TestSuite, { TestSuiteResult } from './lib/testsuite';
+import TestSuite from './lib/tests/testsuite';
+import TestSuiteResult from './lib/results/testsuiteresult';
 
 let consolelog;
 function supressOutput() {
