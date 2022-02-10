@@ -2,6 +2,7 @@ import Harmonia from './harmonia';
 import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
 import ExampleTest from './tests/example.test';
+import Store from './lib/stores/store';
 
 const harmonia = new Harmonia();
 
@@ -24,5 +25,5 @@ harmonia.registerTest( new ExampleTest() );
 harmonia.registerTest( new ExampleTest() );
 
 harmonia.run().then( () => {
-	console.log( JSON.stringify( harmonia.results(), null, 2 ) );
+	console.log( harmonia.resultsJSON() );
 } );
