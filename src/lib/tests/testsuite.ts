@@ -37,6 +37,10 @@ export default class TestSuite extends Test {
 		// Process the results
 		this.processResult();
 
+		// Clean-up after test
+		this.emit( 'testCleanUp', this, this.testResult );
+		await this.cleanUp();
+
 		this.emit( 'afterTestSuite', this, this.testResult );
 
 		return this.testResult;

@@ -21,6 +21,7 @@ export default abstract class Test {
 
 	protected prepare() { /* Empty on purpose */ }
 	protected abstract run();
+	protected cleanUp() { /* Empty on purpose */ }
 
 	public async execute(): Promise<TestResult> {
 		try {
@@ -37,19 +38,19 @@ export default abstract class Test {
 
 			this.emit( 'afterTest', this, this.testResult );
 		} catch ( error ) {
-			if ( error instanceof Issue ) {
-				this.log( 'Execution aborted' );
-				this.testResult.setResult( TestResultType.Aborted );
-
-				this.emit( 'testAborted', this, this.testResult );
-				this.emit( 'afterTest', this, this.testResult );
-
-				return this.testResult;
+			if ( ! ( error instanceof Issue ) ) {
+				// Since we only want to process exceptions that are Issues, rethrow the error,
+				// so it can be handled outside this class.
+				throw error;
 			}
+			this.log( 'Execution aborted' );
+			this.testResult.setResult( TestResultType.Aborted );
 
-			// Since we only want to process exceptions that are Issues, rethrow the error,
-			// so it can be handled outside this class.
-			throw error;
+			this.emit( 'testAborted', this, this.testResult );
+			this.emit( 'afterTest', this, this.testResult );
+		} finally {
+			this.emit( 'testCleanUp', this, this.testResult );
+			await this.cleanUp();
 		}
 
 		return this.testResult;

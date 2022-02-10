@@ -39,11 +39,11 @@ export default class Issue {
 		return IssueType[ this.type ];
 	}
 
-	public toJSON() {
+	public toJSON(): { type: string, message:string, documentation?: string } {
 		return {
 			type: IssueType[ this.type ],
 			message: this.message,
-			documentation: this.documentation ?? false,
+			documentation: this.documentation,
 		};
 	}
 }
