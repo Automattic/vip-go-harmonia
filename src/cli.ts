@@ -210,7 +210,9 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 			break;
 	}
 
-	console.log( `    ${ issueTypeString } \t ${ issue.message } (${ issue.documentation })` );
+	const documentation = issue.documentation ? `(${ issue.documentation })` : '';
+
+	console.log( `    ${ issueTypeString } \t ${ issue.message } ${ documentation }` );
 } );
 
 harmonia.run().then( ( results: TestResult[] ) => {

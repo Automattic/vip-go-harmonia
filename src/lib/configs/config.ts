@@ -40,4 +40,8 @@ export default abstract class BaseConfig<TYPE> {
 	merge( object: { [key: string]: TYPE } ) {
 		this.store.merge( object );
 	}
+
+	all(): { [key: string]: TYPE } {
+		return this.store.all();
+	}
 }

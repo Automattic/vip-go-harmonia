@@ -8,8 +8,8 @@ export enum IssueType {
 export default class Issue {
 	public message: string;
 	public documentation?: string;
-
 	public type: IssueType;
+	public data?: object;
 
 	private constructor() {
 		this.message = '';
@@ -20,18 +20,23 @@ export default class Issue {
 		return new Issue();
 	}
 
-	setType( type: IssueType ) {
+	setType( type: IssueType ): Issue {
 		this.type = type;
 		return this;
 	}
 
-	setMessage( message: string ) {
+	setMessage( message: string ): Issue {
 		this.message = message;
 		return this;
 	}
 
-	setDocumentation( documentation: string ) {
+	setDocumentation( documentation: string ): Issue {
 		this.documentation = documentation;
+		return this;
+	}
+
+	setData( data: object ): Issue {
+		this.data = data;
 		return this;
 	}
 
@@ -39,11 +44,12 @@ export default class Issue {
 		return IssueType[ this.type ];
 	}
 
-	public toJSON(): { type: string, message:string, documentation?: string } {
+	public toJSON(): { type: string, message:string, documentation?: string, data?: object } {
 		return {
 			type: IssueType[ this.type ],
 			message: this.message,
 			documentation: this.documentation,
+			data: this.data,
 		};
 	}
 }
