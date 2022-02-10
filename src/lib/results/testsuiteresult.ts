@@ -4,7 +4,7 @@ import Issue from '../issue';
 import TestSuite from '../tests/testsuite';
 
 export default class TestSuiteResult extends TestResult {
-	private _tests: Test[];
+	private readonly _tests: Test[];
 
 	constructor( test: TestSuite ) {
 		super( test );
@@ -54,7 +54,7 @@ export default class TestSuiteResult extends TestResult {
 
 	toJSON(): object {
 		return {
-			testSuite: this.test(),
+			...this.test().toJSON(),
 			result: this.getTypeString(),
 			tests: this.results(),
 		};

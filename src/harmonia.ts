@@ -80,14 +80,12 @@ export default class Harmonia {
 	private setupTests() {
 		log( 'Setting up the tests' );
 		// Register all the necessary tests
-		// this.registerTest( new NpmScriptsTest() );
-		// this.registerTest( new PackageValidationTest() );
-
-		const testSuite = new TestSuite( 'Node.JS', 'Test a node.JS site' )
+		this.registerTest( new TestSuite( 'Node.JS', 'Test a node.JS site' )
 			.addTest( new NpmScriptsTest() )
-			.addTest( new PackageValidationTest() );
+			.addTest( new PackageValidationTest() ) );
 
-		this.registerTest( testSuite );
+		this.registerTest( new TestSuite( 'Docker', 'Builds and executes the docker environment' )
+			.addTest( new ExampleTest() ) );
 	}
 
 	public registerTest( test: Test ) {

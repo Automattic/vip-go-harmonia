@@ -159,7 +159,6 @@ console.log( ` * Running tests for the ${ packageJSON.name } app (@${ options.si
 console.log();
 
 // Register the event handlers to output some information during the execution
-
 harmonia.on( 'beforeTestSuite', ( suite: TestSuite ) => {
 	console.log( ` >> Running test suite ${ chalk.bold( suite.name ) } - ${ chalk.italic( suite.description ) } ` );
 	console.log();

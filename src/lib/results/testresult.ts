@@ -66,7 +66,7 @@ export default class TestResult {
 
 	public toJSON(): object {
 		return {
-			test: this._test,
+			...this._test.toJSON(),
 			result: TestResultType[ this.testResult ],
 			issues: this.issuesList,
 		};
