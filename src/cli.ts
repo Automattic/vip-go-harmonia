@@ -11,6 +11,7 @@ import TestResult, { TestResultType } from './lib/results/testresult';
 import Issue, { IssueType } from './lib/issue';
 import TestSuite from './lib/tests/testsuite';
 import TestSuiteResult from './lib/results/testsuiteresult';
+import { setCwd } from './utils/shell';
 
 let consolelog;
 function supressOutput() {
@@ -111,6 +112,10 @@ console.log();
 if ( options.help ) {
 	console.log( commandLineUsage( optionsSections ) );
 	process.exit();
+}
+
+if ( options.path ) {
+	setCwd( options.path );
 }
 
 // Create the Harmonia object

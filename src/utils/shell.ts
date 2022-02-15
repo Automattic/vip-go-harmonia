@@ -1,6 +1,7 @@
 import execa, { ExecaChildProcess } from 'execa';
 
 const subprocesses: ExecaChildProcess[] = [];
+let cwd = process.cwd();
 
 export function executeShell( command, envVars = {} ) {
 	const envVariables = {
@@ -9,6 +10,7 @@ export function executeShell( command, envVars = {} ) {
 
 	const promise = execa.command( command, {
 		all: true,
+		cwd,
 		env: Object.assign( {}, envVariables, envVars ),
 	} );
 
@@ -24,4 +26,8 @@ export function cleanUp() {
 		}
 		subprocess.kill( 'SIGKILL' );
 	} );
+}
+
+export function setCwd( path: string ) {
+	cwd = path;
 }
