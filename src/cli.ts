@@ -2,7 +2,7 @@
 import Harmonia from './harmonia';
 import commandLineArgs from 'command-line-args';
 import commandLineUsage from 'command-line-usage';
-import SiteConfig from './lib/configs/site.config';
+import SiteConfig, { ALLOWED_NODEJS_VERSIONS } from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
 import chalk from 'chalk';
 import path from 'path';
@@ -55,7 +55,7 @@ const optionsSections = [
 				name: 'node-version',
 				alias: 'n',
 				typeLabel: '{underline Version}',
-				description: 'Select a specific target Node.JS version in semver format (MAJOR.MINOR.PATCH)',
+				description: 'Select a specific target Node.JS version in semver format (MAJOR.MINOR.PATCH) or an allowed MAJOR (' + ALLOWED_NODEJS_VERSIONS.join( ', ' ) + ')',
 			},
 			{
 				name: 'wait',
