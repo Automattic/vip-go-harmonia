@@ -21,7 +21,7 @@ export default class TestResult {
 	}
 
 	issues(): Issue[] {
-		return this.issuesList;
+		return this.issuesList.filter( el => el.type !== IssueType.Notice );
 	}
 
 	addIssue( issue: Issue ) {
@@ -42,6 +42,10 @@ export default class TestResult {
 
 	setResult( result: TestResultType ) {
 		this.testResult = result;
+	}
+
+	getLastIssue(): Issue {
+		return this.issues()[ this.issuesList.length - 1 ];
 	}
 
 	getBlockers(): Issue[] {
@@ -68,7 +72,7 @@ export default class TestResult {
 		return {
 			...this._test.toJSON(),
 			result: TestResultType[ this.testResult ],
-			issues: this.issuesList,
+			issues: this.issues(),
 		};
 	}
 }

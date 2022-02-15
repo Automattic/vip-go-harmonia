@@ -11,9 +11,7 @@ import stripAnsi from 'strip-ansi';
 import NpmScriptsTest from './tests/npm-scripts.test';
 import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
-import ExampleTest from './tests/example.test';
-import DockerBuild from './tests/docker/build';
-import DockerRun from './tests/docker/run';
+import DockerSuite from './tests/docker/suite';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -86,9 +84,7 @@ export default class Harmonia {
 			.addTest( new NpmScriptsTest() )
 			.addTest( new PackageValidationTest() ) );
 
-		this.registerTest( new TestSuite( 'Docker', 'Builds and executes the docker environment' )
-			.addTest( new DockerBuild() )
-			.addTest( new DockerRun() ) );
+		this.registerTest( new DockerSuite() );
 	}
 
 	public registerTest( test: Test ) {

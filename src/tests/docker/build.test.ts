@@ -12,22 +12,6 @@ export default class DockerBuild extends Test {
 	}
 
 	async prepare() {
-		// TODO: Perhaps move this to a separate "CheckForDocker" test that runs before the docker tests?
-		// Check if Docker is installed
-		try {
-			const dockerShell = await executeShell( 'docker -v' );
-
-			if ( dockerShell.exitCode !== 0 || ! dockerShell.stdout ) {
-				throw new Error;
-			}
-
-			const dockerVersion = dockerShell.stdout.match( /Docker version ([0-9]+\.[0-9]+(?:\.[0-9]+)?)/ )?.[ 1 ];
-			this.notice( `Found Docker Engine ${ chalk.yellow( dockerVersion ) }` );
-		} catch ( error ) {
-			this.blocker( 'Looks like your environment is missing Docker. Without Docker installed on your system ' +
-			"it's not possible to properly test all the application functionality." );
-		}
-
 		// Get required variables
 		this.nodeVersion = this.getOption( 'nodejsVersion' );
 		// TODO: validate nodejs version?
