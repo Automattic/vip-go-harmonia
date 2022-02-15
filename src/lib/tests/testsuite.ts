@@ -49,7 +49,7 @@ export default class TestSuite extends Test {
 			this.log( `${ this.name } has returned an Aborted state. Halting all the tests in the suite` );
 		} finally {
 			// Clean-up after test
-			this.emit( 'testCleanUp', this, this.testResult );
+			this.emit( 'testSuiteCleanUp', this, this.testResult );
 			await this.cleanUp();
 		}
 
