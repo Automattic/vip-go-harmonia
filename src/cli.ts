@@ -132,7 +132,9 @@ const siteOptions = new SiteConfig( {
 	nodejsVersion: options[ 'node-version' ],
 	repository: 'wpcom/test',
 } );
-const envVars = new EnvironmentVariables( {} );
+const envVars = new EnvironmentVariables( {
+	PORT: options.port,
+} );
 
 // Get package.json
 const packageJSONfile = path.resolve( options.path, 'package.json' );

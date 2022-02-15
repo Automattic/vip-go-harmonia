@@ -4,7 +4,7 @@ set -ex;
 
 # Tag images with the current commit SHA.
 COMMIT="$(git rev-parse HEAD)"
-IMAGE_TAG="vip-preflight-checks:$COMMIT"
+IMAGE_TAG="vip-harmonia:$COMMIT"
 
 # Create .dockerignore to prevent .git and scripts from being baked into image.
 # Note that this will overwrite any .dockerignore already in the repo. However,

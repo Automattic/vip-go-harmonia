@@ -17,14 +17,20 @@ export default class SiteConfig extends BaseConfig<any> {
 	}
 
 	protected validate(): boolean {
+		this.validateNodeJSVersion();
+
+		return true;
+	}
+
+	private validateNodeJSVersion() {
 		if ( semver.valid( this.get( 'nodejsVersion' ) ) ) {
-			return true;
+			return;
 		}
 
 		if ( ALLOWED_NODEJS_VERSIONS.includes( parseInt( this.get( 'nodejsVersion' ), 10 ) ) ) {
 			// TODO: get latest semver for this major
 			this.set( 'nodejsVersion', parseInt( this.get( 'nodejsVersion' ), 10 ) );
-			return true;
+			return;
 		}
 
 		throw new InvalidArgumentsConfig( `Invalid Node.JS version. ${ this.get( 'nodejsVersion' ) } does not follow ` +

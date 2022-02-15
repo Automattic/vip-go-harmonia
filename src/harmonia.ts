@@ -13,6 +13,7 @@ import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
 import ExampleTest from './tests/example.test';
 import DockerBuild from './tests/docker/build';
+import DockerRun from './tests/docker/run';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -86,7 +87,8 @@ export default class Harmonia {
 			.addTest( new PackageValidationTest() ) );
 
 		this.registerTest( new TestSuite( 'Docker', 'Builds and executes the docker environment' )
-			.addTest( new DockerBuild() ) );
+			.addTest( new DockerBuild() )
+			.addTest( new DockerRun() ) );
 	}
 
 	public registerTest( test: Test ) {
