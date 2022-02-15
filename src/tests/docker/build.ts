@@ -37,7 +37,7 @@ export default class DockerBuild extends Test {
 	async run() {
 		this.notice( `Using Node.js ${ chalk.yellow( this.nodeVersion ) } to build the image` );
 		try {
-			console.log( chalk.blue( '  Info:' ), 'Building Docker image...' );
+			this.notice( 'Building Docker image...' );
 			const subprocess = executeShell( `bash ${ __dirname }/scripts/build.sh`, {
 				...this.envVariables,
 				NODE_VERSION: this.nodeVersion,
@@ -47,14 +47,9 @@ export default class DockerBuild extends Test {
 			// subprocess.stderr?.pipe( process.stdout );
 
 			await subprocess; // Wait for the Promise to finish.
-		} catch ( { shortMessage, all, stderr } ) {
+		} catch ( error ) {
 			// TODO: better error classification, given on the build output
-			this.blocker( 'There was an error building the Docker image', undefined, {
-				message: shortMessage,
-				output: all,
-				stderr: stderr,
-			} );
-			console.log( chalk.red( shortMessage ) );
+			this.blocker( 'There was an error building the Docker image', undefined, error as object );
 		}
 	}
 }

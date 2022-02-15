@@ -9,7 +9,7 @@ export default class Issue {
 	public message: string;
 	public documentation?: string;
 	public type: IssueType;
-	public data?: object;
+	public data?: any;
 
 	private constructor() {
 		this.message = '';
@@ -38,6 +38,10 @@ export default class Issue {
 	setData( data: object ): Issue {
 		this.data = data;
 		return this;
+	}
+
+	getData(): any {
+		return this.data;
 	}
 
 	getTypeString(): string {

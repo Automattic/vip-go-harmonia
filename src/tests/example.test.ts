@@ -13,6 +13,6 @@ export default class ExampleTest extends Test {
 		this.log( 'The test is running.' );
 		this.warning( 'Oops, a warning', 'https://example.com' );
 		this.error( 'Oops, a error without documentation' );
-		// this.blocker( 'A blocker!', 'https://oops.com' );
+		this.blocker( 'A blocker!', 'https://oops.com' );
 	}
 }

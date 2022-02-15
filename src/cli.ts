@@ -174,7 +174,6 @@ harmonia.on( 'beforeTest', ( test: Test ) => {
 } );
 
 harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
-	const issues = result.issues();
 	switch ( result.getType() ) {
 		case TestResultType.Success:
 			console.log( `  ${ chalk.bgGreen( 'Test passed with no errors' ) }` );
@@ -213,6 +212,13 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 	const documentation = issue.documentation ? `(${ issue.documentation })` : '';
 
 	console.log( `    ${ issueTypeString } \t ${ issue.message } ${ documentation }` );
+
+	// If it's a Blocker or Error, and the issue includes a stdout, print it out.
+	const issueData = issue.getData();
+	if ( [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) && issueData?.all ) {
+		console.log( issueData.all );
+		console.log();
+	}
 } );
 
 harmonia.run().then( ( results: TestResult[] ) => {

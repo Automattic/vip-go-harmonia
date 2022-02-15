@@ -8,6 +8,7 @@ export function executeShell( command, envVars = {} ) {
 	};
 
 	const promise = execa.command( command, {
+		all: true,
 		env: Object.assign( {}, envVariables, envVars ),
 	} );
 
