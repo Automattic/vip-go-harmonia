@@ -45,7 +45,7 @@ export default class TestResult {
 	}
 
 	getLastIssue(): Issue {
-		return this.issues()[ this.issuesList.length - 1 ];
+		return this.issues()[ this.issues().length - 1 ];
 	}
 
 	getBlockers(): Issue[] {

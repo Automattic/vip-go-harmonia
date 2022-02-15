@@ -12,6 +12,7 @@ import NpmScriptsTest from './tests/npm-scripts.test';
 import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
+import ExampleTest from './tests/example.test';
 
 const log = require( 'debug' )( 'harmonia' );
 
