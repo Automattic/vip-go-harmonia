@@ -69,6 +69,18 @@ export default class TestSuite extends Test {
 		return this._tests;
 	}
 
+	/**
+	 * Return all the TestResults of the child tests
+	 */
+	results(): TestResult[] {
+		return this._tests.reduce( ( results: TestResult[], test: Test ) => {
+			if ( test.result().getType() !== TestResultType.NotStarted ) {
+				results.push( test.result() );
+			}
+			return results;
+		}, [] );
+	}
+
 	addTest( test: Test ): TestSuite {
 		this.log( `Registering test ${ test.name } (${ test.constructor.name })` );
 
