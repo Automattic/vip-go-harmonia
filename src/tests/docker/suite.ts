@@ -3,6 +3,7 @@ import DockerBuild from './build.test';
 import DockerRun from './run.test';
 import { executeShell } from '../../utils/shell';
 import chalk from 'chalk';
+import HealthcheckTest from './healthcheck.test';
 
 export default class DockerSuite extends TestSuite {
 	constructor() {
@@ -11,7 +12,8 @@ export default class DockerSuite extends TestSuite {
 
 	setupTests() {
 		this.addTest( new DockerBuild() )
-			.addTest( new DockerRun() );
+			.addTest( new DockerRun() )
+			.addTest( new HealthcheckTest() );
 	}
 
 	async prepare() {

@@ -11,7 +11,7 @@ export default class NpmScriptsTest extends Test {
 	}
 
 	prepare() {
-		this.packageJSON = this.getOption( 'packageJSON' );
+		this.packageJSON = this.getSiteOption( 'packageJSON' );
 		this.scripts = this.packageJSON.scripts;
 	}
 

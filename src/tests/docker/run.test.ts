@@ -1,14 +1,16 @@
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
-import { executeShell } from '../../utils/shell';
+import { cleanUp, executeShell } from '../../utils/shell';
 import { ExecaSyncError } from 'execa';
 import waait from 'waait';
+import { Md5 } from 'ts-md5/dist/md5';
 
 export default class DockerRun extends Test {
 	private nodeVersion: string = '';
 	private envVariables: object = {};
 	private imageTag: string = '';
 	private port: number = 0;
+	private containerName: string = '';
 
 	constructor() {
 		super( 'Start and run the Docker image',
@@ -17,19 +19,22 @@ export default class DockerRun extends Test {
 
 	async prepare() {
 		// Get required variables
-		this.nodeVersion = this.getOption( 'nodejsVersion' );
+		this.nodeVersion = this.getSiteOption( 'nodejsVersion' );
 		this.envVariables = this.getEnvironmentVariables();
 		this.port = this.getEnvVar( 'PORT' ) as number;
 
 		// Get the image tag
 		const commitSHA = ( await executeShell( 'git rev-parse HEAD' ) ).stdout;
 		this.imageTag = `vip-harmonia:${ commitSHA }`;
+
+		// Generate a container name
+		this.containerName = 'vip_harmonia_' + Md5.hashStr( Date.now().toString() );
 	}
 
 	async run() {
 		this.notice( `Running Docker image on PORT ${ chalk.yellow( this.port ) } for image ${ chalk.yellow( this.imageTag ) }...` );
 		try {
-			const subprocess = executeShell( `docker run -t -e PORT -p ${ this.port }:${ this.port } ${ this.imageTag }`, {
+			const subprocess = executeShell( `docker run -t --name ${ this.containerName } -e PORT -p ${ this.port }:${ this.port } ${ this.imageTag }`, {
 				...this.envVariables,
 				NODE_VERSION: this.nodeVersion,
 				PORT: this.port,
@@ -42,6 +47,9 @@ export default class DockerRun extends Test {
 			if ( subprocess.exitCode ) {
 				await subprocess;
 			}
+
+			// Save the container ID
+			this.save( 'containerName', this.containerName );
 		} catch ( error ) {
 			// TODO: better error classification, given on the execution output
 			this.blocker( 'There was an error starting the Docker image', undefined, error as object );

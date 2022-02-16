@@ -222,8 +222,12 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 
 	// If it's a Blocker or Error, and the issue includes a stdout, print it out.
 	const issueData = issue.getData();
-	if ( [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) && issueData?.all ) {
-		console.log( issueData.all );
+	if ( issueData && [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) ) {
+		if ( issueData.all ) {
+			console.log( issueData.all );
+		} else if ( typeof issueData === 'string' ) {
+			console.log( issueData );
+		}
 		console.log();
 	}
 } );
