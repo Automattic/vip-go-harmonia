@@ -78,6 +78,10 @@ export default class Store<TYPE=any> {
 		return Object.keys( this.store ).length;
 	}
 
+	all(): { [key: string]: TYPE } {
+		return this.store;
+	}
+
 	toString() {
 		return JSON.stringify( this.store );
 	}

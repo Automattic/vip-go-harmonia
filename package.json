@@ -11,7 +11,7 @@
     "exec:debug": "DEBUG=* npm run exec",
     "test": "npm run check-types && npm run lint && jest",
     "check-types": "tsc",
-    "build": "babel src -d dist --extensions '.ts,.js' && chmod +x dist/cli.js",
+    "build": "babel src -d dist --extensions '.ts,.js' --copy-files --no-copy-ignored && chmod +x dist/cli.js",
     "build:watch": "babel src -d dist --watch",
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .ts"
@@ -58,8 +58,10 @@
     "command-line-args": "^5.2.1",
     "command-line-usage": "^6.1.1",
     "debug": "^4.3.3",
+    "execa": "^5.1.1",
     "semver": "^7.3.5",
     "strip-ansi": "^6.0.1",
-    "supports-color": "^9.2.1"
+    "supports-color": "^9.2.1",
+    "waait": "^1.0.5"
   }
 }

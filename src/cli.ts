@@ -2,7 +2,7 @@
 import Harmonia from './harmonia';
 import commandLineArgs from 'command-line-args';
 import commandLineUsage from 'command-line-usage';
-import SiteConfig from './lib/configs/site.config';
+import SiteConfig, { ALLOWED_NODEJS_VERSIONS } from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
 import chalk from 'chalk';
 import path from 'path';
@@ -11,6 +11,7 @@ import TestResult, { TestResultType } from './lib/results/testresult';
 import Issue, { IssueType } from './lib/issue';
 import TestSuite from './lib/tests/testsuite';
 import TestSuiteResult from './lib/results/testsuiteresult';
+import { setCwd } from './utils/shell';
 
 let consolelog;
 function supressOutput() {
@@ -55,7 +56,7 @@ const optionsSections = [
 				name: 'node-version',
 				alias: 'n',
 				typeLabel: '{underline Version}',
-				description: 'Select a specific target Node.JS version in semver format (MAJOR.MINOR.PATCH)',
+				description: 'Select a specific target Node.JS version in semver format (MAJOR.MINOR.PATCH) or an allowed MAJOR (' + ALLOWED_NODEJS_VERSIONS.join( ', ' ) + ')',
 			},
 			{
 				name: 'wait',
@@ -113,6 +114,10 @@ if ( options.help ) {
 	process.exit();
 }
 
+if ( options.path ) {
+	setCwd( options.path );
+}
+
 // Create the Harmonia object
 const harmonia = new Harmonia();
 
@@ -127,7 +132,9 @@ const siteOptions = new SiteConfig( {
 	nodejsVersion: options[ 'node-version' ],
 	repository: 'wpcom/test',
 } );
-const envVars = new EnvironmentVariables( {} );
+const envVars = new EnvironmentVariables( {
+	PORT: options.port,
+} );
 
 // Get package.json
 const packageJSONfile = path.resolve( options.path, 'package.json' );
@@ -174,7 +181,6 @@ harmonia.on( 'beforeTest', ( test: Test ) => {
 } );
 
 harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
-	const issues = result.issues();
 	switch ( result.getType() ) {
 		case TestResultType.Success:
 			console.log( `  ${ chalk.bgGreen( 'Test passed with no errors' ) }` );
@@ -210,7 +216,16 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 			break;
 	}
 
-	console.log( `    ${ issueTypeString } \t ${ issue.message } (${ issue.documentation })` );
+	const documentation = issue.documentation ? `(${ issue.documentation })` : '';
+
+	console.log( `    ${ issueTypeString } \t ${ issue.message } ${ documentation }` );
+
+	// If it's a Blocker or Error, and the issue includes a stdout, print it out.
+	const issueData = issue.getData();
+	if ( [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) && issueData?.all ) {
+		console.log( issueData.all );
+		console.log();
+	}
 } );
 
 harmonia.run().then( ( results: TestResult[] ) => {

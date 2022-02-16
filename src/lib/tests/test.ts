@@ -2,6 +2,7 @@ import TestResult, { TestResultType } from '../results/testresult';
 import Issue, { IssueType } from '../issue';
 import eventEmitter from '../events';
 import Store from '../stores/store';
+import EnvironmentVariables from '../configs/envvars.config';
 
 export default abstract class Test {
 	private readonly _name: string;
@@ -21,6 +22,7 @@ export default abstract class Test {
 
 	protected prepare() { /* Empty on purpose */ }
 	protected abstract run();
+	protected cleanUp() { /* Empty on purpose */ }
 
 	public async execute(): Promise<TestResult> {
 		try {
@@ -37,19 +39,19 @@ export default abstract class Test {
 
 			this.emit( 'afterTest', this, this.testResult );
 		} catch ( error ) {
-			if ( error instanceof Issue ) {
-				this.log( 'Execution aborted' );
-				this.testResult.setResult( TestResultType.Aborted );
-
-				this.emit( 'testAborted', this, this.testResult );
-				this.emit( 'afterTest', this, this.testResult );
-
-				return this.testResult;
+			if ( ! ( error instanceof Issue ) ) {
+				// Since we only want to process exceptions that are Issues, rethrow the error,
+				// so it can be handled outside this class.
+				throw error;
 			}
+			this.log( 'Execution aborted' );
+			this.testResult.setResult( TestResultType.Aborted );
 
-			// Since we only want to process exceptions that are Issues, rethrow the error,
-			// so it can be handled outside this class.
-			throw error;
+			this.emit( 'testAborted', this, this.testResult );
+			this.emit( 'afterTest', this, this.testResult );
+		} finally {
+			this.emit( 'testCleanUp', this, this.testResult );
+			await this.cleanUp();
 		}
 
 		return this.testResult;
@@ -75,6 +77,10 @@ export default abstract class Test {
 		return this._options.get( 'env' ).get( name );
 	}
 
+	protected getEnvironmentVariables(): { [key: string]: string } {
+		return this._options.get( 'env' ).all();
+	}
+
 	public result() {
 		return this.testResult;
 	}
@@ -98,16 +104,16 @@ export default abstract class Test {
 		this.testResult.setResult( TestResultType.Success );
 	}
 
-	protected blocker( message: string, docUrl?: string ) {
-		const issue = this.createIssue( message, docUrl )
+	protected blocker( message: string, docUrl?: string, data?: object ) {
+		const issue = this.createIssue( message, docUrl, data )
 			.setType( IssueType.Blocker );
 		this.emit( 'issue', issue );
 		// If the issue is a blocker, the test should abort by throwing the issue.
 		throw issue;
 	}
 
-	protected error( message: string, docUrl?: string ) {
-		const issue = this.createIssue( message, docUrl )
+	protected error( message: string, docUrl?: string, data?: object ) {
+		const issue = this.createIssue( message, docUrl, data )
 			.setType( IssueType.Error );
 
 		// If there is an error, the test should be considered as failed
@@ -117,27 +123,31 @@ export default abstract class Test {
 		return issue;
 	}
 
-	protected warning( message: string, docUrl?: string ) {
-		const issue = this.createIssue( message, docUrl )
+	protected warning( message: string, docUrl?: string, data?: object ) {
+		const issue = this.createIssue( message, docUrl, data )
 			.setType( IssueType.Warning );
 		this.emit( 'issue', issue );
 		return issue;
 	}
 
-	protected notice( message: string, docUrl?: string ) {
-		const issue = this.createIssue( message, docUrl )
+	protected notice( message: string, docUrl?: string, data?: object ) {
+		const issue = this.createIssue( message, docUrl, data )
 			.setType( IssueType.Notice );
 		this.emit( 'issue', issue );
 		return issue;
 	}
 
-	private createIssue( message: string, docUrl?: string ) {
+	private createIssue( message: string, docUrl?: string, data?: object ) {
 		const issue: Issue = Issue.build();
 
 		issue.setMessage( message );
 
 		if ( docUrl ) {
 			issue.setDocumentation( docUrl );
+		}
+
+		if ( data ) {
+			issue.setData( data );
 		}
 
 		// Store the issue
