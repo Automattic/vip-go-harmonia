@@ -4,6 +4,7 @@ import chalk from 'chalk';
 export default class PackageValidationTest extends Test {
 	private packageJSON;
 	private dependencies;
+	private devDependencies;
 
 	/**
 	 * List of the required packages for the node.js environment.
@@ -30,14 +31,15 @@ export default class PackageValidationTest extends Test {
 	prepare() {
 		this.packageJSON = this.getOption( 'packageJSON' );
 		this.dependencies = this.packageJSON.dependencies;
+		this.devDependencies = this.packageJSON.devDependencies;
 	}
 
 	async run() {
-		const dependencies = Object.keys( this.dependencies );
+		const dependencies = [ ...Object.keys( this.dependencies ), ...Object.keys( this.devDependencies ) ];
 
 		for ( const requiredPackage of this.requiredPackages ) {
 			if ( ! dependencies.includes( requiredPackage ) ) {
-				this.error( `Missing required package ${ chalk.bold( requiredPackage ) }`, 'TBD' );
+				this.warning( `Missing required package ${ chalk.bold( requiredPackage ) }`, 'TBD' );
 			}
 		}
 

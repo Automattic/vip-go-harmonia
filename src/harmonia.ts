@@ -13,6 +13,7 @@ import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
 import ExampleTest from './tests/example.test';
+import Issue from './lib/issue';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -57,15 +58,32 @@ export default class Harmonia {
 		}
 		this.emit( 'testsDone', this.results() );
 		log( 'All tests have been executed' );
-		return this.results();
+		return this.results( true );
 	}
 
-	public results(): TestResult[] {
+	public results( includeSuites = false ): TestResult[] {
 		return this.tests.reduce( ( results: TestResult[], test: Test ) => {
-			if ( test.result().getType() !== TestResultType.NotStarted ) {
-				results.push( test.result() );
+			if ( test.result().getType() === TestResultType.NotStarted ) {
+				return results;
 			}
+
+			if ( test instanceof TestSuite ) {
+				if ( includeSuites ) {
+					results.push( test.result() );
+				}
+				results = [ ...results, ...test.results() ];
+				return results;
+			}
+
+			results.push( test.result() );
 			return results;
+		}, [] );
+	}
+
+	public allIssues(): Issue[] {
+		return this.results().reduce( ( issues: Issue[], result: TestResult ) => {
+			issues = [ ...issues, ...result.issues() ];
+			return issues;
 		}, [] );
 	}
 
