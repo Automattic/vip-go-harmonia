@@ -2,7 +2,6 @@ import Harmonia from './harmonia';
 import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
 import ExampleTest from './tests/example.test';
-import Store from './lib/stores/store';
 
 const harmonia = new Harmonia();
 
