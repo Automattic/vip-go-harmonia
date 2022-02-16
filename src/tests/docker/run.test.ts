@@ -35,9 +35,6 @@ export default class DockerRun extends Test {
 				PORT: this.port,
 			} );
 
-			// subprocess.stdout?.pipe( process.stdout );
-
-			// await subprocess;
 			await waait( 3000 ); // Wait a little, giving time for the server to boot up
 
 			// If subprocess has an exit code, it means that it exited prematurely.

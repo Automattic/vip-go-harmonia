@@ -14,7 +14,6 @@ export default class DockerBuild extends Test {
 	async prepare() {
 		// Get required variables
 		this.nodeVersion = this.getOption( 'nodejsVersion' );
-		// TODO: validate nodejs version?
 		this.envVariables = this.getEnvironmentVariables();
 	}
 
@@ -26,9 +25,6 @@ export default class DockerBuild extends Test {
 				...this.envVariables,
 				NODE_VERSION: this.nodeVersion,
 			} );
-
-			// subprocess.stdout?.pipe( process.stdout );
-			// subprocess.stderr?.pipe( process.stdout );
 
 			await subprocess; // Wait for the Promise to finish.
 		} catch ( error ) {
