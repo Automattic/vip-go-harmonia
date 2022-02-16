@@ -171,11 +171,6 @@ harmonia.on( 'beforeTestSuite', ( suite: TestSuite ) => {
 	console.log();
 } );
 
-harmonia.on( 'afterTestSuite', ( suite: TestSuite, result: TestSuiteResult ) => {
-	console.log( ` >> Finished running ${ chalk.bold( suite.name ) } suite` );
-	console.log();
-} );
-
 harmonia.on( 'beforeTest', ( test: Test ) => {
 	console.log( `  [ ${ chalk.bold( test.name ) } ] - ${ test.description }` );
 } );
@@ -186,16 +181,26 @@ harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
 			console.log( `  ${ chalk.bgGreen( 'Test passed with no errors' ) }` );
 			break;
 		case TestResultType.Failed:
-			console.log( `  ${ chalk.bgRed( 'Test failed.' ) } - There were ${ result.getErrors().length } errors.` );
+			console.log( `  ${ chalk.bgRed( `Test failed with ${ result.getErrors().length } errors..` ) }` );
 			break;
 		case TestResultType.PartialSuccess:
-			console.log( `  ${ chalk.bgYellow( 'Test partially failed.' ) } - There were ${ result.issues().length } issues found.` );
+			console.log( `  ${ chalk.bgYellow( 'Test partially succeeded.' ) }` );
 			break;
 		case TestResultType.Aborted:
 			console.log( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
 				'the application fully incompatible with VIP Go.' );
 			break;
 	}
+	console.log();
+} );
+
+harmonia.on( 'afterTestSuite', ( test: TestSuite, result: TestSuiteResult ) => {
+	if ( TestResultType.Aborted === result.getType() ) {
+		console.log( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
+			'the application fully incompatible with VIP Go.' );
+		console.log();
+	}
+	console.log( ` >> Finished running ${ chalk.bold( test.name ) } suite` );
 	console.log();
 } );
 
@@ -233,11 +238,63 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 } );
 
 harmonia.run().then( ( results: TestResult[] ) => {
-	// Re-enable the output
+	// If the output is JSON, reenable the console.log output and print-out the json format.
 	if ( options.json ) {
 		enableOutput();
 		console.log( harmonia.resultsJSON() );
+		process.exit( 0 );
 	}
+
+	// Calculate the results
+	const resultCounter = results.reduce( ( counter: object, result: TestResult ) => {
+		if ( ! counter[ result.getType() ] ) {
+			counter[ result.getType() ] = 0;
+		}
+		counter[ result.getType() ]++;
+		return counter;
+	}, { } );
+
+	const testSuiteResults = results.filter( result => result instanceof TestSuiteResult );
+
+	// Print the results
+	console.log( '\n' + chalk.bgGray( '        HARMONIA RESULTS        \n' ) );
+	if ( resultCounter[ TestResultType.Success ] ) {
+		console.log( ` ${ chalk.bold.bgGreen( ' PASSED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Success ] ) } tests` );
+	}
+	if ( resultCounter[ TestResultType.PartialSuccess ] ) {
+		console.log( ` ${ chalk.bold.bgYellow( ' PARTIAL SUCCESS ' ) } - ${ chalk.bold( resultCounter[ TestResultType.PartialSuccess ] ) } tests` );
+	}
+	if ( resultCounter[ TestResultType.Failed ] ) {
+		console.log( ` ${ chalk.bold.bgRed( ' FAILED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Failed ] ) } tests` );
+	}
+	if ( resultCounter[ TestResultType.Aborted ] ) {
+		console.log( ` ${ chalk.bold.bgRedBright( ' ABORTED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Aborted ] ) } tests` );
+	}
+	console.log();
+	console.log( ` > Total of ${ chalk.bold( results.length ) } tests executed, ${ testSuiteResults.length } of which are Test Suites.` );
+	console.log();
+	// If there is a Aborted test result
+	if ( resultCounter[ TestResultType.Aborted ] ) {
+		console.log( `${ chalk.bold.bgRedBright( '  NOT PASS  ' ) } There was a critical failure that makes the application ` +
+			'incompatible with VIP Go. Please review the results and re-run the tests.' );
+		process.exit( 1 );
+	}
+
+	// If there is only a partial success, but no failures
+	if ( resultCounter[ TestResultType.PartialSuccess ] && ! resultCounter[ TestResultType.Failed ] ) {
+		console.log( `${ chalk.bold.bgYellow( '  PASS  ' ) } The application has passed the required tests, but it does not follow all the recommendations.`,
+			'Please review the results.' );
+		process.exit( 0 );
+	}
+
+	// If there is a failure
+	if ( resultCounter[ TestResultType.Failed ] ) {
+		console.log( `${ chalk.bold.bgRed( '  NOT PASS  ' ) } The application has failed some tests, and will very likely have problems in a production ` +
+			'environment. Please review all the errors found in the results.' );
+		process.exit( 0 );
+	}
+
+	console.log( `${ chalk.bold.bgGreen( '  PASS  ' ) } Congratulations. The application passes all the tests.` );
 	process.exit( 0 );
 } );
 
