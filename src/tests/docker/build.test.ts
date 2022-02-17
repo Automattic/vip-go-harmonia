@@ -1,7 +1,6 @@
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
 import { executeShell } from '../../utils/shell';
-import { ExecaSyncError } from 'execa';
 
 export default class DockerBuild extends Test {
 	private nodeVersion: string = '';

@@ -1,7 +1,6 @@
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
 import { executeShell } from '../../utils/shell';
-import { ExecaSyncError } from 'execa';
 import waait from 'waait';
 
 export default class DockerRun extends Test {

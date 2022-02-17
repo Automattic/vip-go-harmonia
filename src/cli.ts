@@ -122,7 +122,7 @@ if ( options.path ) {
 const harmonia = new Harmonia();
 
 // Register some events handlers
-harmonia.on( 'ready', ha => {
+harmonia.on( 'ready', () => {
 	console.log( 'Harmonia is ready! ' );
 } );
 
