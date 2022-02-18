@@ -1,13 +1,19 @@
 import chalk from 'chalk';
-import { ExecaSyncError } from 'execa';
-import waait from 'waait';
-import fetch from 'node-fetch';
 
 import Test from '../../lib/tests/test';
 import { executeShell } from '../../utils/shell';
-import Issue from '../../lib/issue';
+import fetchWithTiming from '../../utils/http';
 
 const CACHE_HEALTHCHECK_ROUTE = '/cache-healthcheck?';
+
+/**
+ * Maximum desired duration of a cache-healthcheck request, in ms.
+ */
+const CACHE_HEALTHCHECK_MAX_DESIRED_DURATION = 5;
+/**
+ * Maximum allowed duration of a cache-healthcheck request, in ms.
+ */
+const CACHE_HEALTHCHECK_MAX_ALLOWED_DURATION = 11;
 
 export default class HealthcheckTest extends Test {
 	private port: number = 0;
@@ -42,7 +48,10 @@ export default class HealthcheckTest extends Test {
 		const cacheURL = `http://localhost:${ this.port }${ CACHE_HEALTHCHECK_ROUTE }`;
 		this.notice( `Sending a GET request to ${ chalk.yellow( cacheURL ) }...` );
 
-		const response = await fetch( cacheURL );
+		const request = await fetchWithTiming( cacheURL );
+		const response = request.response;
+
+		this.notice( `Got a ${ chalk.bgWhite.black.bold( response.status ) } response in ${ request.duration }ms` );
 
 		// Get the logs
 		const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ this.startDate }` );
@@ -54,6 +63,21 @@ export default class HealthcheckTest extends Test {
 			this.blocker( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( CACHE_HEALTHCHECK_ROUTE ) }. ` +
 				`Make sure your application accepts a ${ chalk.yellow( 'PORT' ) } environment variable.`, this.cacheHealthcheckDoc,
 			{ all: logs } );
+			return;
+		}
+
+		if ( request.duration > CACHE_HEALTHCHECK_MAX_ALLOWED_DURATION ) {
+			this.error( `The request to ${ chalk.bold( CACHE_HEALTHCHECK_ROUTE ) } took longer than ` +
+				`${ chalk.bold( CACHE_HEALTHCHECK_MAX_ALLOWED_DURATION + 'ms' ) } (${ chalk.yellow( request.duration + 'ms' ) }).\n` +
+				'This request is taking too long and it might be caused by some problem with your application.',
+			undefined, { all: logs } );
+			return;
+		}
+
+		if ( request.duration > CACHE_HEALTHCHECK_MAX_DESIRED_DURATION ) {
+			this.warning( `The request to ${ chalk.bold( CACHE_HEALTHCHECK_ROUTE ) } took longer than ` +
+				`${ chalk.bold( CACHE_HEALTHCHECK_MAX_DESIRED_DURATION + 'ms' ) } (${ chalk.yellow( request.duration + 'ms' ) })` );
+			return;
 		}
 	}
 }

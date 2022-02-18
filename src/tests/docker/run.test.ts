@@ -1,7 +1,6 @@
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
-import { cleanUp, executeShell } from '../../utils/shell';
-import { ExecaSyncError } from 'execa';
+import { executeShell } from '../../utils/shell';
 import waait from 'waait';
 import { Md5 } from 'ts-md5/dist/md5';
 
