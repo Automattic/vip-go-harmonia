@@ -9,11 +9,11 @@ const CACHE_HEALTHCHECK_ROUTE = '/cache-healthcheck?';
 /**
  * Maximum desired duration of a cache-healthcheck request, in ms.
  */
-const CACHE_HEALTHCHECK_MAX_DESIRED_DURATION = 5;
+const CACHE_HEALTHCHECK_MAX_DESIRED_DURATION = 100;
 /**
  * Maximum allowed duration of a cache-healthcheck request, in ms.
  */
-const CACHE_HEALTHCHECK_MAX_ALLOWED_DURATION = 11;
+const CACHE_HEALTHCHECK_MAX_ALLOWED_DURATION = 200;
 
 export default class HealthcheckTest extends Test {
 	private port: number = 0;
