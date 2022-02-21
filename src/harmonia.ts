@@ -67,6 +67,7 @@ export default class Harmonia {
 			}
 
 			if ( test instanceof TestSuite ) {
+				// If it's a TestSuite, go deep into the suite results and merge it with the reduced array
 				if ( includeSuites ) {
 					results.push( test.result() );
 				}
@@ -87,12 +88,25 @@ export default class Harmonia {
 	}
 
 	public resultsJSON( strip: boolean = true ) {
-		return JSON.stringify( this.results(), ( key, value ) => {
+		// Get the results of the tests, but not go deep, ie, if it's a test suite, simply get and store the testSuiteResult
+		const resultsNotDeep = this.tests.reduce( ( results: TestResult[], test: Test ) => {
+			if ( test.result().getType() === TestResultType.NotStarted ) {
+				return results;
+			}
+			results.push( test.result() );
+			return results;
+		}, [] );
+
+		return JSON.stringify( resultsNotDeep, ( key, value ) => {
 			if ( strip && typeof value === 'string' ) {
 				return stripAnsi( value );
 			}
 			return value;
 		} );
+	}
+
+	toJSON() {
+		return this.resultsJSON( true );
 	}
 
 	private setupTests() {

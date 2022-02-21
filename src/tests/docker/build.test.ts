@@ -12,7 +12,7 @@ export default class DockerBuild extends Test {
 
 	async prepare() {
 		// Get required variables
-		this.nodeVersion = this.getOption( 'nodejsVersion' );
+		this.nodeVersion = this.getSiteOption( 'nodejsVersion' );
 		this.envVariables = this.getEnvironmentVariables();
 	}
 

@@ -223,12 +223,18 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 
 	const documentation = issue.documentation ? `(${ issue.documentation })` : '';
 
-	console.log( `    ${ issueTypeString } \t ${ issue.message } ${ documentation }` );
+	// Replace \n with \n\t\t to keep new lines aligned
+	const message = issue.message.replace( '\n', '\n\t\t' );
+	console.log( `    ${ issueTypeString } \t${ message } ${ documentation }` );
 
 	// If it's a Blocker or Error, and the issue includes a stdout, print it out.
 	const issueData = issue.getData();
-	if ( [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) && issueData?.all ) {
-		console.log( issueData.all );
+	if ( issueData && [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) ) {
+		if ( issueData.all ) {
+			console.log( issueData.all );
+		} else if ( typeof issueData === 'string' ) {
+			console.log( issueData );
+		}
 		console.log();
 	}
 } );

@@ -29,7 +29,7 @@ export default class PackageValidationTest extends Test {
 	}
 
 	prepare() {
-		this.packageJSON = this.getOption( 'packageJSON' );
+		this.packageJSON = this.getSiteOption( 'packageJSON' );
 		this.dependencies = this.packageJSON.dependencies;
 		this.devDependencies = this.packageJSON.devDependencies;
 	}

@@ -64,11 +64,23 @@ export default abstract class Test {
 		return this._description;
 	}
 
+	public save( key: string, value: any ): boolean {
+		if ( [ 'site', 'env' ].includes( key ) ) {
+			return false;
+		}
+		this._options.set( key, value );
+		return true;
+	}
+
+	public get( key: string ): any {
+		return this._options.get( key );
+	}
+
 	public setOptions( value: Store<any> ) {
 		this._options = value;
 	}
 
-	protected getOption( name ): any {
+	protected getSiteOption( name ): any {
 		return this._options.get( 'site' ).get( name );
 	}
 
