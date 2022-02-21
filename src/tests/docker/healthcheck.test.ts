@@ -69,7 +69,7 @@ export default class HealthcheckTest extends Test {
 		if ( request.duration > CACHE_HEALTHCHECK_MAX_ALLOWED_DURATION ) {
 			this.error( `The request to ${ chalk.bold( CACHE_HEALTHCHECK_ROUTE ) } took longer than ` +
 				`${ chalk.bold( CACHE_HEALTHCHECK_MAX_ALLOWED_DURATION + 'ms' ) } (${ chalk.yellow( request.duration + 'ms' ) }).\n` +
-				'This request is taking too long and it might be caused by some problem with your application.',
+				'This request is taking too long and it might be a symptom of performance issues with your application.',
 			undefined, { all: logs } );
 			return;
 		}
