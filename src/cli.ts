@@ -12,6 +12,8 @@ import Issue, { IssueType } from './lib/issue';
 import TestSuite from './lib/tests/testsuite';
 import TestSuiteResult from './lib/results/testsuiteresult';
 import { setCwd } from './utils/shell';
+import { readFileSync } from 'fs';
+import dotenv from 'dotenv';
 
 let consolelog;
 function supressOutput() {
@@ -126,14 +128,12 @@ harmonia.on( 'ready', () => {
 	console.log( 'Harmonia is ready! ' );
 } );
 
-// Create the Config objects
+// Create the Site Config objects
 const siteOptions = new SiteConfig( {
 	siteID: options.site,
 	nodejsVersion: options[ 'node-version' ],
 	repository: 'wpcom/test',
-} );
-const envVars = new EnvironmentVariables( {
-	PORT: options.port,
+	baseURL: 'http://localhost:' + options.port,
 } );
 
 // Get package.json
@@ -147,6 +147,23 @@ try {
 		`Could not find a ${ chalk.yellow( 'package.json' ) } in the current folder (${ options.path }).` );
 	process.exit( 1 );
 }
+
+// Get from .env, if exists
+let dotenvOptions: object = {};
+try {
+	const dotenvPath = path.resolve( options.path, '.env' );
+	const dotenvContent = readFileSync( dotenvPath );
+	dotenvOptions = dotenv.parse( dotenvContent );
+	// Save dotenv in the site config
+} catch ( error ) {
+	// nothing
+}
+siteOptions.set( 'dotenv', dotenvOptions );
+
+// Create the EnviornmentVariables object
+const envVars = new EnvironmentVariables( {
+	PORT: options.port,
+} );
 
 // Bootstrap
 try {
@@ -195,12 +212,24 @@ harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
 } );
 
 harmonia.on( 'afterTestSuite', ( test: TestSuite, result: TestSuiteResult ) => {
-	if ( TestResultType.Aborted === result.getType() ) {
-		console.log( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
-			'the application fully incompatible with VIP Go.' );
-		console.log();
+	// Create a badge
+	let badge;
+	switch ( result.getType() ) {
+		case TestResultType.Failed:
+			badge = chalk.bgRed.bold( ' FAILED ' );
+			break;
+		case TestResultType.Aborted:
+			badge = chalk.bgRedBright.underline.bold( ' ABORTED ' );
+			break;
+		case TestResultType.PartialSuccess:
+			badge = chalk.bgYellow.bold( ' PASS ' );
+			break;
+		default:
+			badge = chalk.bgGreen.bold( ' PASS ' );
+			break;
 	}
-	console.log( ` >> Finished running ${ chalk.bold( test.name ) } suite` );
+
+	console.log( ` >> ${ badge } Finished running ${ chalk.bold( test.name ) } suite` );
 	console.log();
 } );
 
@@ -232,10 +261,11 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 	if ( issueData && [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) ) {
 		if ( issueData.all ) {
 			console.log( issueData.all );
+			console.log();
 		} else if ( typeof issueData === 'string' ) {
 			console.log( issueData );
+			console.log();
 		}
-		console.log();
 	}
 } );
 

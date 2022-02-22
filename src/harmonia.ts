@@ -13,6 +13,7 @@ import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
 import Issue from './lib/issue';
+import HealthSuite from './tests/health/suite';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -117,6 +118,7 @@ export default class Harmonia {
 			.addTest( new PackageValidationTest() ) );
 
 		this.registerTest( new DockerSuite() );
+		this.registerTest( new HealthSuite() );
 	}
 
 	public registerTest( test: Test ) {

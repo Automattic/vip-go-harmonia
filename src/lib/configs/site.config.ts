@@ -5,7 +5,9 @@ export interface SiteConfigArgs {
 	siteID: number,
 	nodejsVersion: string,
 	repository: string,
+	baseURL: string,
 	packageJson?: object,
+	dotenv?: object,
 }
 
 export const ALLOWED_NODEJS_VERSIONS = [ 12, 14, 16 ];
@@ -39,5 +41,30 @@ export default class SiteConfig extends BaseConfig<any> {
 
 	setPackageJSON( packageJSON: object ) {
 		this.set( 'packageJSON', packageJSON );
+	}
+
+	isNodeJS(): boolean {
+		return true;
+	}
+
+	isNextJS(): boolean {
+		const dotenv = this.get( 'dotenv' );
+		return !! dotenv.NEXT_PUBLIC_SERVER_URL;
+	}
+
+	getLocalURL() {
+		return this.get( 'baseURL' );
+	}
+
+	getPublicURL() {
+		const dotenv = this.get( 'dotenv' );
+
+		if ( this.isNextJS() && dotenv.NEXT_PUBLIC_SERVER_URL ) {
+			// Remove any extra paths
+			const url = new URL( dotenv.NEXT_PUBLIC_SERVER_URL );
+			return url.origin;
+		}
+
+		return this.get( 'baseURL' );
 	}
 }

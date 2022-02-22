@@ -2,6 +2,7 @@ import TestResult, { TestResultType } from '../results/testresult';
 import Issue, { IssueType } from '../issue';
 import eventEmitter from '../events';
 import Store from '../stores/store';
+import SiteConfig from '../configs/site.config';
 
 export default abstract class Test {
 	private readonly _name: string;
@@ -82,6 +83,10 @@ export default abstract class Test {
 
 	protected getSiteOption( name ): any {
 		return this._options.get( 'site' ).get( name );
+	}
+
+	protected getSiteOptions(): SiteConfig {
+		return this._options.get( 'site' );
 	}
 
 	protected getEnvVar( name ): string|boolean|number {
