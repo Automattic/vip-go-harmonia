@@ -1,6 +1,7 @@
 import TestSuite from '../../lib/tests/testsuite';
 import StaticRequestsTest from './static-requests.test';
-import RandomUrlsTest from './random-urls.test';
+import HomeURLsTest from './home-urls.test';
+import TopRequestsTest from './top-requests.test';
 
 export default class HealthSuite extends TestSuite {
 	constructor() {
@@ -9,10 +10,7 @@ export default class HealthSuite extends TestSuite {
 
 	setupTests() {
 		this.addTest( new StaticRequestsTest() )
-			.addTest( new RandomUrlsTest() );
-	}
-
-	async prepare() {
-		// TODO: get URLs
+			.addTest( new HomeURLsTest() )
+			.addTest( new TopRequestsTest() );
 	}
 }

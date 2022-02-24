@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@types/node-fetch": "^2.6.1",
+    "@types/valid-url": "^1.0.3",
     "chalk": "^4.1.2",
     "command-line-args": "^5.2.1",
     "command-line-usage": "^6.1.1",
@@ -67,6 +68,7 @@
     "strip-ansi": "^6.0.1",
     "supports-color": "^9.2.1",
     "ts-md5": "^1.2.11",
+    "valid-url": "^1.0.9",
     "waait": "^1.0.5"
   }
 }

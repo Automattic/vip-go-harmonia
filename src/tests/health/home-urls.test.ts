@@ -14,20 +14,16 @@ const REQUEST_MAX_DESIRED_DURATION = 1000;
  */
 const REQUEST_MAX_ALLOWED_DURATION = 2000;
 
-export default class RandomUrlsTest extends BaseHealthTest {
+export default class HomeURLsTest extends BaseHealthTest {
 	protected paths: string[] = []
 
-	private publicURL: string = '';
-
 	constructor() {
-		super( 'Testing with random URLs',
-			'Get a set of random URLs from the sitemap and/or index and check their availability' );
+		super( 'Testing with home URLs',
+			'Fetches URLS from the index and check their availability' );
 	}
 
 	async prepare() {
 		await super.prepare();
-		// Get public URL for search-replace with the local URL
-		this.publicURL = this.getSiteOptions().getPublicURL();
 
 		// Get all the homepage URLs
 		this.paths = await this.getHomepagePaths( );
@@ -38,17 +34,8 @@ export default class RandomUrlsTest extends BaseHealthTest {
 			// Get random URLs from homepage
 			const homepageRequest = await fetch( this.baseURL );
 			const homepageContent = await homepageRequest.text();
-			const allURLs = Array.from( getUrls( homepageContent, { extractFromQueryString: true, requireSchemeOrWww: true } ) )
-				// Get only URLs that start with either the public or local URL
-				.filter( url => url.startsWith( this.publicURL ) || url.startsWith( this.baseURL ) )
-				// Search and replace the public URL
-				.map( url => {
-					let path = url.replace( this.publicURL, '' );
-					if ( ! path.startsWith( '/' ) ) {
-						path = '/' + path;
-					}
-					return path;
-				} );
+			const allURLs = this.filterPaths(
+				Array.from( getUrls( homepageContent, { extractFromQueryString: true, requireSchemeOrWww: true } ) ) );
 			return allURLs.slice( 0, limit );
 		} catch ( error ) {
 			// TODO

@@ -8,6 +8,7 @@ export interface SiteConfigArgs {
 	baseURL: string,
 	packageJson?: object,
 	dotenv?: object,
+	topRequests?: string[],
 }
 
 export const ALLOWED_NODEJS_VERSIONS = [ 12, 14, 16 ];

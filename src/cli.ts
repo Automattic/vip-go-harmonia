@@ -14,7 +14,7 @@ import TestSuiteResult from './lib/results/testsuiteresult';
 import { setCwd } from './utils/shell';
 import { readFileSync } from 'fs';
 import dotenv from 'dotenv';
-
+import { isWebUri } from 'valid-url';
 let consolelog;
 function supressOutput() {
 	consolelog = console.log;
@@ -35,6 +35,7 @@ const optionDefinitions = [
 	{ name: 'verbose', type: Boolean, defaultValue: false },
 	{ name: 'json', type: Boolean, defaultValue: false },
 	{ name: 'path', type: String, defaultValue: process.cwd() },
+	{ name: 'test-url', lazyMultiple: true, type: String },
 	{ name: 'help', alias: 'h', type: Boolean },
 ];
 
@@ -92,6 +93,12 @@ const optionsSections = [
 				description: `Path for the project where tests should execute (${ process.cwd() })`,
 			},
 			{
+				name: 'test-url',
+				typeLabel: '{underline URL or JSON array}',
+				defaultOption: 'None',
+				description: 'Add a URL that should be tested in the health-check. Can be added multiple times or be a JSON string.',
+			},
+			{
 				name: 'help',
 				description: 'Print this usage guide',
 			},
@@ -128,12 +135,33 @@ harmonia.on( 'ready', () => {
 	console.log( 'Harmonia is ready! ' );
 } );
 
+// Get extra URLs for testing
+let testURLs: string[] = options[ 'test-url' ] ?? [];
+// If it's an array of elements, use them
+if ( options[ 'test-url' ]?.length === 1 ) {
+	try {
+		// Get the first element, if it's a string, try to convert to json
+		const firstElem = options[ 'test-url' ][ 0 ];
+		const jsonURLs = JSON.parse( firstElem );
+
+		testURLs = jsonURLs;
+	} catch ( error ) {	}
+}
+
+// Test the URLs array and make sure they are valid URLs
+if ( testURLs && ! testURLs.every( url => isWebUri( url ) ) ) {
+	console.error( chalk.bold.redBright( 'Error:' ),
+		`The provided values of ${ chalk.bold( '--test-url' ) } contains at least an invalid URL` );
+	process.exit( 1 );
+}
+
 // Create the Site Config objects
 const siteOptions = new SiteConfig( {
 	siteID: options.site,
 	nodejsVersion: options[ 'node-version' ],
 	repository: 'wpcom/test',
 	baseURL: 'http://localhost:' + options.port,
+	topRequests: testURLs,
 } );
 
 // Get package.json
@@ -170,7 +198,7 @@ try {
 	harmonia.bootstrap( siteOptions, envVars );
 } catch ( error ) {
 	if ( error instanceof Error ) {
-		console.error( chalk.bold.redBright( 'Error:' ), error.message ?? error );
+		console.error( chalk.bold.redBright( 'Error:' ), ( error as Error ).message ?? error );
 	} else {
 		console.error( error );
 	}

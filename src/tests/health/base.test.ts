@@ -4,6 +4,7 @@ import Test from '../../lib/tests/test';
 import { executeShell } from '../../utils/shell';
 import fetchWithTiming, { HarmoniaFetchError, TimedResponse } from '../../utils/http';
 import Issue from '../../lib/issue';
+import { isWebUri } from 'valid-url';
 
 /**
  * Maximum desired duration of a cache-healthcheck request, in ms.
@@ -20,6 +21,7 @@ export default abstract class BaseHealthTest extends Test {
 
 	protected baseURL: string = '';
 	protected paths: string[] = []
+	protected publicURL: string = '';
 
 	protected constructor( name, description ) {
 		super( name, description );
@@ -30,13 +32,16 @@ export default abstract class BaseHealthTest extends Test {
 		this.port = this.getEnvVar( 'PORT' ) as number;
 		this.baseURL = this.getSiteOptions().getLocalURL();
 
+		// Get public URL for search-replace with the local URL
+		this.publicURL = this.getSiteOptions().getPublicURL();
+
 		// Get the docker container name
 		this.containerName = this.get( 'containerName' );
 	}
 
 	async run() {
 		for ( const path of this.paths ) {
-			const url = this.baseURL + path;
+			const url = isWebUri( path ) ? path : this.baseURL + path;
 			try {
 				await this.request( url );
 			} catch ( error ) {
@@ -51,12 +56,43 @@ export default abstract class BaseHealthTest extends Test {
 		}
 	}
 
-	async request( url ) {
+	/**
+	 * Given an array of URLs, filter the URLs that are starting either with the local or the public URL,
+	 * and does a search-replace, converting full URLs into paths.
+	 * @param urls
+	 * @protected
+	 */
+	protected filterPaths( urls: string[] ): string[] {
+		return urls
+			// Get only URLs that start with either the public or local URL
+			.filter( url => url.startsWith( this.publicURL ) || url.startsWith( this.baseURL ) )
+			// Search and replace the public URL
+			.map( url => {
+				let path = url.replace( this.publicURL, '' );
+				if ( ! path.startsWith( '/' ) ) {
+					path = '/' + path;
+				}
+				return path;
+			} );
+	}
+
+	/**
+	 * Performs and handles a request
+	 * @param url
+	 * @protected
+	 */
+	protected async request( url ) {
 		const request = await fetchWithTiming( url );
 		await this.handleRequest( request );
 	}
 
-	async handleRequest( request: TimedResponse ): Promise<Issue> {
+	/**
+	 * Handles a request, and returns the resulting issue.
+	 * @param request
+	 * @protected
+	 * @return Issue
+	 */
+	protected async handleRequest( request: TimedResponse ): Promise<Issue> {
 		// Check for logs
 		const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ request.startDate.toISOString() }` );
 		const logs = subprocess.all;
