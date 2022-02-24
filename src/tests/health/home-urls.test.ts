@@ -27,6 +27,10 @@ export default class HomeURLsTest extends BaseHealthTest {
 
 		// Get all the homepage URLs
 		this.paths = await this.getHomepagePaths( );
+
+		if ( ! this.paths || this.paths?.length === 0 ) {
+			this.skip( 'No URLs available for testing' );
+		}
 	}
 
 	async getHomepagePaths( limit = 10 ) {

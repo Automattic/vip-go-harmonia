@@ -38,16 +38,22 @@ export default abstract class Test {
 			this.processResult();
 
 			this.emit( 'afterTest', this, this.testResult );
-		} catch ( error ) {
-			if ( ! ( error instanceof Issue ) ) {
+		} catch ( issue ) {
+			if ( ! ( issue instanceof Issue ) ) {
 				// Since we only want to process exceptions that are Issues, rethrow the error,
 				// so it can be handled outside this class.
-				throw error;
+				throw issue;
 			}
-			this.log( 'Execution aborted' );
-			this.testResult.setResult( TestResultType.Aborted );
-
-			this.emit( 'testAborted', this, this.testResult );
+			// If the issue is a notice, the test has been skipped
+			if ( issue.type === IssueType.Notice && this.testResult.getType() === TestResultType.Skipped ) {
+				this.log( 'Execution skipped' );
+				this.emit( 'testSkipped' );
+			} else {
+				// Otherwise, abort it
+				this.log( 'Execution aborted' );
+				this.testResult.setResult( TestResultType.Aborted );
+				this.emit( 'testAborted', this, this.testResult );
+			}
 			this.emit( 'afterTest', this, this.testResult );
 		} finally {
 			this.emit( 'testCleanUp', this, this.testResult );
@@ -118,6 +124,14 @@ export default abstract class Test {
 
 		// Otherwise, we can consider the test a success
 		this.testResult.setResult( TestResultType.Success );
+	}
+
+	protected skip( message: string ) {
+		const issue = this.createIssue( message )
+			.setType( IssueType.Notice );
+
+		this.testResult.setResult( TestResultType.Skipped );
+		throw issue;
 	}
 
 	protected blocker( message: string, docUrl?: string, data?: object ) {

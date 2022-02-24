@@ -15,6 +15,7 @@ import { setCwd } from './utils/shell';
 import { readFileSync } from 'fs';
 import dotenv from 'dotenv';
 import { isWebUri } from 'valid-url';
+
 let consolelog;
 function supressOutput() {
 	consolelog = console.log;
@@ -235,6 +236,9 @@ harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
 			console.log( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
 				'the application fully incompatible with VIP Go.' );
 			break;
+		case TestResultType.Skipped:
+			const skippedIssue = result.getLastNotice();
+			console.log( `  ${ chalk.bgGrey.bold( ' Skipped ' ) }\t${ skippedIssue.message }` );
 	}
 	console.log();
 } );
@@ -318,6 +322,9 @@ harmonia.run().then( ( results: TestResult[] ) => {
 
 	// Print the results
 	console.log( '\n' + chalk.bgGray( '        HARMONIA RESULTS        \n' ) );
+	if ( resultCounter[ TestResultType.Skipped ] ) {
+		console.log( ` ${ chalk.bold.bgGrey( ' SKIPPED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Skipped ] ) } tests` );
+	}
 	if ( resultCounter[ TestResultType.Success ] ) {
 		console.log( ` ${ chalk.bold.bgGreen( ' PASSED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Success ] ) } tests` );
 	}
@@ -330,6 +337,7 @@ harmonia.run().then( ( results: TestResult[] ) => {
 	if ( resultCounter[ TestResultType.Aborted ] ) {
 		console.log( ` ${ chalk.bold.bgRedBright( ' ABORTED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Aborted ] ) } tests` );
 	}
+
 	console.log();
 	console.log( ` > Total of ${ chalk.bold( results.length ) } tests executed, ${ testSuiteResults.length } of which are Test Suites.` );
 	console.log();
