@@ -40,19 +40,26 @@ export default abstract class BaseHealthTest extends Test {
 	}
 
 	async run() {
+		const promises: Promise<any>[] = [];
+
+		// Do the request to the paths asynchronously
 		for ( const path of this.paths ) {
 			const url = isWebUri( path ) ? path : this.baseURL + path;
-			try {
-				await this.request( url );
-			} catch ( error ) {
-				if ( error instanceof HarmoniaFetchError ) {
-					// Get logs
-					const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ error.getStartDate().toISOString() }` );
-					const logs = subprocess.all;
+			promises.push( this.request( url ) );
+		}
 
-					this.blocker( `Error fetching ${ url }: ${ error.message }`, undefined, { all: logs } );
-				}
+		try {
+			await Promise.all( promises );
+		} catch ( error ) {
+			if ( error instanceof HarmoniaFetchError ) {
+				// Get logs
+				const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ error.getStartDate().toISOString() } ` +
+					`--until ${ error.getEndDate().toISOString() }` );
+				const logs = subprocess.all;
+
+				this.blocker( `Error fetching ${ error.getURL() }: ${ error.message }`, undefined, { all: logs } );
 			}
+			console.log( error );
 		}
 	}
 

@@ -10,6 +10,8 @@ export interface TimedResponse {
 
 export class HarmoniaFetchError extends HarmoniaError {
 	public startDate;
+	public endDate = new Date();
+	public url;
 	public constructor( error: FetchError ) {
 		super();
 		Object.assign( this, error );
@@ -19,6 +21,18 @@ export class HarmoniaFetchError extends HarmoniaError {
 	}
 	public getStartDate(): Date {
 		return this.startDate;
+	}
+	public setEndDate( date: Date ) {
+		this.endDate = date;
+	}
+	public getEndDate(): Date {
+		return this.endDate;
+	}
+	public setURL( url ) {
+		this.url = url;
+	}
+	public getURL() {
+		return this.url;
 	}
 }
 
@@ -33,6 +47,7 @@ export default async function fetchWithTiming( url, options? ): Promise<TimedRes
 		if ( error instanceof FetchError ) {
 			const harmoniaError: HarmoniaFetchError = new HarmoniaFetchError( error );
 			harmoniaError.setStartDate( startDate );
+			harmoniaError.setURL( url );
 			throw harmoniaError;
 		}
 		throw error;
