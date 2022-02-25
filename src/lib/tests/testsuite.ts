@@ -39,11 +39,11 @@ export default class TestSuite extends Test {
 
 			// Process the results
 			this.processResult();
-		} catch ( error ) {
-			if ( ! ( error instanceof Issue ) ) {
+		} catch ( issue ) {
+			if ( ! ( issue instanceof Issue ) ) {
 				// Since we only want to process exceptions that are Issues, rethrow the error,
 				// so it can be handled outside this class.
-				throw error;
+				throw issue;
 			}
 			this.testResult.setResult( TestResultType.Aborted );
 			this.log( `${ this.name } has returned an Aborted state. Halting all the tests in the suite` );

@@ -55,16 +55,20 @@
   },
   "dependencies": {
     "@types/node-fetch": "^2.6.1",
+    "@types/valid-url": "^1.0.3",
     "chalk": "^4.1.2",
     "command-line-args": "^5.2.1",
     "command-line-usage": "^6.1.1",
     "debug": "^4.3.3",
+    "dotenv": "^16.0.0",
     "execa": "^5.1.1",
+    "get-urls": "^10.0.1",
     "node-fetch": "^2.6.7",
     "semver": "^7.3.5",
     "strip-ansi": "^6.0.1",
     "supports-color": "^9.2.1",
     "ts-md5": "^1.2.11",
+    "valid-url": "^1.0.9",
     "waait": "^1.0.5"
   }
 }

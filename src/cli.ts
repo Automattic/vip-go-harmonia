@@ -12,6 +12,9 @@ import Issue, { IssueType } from './lib/issue';
 import TestSuite from './lib/tests/testsuite';
 import TestSuiteResult from './lib/results/testsuiteresult';
 import { setCwd } from './utils/shell';
+import { readFileSync } from 'fs';
+import dotenv from 'dotenv';
+import { isWebUri } from 'valid-url';
 
 let consolelog;
 function supressOutput() {
@@ -33,6 +36,7 @@ const optionDefinitions = [
 	{ name: 'verbose', type: Boolean, defaultValue: false },
 	{ name: 'json', type: Boolean, defaultValue: false },
 	{ name: 'path', type: String, defaultValue: process.cwd() },
+	{ name: 'test-url', lazyMultiple: true, type: String },
 	{ name: 'help', alias: 'h', type: Boolean },
 ];
 
@@ -90,6 +94,12 @@ const optionsSections = [
 				description: `Path for the project where tests should execute (${ process.cwd() })`,
 			},
 			{
+				name: 'test-url',
+				typeLabel: '{underline URL or JSON array}',
+				defaultOption: 'None',
+				description: 'Add a URL that should be tested in the health-check. Can be added multiple times or be a JSON string.',
+			},
+			{
 				name: 'help',
 				description: 'Print this usage guide',
 			},
@@ -126,14 +136,33 @@ harmonia.on( 'ready', () => {
 	console.log( 'Harmonia is ready! ' );
 } );
 
-// Create the Config objects
+// Get extra URLs for testing
+let testURLs: string[] = options[ 'test-url' ] ?? [];
+// If it's an array of elements, use them
+if ( options[ 'test-url' ]?.length === 1 ) {
+	try {
+		// Get the first element, if it's a string, try to convert to json
+		const firstElem = options[ 'test-url' ][ 0 ];
+		const jsonURLs = JSON.parse( firstElem );
+
+		testURLs = jsonURLs;
+	} catch ( error ) {	}
+}
+
+// Test the URLs array and make sure they are valid URLs
+if ( testURLs && ! testURLs.every( url => isWebUri( url ) ) ) {
+	console.error( chalk.bold.redBright( 'Error:' ),
+		`The provided values of ${ chalk.bold( '--test-url' ) } contains at least an invalid URL` );
+	process.exit( 1 );
+}
+
+// Create the Site Config objects
 const siteOptions = new SiteConfig( {
 	siteID: options.site,
 	nodejsVersion: options[ 'node-version' ],
 	repository: 'wpcom/test',
-} );
-const envVars = new EnvironmentVariables( {
-	PORT: options.port,
+	baseURL: 'http://localhost:' + options.port,
+	topRequests: testURLs,
 } );
 
 // Get package.json
@@ -148,12 +177,29 @@ try {
 	process.exit( 1 );
 }
 
+// Get from .env, if exists
+let dotenvOptions: object = {};
+try {
+	const dotenvPath = path.resolve( options.path, '.env' );
+	const dotenvContent = readFileSync( dotenvPath );
+	dotenvOptions = dotenv.parse( dotenvContent );
+	// Save dotenv in the site config
+} catch ( error ) {
+	// nothing
+}
+siteOptions.set( 'dotenv', dotenvOptions );
+
+// Create the EnviornmentVariables object
+const envVars = new EnvironmentVariables( {
+	PORT: options.port,
+} );
+
 // Bootstrap
 try {
 	harmonia.bootstrap( siteOptions, envVars );
 } catch ( error ) {
 	if ( error instanceof Error ) {
-		console.error( chalk.bold.redBright( 'Error:' ), error.message ?? error );
+		console.error( chalk.bold.redBright( 'Error:' ), ( error as Error ).message ?? error );
 	} else {
 		console.error( error );
 	}
@@ -190,17 +236,32 @@ harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
 			console.log( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
 				'the application fully incompatible with VIP Go.' );
 			break;
+		case TestResultType.Skipped:
+			const skippedIssue = result.getLastNotice();
+			console.log( `  ${ chalk.bgGrey.bold( ' Skipped ' ) }\t${ skippedIssue.message }` );
 	}
 	console.log();
 } );
 
 harmonia.on( 'afterTestSuite', ( test: TestSuite, result: TestSuiteResult ) => {
-	if ( TestResultType.Aborted === result.getType() ) {
-		console.log( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
-			'the application fully incompatible with VIP Go.' );
-		console.log();
+	// Create a badge
+	let badge;
+	switch ( result.getType() ) {
+		case TestResultType.Failed:
+			badge = chalk.bgRed.bold( ' FAILED ' );
+			break;
+		case TestResultType.Aborted:
+			badge = chalk.bgRedBright.underline.bold( ' ABORTED ' );
+			break;
+		case TestResultType.PartialSuccess:
+			badge = chalk.bgYellow.bold( ' PASS ' );
+			break;
+		default:
+			badge = chalk.bgGreen.bold( ' PASS ' );
+			break;
 	}
-	console.log( ` >> Finished running ${ chalk.bold( test.name ) } suite` );
+
+	console.log( ` >> ${ badge } Finished running ${ chalk.bold( test.name ) } suite` );
 	console.log();
 } );
 
@@ -232,10 +293,11 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 	if ( issueData && [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) ) {
 		if ( issueData.all ) {
 			console.log( issueData.all );
+			console.log();
 		} else if ( typeof issueData === 'string' ) {
 			console.log( issueData );
+			console.log();
 		}
-		console.log();
 	}
 } );
 
@@ -260,6 +322,9 @@ harmonia.run().then( ( results: TestResult[] ) => {
 
 	// Print the results
 	console.log( '\n' + chalk.bgGray( '        HARMONIA RESULTS        \n' ) );
+	if ( resultCounter[ TestResultType.Skipped ] ) {
+		console.log( ` ${ chalk.bold.bgGrey( ' SKIPPED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Skipped ] ) } tests` );
+	}
 	if ( resultCounter[ TestResultType.Success ] ) {
 		console.log( ` ${ chalk.bold.bgGreen( ' PASSED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Success ] ) } tests` );
 	}
@@ -272,6 +337,7 @@ harmonia.run().then( ( results: TestResult[] ) => {
 	if ( resultCounter[ TestResultType.Aborted ] ) {
 		console.log( ` ${ chalk.bold.bgRedBright( ' ABORTED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Aborted ] ) } tests` );
 	}
+
 	console.log();
 	console.log( ` > Total of ${ chalk.bold( results.length ) } tests executed, ${ testSuiteResults.length } of which are Test Suites.` );
 	console.log();

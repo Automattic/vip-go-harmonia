@@ -33,10 +33,6 @@ export default class HealthcheckTest extends Test {
 		// Get required variables
 		this.port = this.getEnvVar( 'PORT' ) as number;
 
-		// Get the image tag
-		const commitSHA = ( await executeShell( 'git rev-parse HEAD' ) ).stdout;
-		this.imageTag = `vip-harmonia:${ commitSHA }`;
-
 		// Get the docker container name
 		this.containerName = this.get( 'containerName' );
 
@@ -60,7 +56,7 @@ export default class HealthcheckTest extends Test {
 		const is200 = response.status === 200;
 
 		if ( ! is200 ) {
-			this.blocker( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( CACHE_HEALTHCHECK_ROUTE ) }. ` +
+			this.blocker( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( CACHE_HEALTHCHECK_ROUTE ) }.\n` +
 				`Make sure your application accepts a ${ chalk.yellow( 'PORT' ) } environment variable.`, this.cacheHealthcheckDoc,
 			{ all: logs } );
 			return;

@@ -7,6 +7,7 @@ const harmonia = new Harmonia();
 
 // Create dummy site option
 const siteOptions: SiteConfig = new SiteConfig( {
+	baseURL: 'http://localhost:1234',
 	siteID: 1,
 	nodejsVersion: '14.15',
 	repository: 'wpcomvip/test',

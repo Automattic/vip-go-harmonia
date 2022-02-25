@@ -6,7 +6,8 @@ export enum TestResultType {
 	Success,
 	PartialSuccess,
 	Failed,
-	Aborted
+	Aborted,
+	Skipped,
 }
 
 export default class TestResult {
@@ -48,6 +49,11 @@ export default class TestResult {
 		return this.issues()[ this.issues().length - 1 ];
 	}
 
+	getLastNotice(): Issue {
+		const notices = this.issuesList.filter( el => el.type === IssueType.Notice );
+		return notices[ notices.length - 1 ];
+	}
+
 	getBlockers(): Issue[] {
 		return this.issuesList.filter( el => el.type === IssueType.Blocker );
 	}
@@ -72,7 +78,7 @@ export default class TestResult {
 		return {
 			...this._test.toJSON(),
 			result: TestResultType[ this.testResult ],
-			issues: this.issues(),
+			issues: this.getType() === TestResultType.Skipped ? [ this.getLastNotice(), ...this.issues() ] : this.issues(),
 		};
 	}
 }
