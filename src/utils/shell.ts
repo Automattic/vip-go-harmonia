@@ -16,6 +16,19 @@ export function executeShell( command, envVars = {} ) {
 
 	subprocesses.push( promise );
 
+	// Remove the promise from the list when finalized
+	promise.then( () => {
+		const index = subprocesses.indexOf( promise, 0 );
+		if ( index > -1 ) {
+			subprocesses.splice( index, 1 );
+		}
+	} ).catch( () => {
+		const index = subprocesses.indexOf( promise, 0 );
+		if ( index > -1 ) {
+			subprocesses.splice( index, 1 );
+		}
+	} );
+
 	return promise;
 }
 
@@ -24,7 +37,7 @@ export function cleanUp() {
 		if ( null !== subprocess.exitCode ) {
 			return;
 		}
-		subprocess.kill( 'SIGKILL' );
+		subprocess.kill();
 	} );
 }
 

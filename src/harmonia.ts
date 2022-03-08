@@ -5,6 +5,9 @@ import Test from './lib/tests/test';
 import TestResult, { TestResultType } from './lib/results/testresult';
 import eventEmitter from './lib/events';
 import stripAnsi from 'strip-ansi';
+import { cleanUp } from './utils/shell';
+import Issue from './lib/issue';
+
 /**
  * Test imports
  */
@@ -12,7 +15,6 @@ import NpmScriptsTest from './tests/npm-scripts.test';
 import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
-import Issue from './lib/issue';
 import HealthSuite from './tests/health/suite';
 
 const log = require( 'debug' )( 'harmonia' );
@@ -26,6 +28,10 @@ export default class Harmonia {
 		this.tests = [];
 
 		log( 'Harmonia class initialized' );
+
+		// Shutdown handlers
+		process.on( 'SIGINT', this.shutdownHandler.bind( this ) );
+		process.on( 'SIGTERM', this.shutdownHandler.bind( this ) );
 	}
 
 	public bootstrap( siteOptions: SiteConfig, envVars: EnvironmentVariables ) {
@@ -58,6 +64,9 @@ export default class Harmonia {
 		}
 		this.emit( 'testsDone', this.results() );
 		log( 'All tests have been executed' );
+
+		this.shutdown();
+
 		return this.results( true );
 	}
 
@@ -125,6 +134,23 @@ export default class Harmonia {
 		log( `Registering test ${ test.name } (${ test.constructor.name })` );
 		test.setOptions( this.options );	// Set the test options
 		this.tests.push( test );			// Store the test
+	}
+
+	/**
+	 * Runs when Harmonia shutdowns. Used to clean-up.
+	 * @private
+	 */
+	private shutdown() {
+		log( 'Shutting down Harmonia' );
+		this.emit( 'shutdown' );
+
+		// Clean-up any lingering shell processes
+		cleanUp();
+	}
+
+	private shutdownHandler() {
+		this.shutdown();
+		process.exit( 1 );
 	}
 
 	public on( eventName: string, listener: ( ...args: any[] ) => void ) {
