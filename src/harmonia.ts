@@ -23,6 +23,8 @@ export default class Harmonia {
 	private options: Store<any>;
 	private tests: Test[];
 
+	private static verbose: boolean = false;
+
 	public constructor() {
 		this.options = new Store();
 		this.tests = [];
@@ -160,6 +162,14 @@ export default class Harmonia {
 
 	private emit( eventName: string, ...args: any[] ): boolean {
 		return eventEmitter.emit( `harmonia:${ eventName }`, ...args );
+	}
+
+	public static setVerbosity( flag = true ) {
+		Harmonia.verbose = true;
+	}
+
+	public static isVerbose(): boolean {
+		return this.verbose;
 	}
 }
 

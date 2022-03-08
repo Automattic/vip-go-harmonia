@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { executeShell } from '../../utils/shell';
 import waait from 'waait';
 import { Md5 } from 'ts-md5/dist/md5';
+import Harmonia from '../../harmonia';
 
 export default class DockerRun extends Test {
 	private nodeVersion: string = '';
@@ -45,6 +46,10 @@ export default class DockerRun extends Test {
 			// By awaiting the subprocess, we force it to resolve and handle the error in the catch block
 			if ( subprocess.exitCode ) {
 				await subprocess;
+			}
+
+			if ( Harmonia.isVerbose() ) {
+				subprocess.stdout?.pipe( process.stdout );
 			}
 
 			// Save the container ID

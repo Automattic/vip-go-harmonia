@@ -147,6 +147,10 @@ if ( options.help ) {
 	process.exit();
 }
 
+if ( options.verbose && ! options.json ) {
+	Harmonia.setVerbosity( true );
+}
+
 if ( options.path ) {
 	setCwd( options.path );
 }

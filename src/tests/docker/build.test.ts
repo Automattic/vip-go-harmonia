@@ -1,6 +1,7 @@
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
 import { executeShell } from '../../utils/shell';
+import Harmonia from '../../harmonia';
 
 export default class DockerBuild extends Test {
 	private nodeVersion: string = '';
@@ -33,7 +34,9 @@ export default class DockerBuild extends Test {
 				NODE_VERSION: this.nodeVersion,
 			} );
 
-			subprocess.stdout?.pipe( process.stdout );
+			if ( Harmonia.isVerbose() ) {
+				subprocess.stdout?.pipe( process.stdout );
+			}
 			await subprocess; // Wait for the Promise to finish.
 		} catch ( error ) {
 			// TODO: better error classification, given on the build output
