@@ -15,6 +15,7 @@ import { setCwd } from './utils/shell';
 import { readFileSync } from 'fs';
 import dotenv from 'dotenv';
 import { isWebUri } from 'valid-url';
+import * as fs from 'fs';
 
 let consolelog;
 function supressOutput() {
@@ -35,6 +36,7 @@ const optionDefinitions = [
 	{ name: 'wait', alias: 'w', type: Number, defaultValue: 3000 },
 	{ name: 'verbose', type: Boolean, defaultValue: false },
 	{ name: 'json', type: Boolean, defaultValue: false },
+	{ name: 'output', alias: 'o', type: String, defaultValue: '' },
 	{ name: 'path', type: String, defaultValue: process.cwd() },
 	{ name: 'test-url', lazyMultiple: true, type: String },
 	{ name: 'help', alias: 'h', type: Boolean },
@@ -84,8 +86,15 @@ const optionsSections = [
 			},
 			{
 				name: 'json',
+				typeLabel: ' ',
 				defaultOption: 'false',
 				description: 'Output only the JSON results of the tests',
+			},
+			{
+				name: 'output',
+				alias: 'o',
+				typeLabel: '{underline path/to/file.json}',
+				description: 'Save the test results on the specified JSON file',
 			},
 			{
 				name: 'path',
@@ -101,6 +110,7 @@ const optionsSections = [
 			},
 			{
 				name: 'help',
+				typeLabel: ' ',
 				description: 'Print this usage guide',
 			},
 		],
@@ -126,6 +136,12 @@ if ( options.help ) {
 
 if ( options.path ) {
 	setCwd( options.path );
+}
+
+// If output file was passed, try to create it.
+let outputStream;
+if ( options.output ) {
+	outputStream = fs.createWriteStream( options.output );
 }
 
 // Create the Harmonia object
@@ -307,6 +323,13 @@ harmonia.run().then( ( results: TestResult[] ) => {
 		enableOutput();
 		console.log( harmonia.resultsJSON() );
 		process.exit( 0 );
+	}
+
+	// If there is a output file, write the JSON to the file
+	if ( options.output ) {
+		outputStream.write( harmonia.resultsJSON() );
+		outputStream.on( 'error', err => console.error( `Error writing to output file at ${ options.output }: ${ err.message }` ) );
+		outputStream.end();
 	}
 
 	// Calculate the results
