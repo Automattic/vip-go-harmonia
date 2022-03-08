@@ -9,6 +9,7 @@ export interface SiteConfigArgs {
 	packageJson?: object,
 	dotenv?: object,
 	topRequests?: string[],
+	dockerBuildEnvs?: string,
 }
 
 export const ALLOWED_NODEJS_VERSIONS = [ 12, 14, 16 ];

@@ -99,6 +99,10 @@ export default abstract class Test {
 		return this._options.get( 'env' ).get( name );
 	}
 
+	protected setEnvVar( name, value ) {
+		this._options.get( 'env' ).set( name, value );
+	}
+
 	protected getEnvironmentVariables(): { [key: string]: string } {
 		return this._options.get( 'env' ).all();
 	}

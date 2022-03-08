@@ -40,6 +40,7 @@ const optionDefinitions = [
 	{ name: 'path', type: String, defaultValue: process.cwd() },
 	{ name: 'test-url', lazyMultiple: true, type: String },
 	{ name: 'help', alias: 'h', type: Boolean },
+	{ name: 'docker-build-env', type: String },
 ];
 
 const options = commandLineArgs( optionDefinitions );
@@ -86,7 +87,7 @@ const optionsSections = [
 			},
 			{
 				name: 'json',
-				typeLabel: ' ',
+				type: Boolean,
 				defaultOption: 'false',
 				description: 'Output only the JSON results of the tests',
 			},
@@ -110,8 +111,20 @@ const optionsSections = [
 			},
 			{
 				name: 'help',
-				typeLabel: ' ',
+				type: Boolean,
 				description: 'Print this usage guide',
+			},
+		],
+	},
+	{
+		header: 'Docker-specific options',
+		content: 'Docker-specific options',
+		optionList: [
+			{
+				name: 'docker-build-env',
+				typeLabel: '{underline String}',
+				description: 'Environment variables exports to be used in the docker build. The format must match a Linux variable definition, e.g.:\n' +
+					'export var1="value1"\\nexport var2="value2"',
 			},
 		],
 	},
@@ -191,6 +204,20 @@ try {
 	console.error( chalk.bold.redBright( 'Error:' ),
 		`Could not find a ${ chalk.yellow( 'package.json' ) } in the current folder (${ options.path }).` );
 	process.exit( 1 );
+}
+
+// Get the Docker build environment variables
+if ( options[ 'docker-build-env' ] ) {
+	// Very ugly format validation
+	const dockerBuildEnvs = options[ 'docker-build-env' ];
+	if ( ! dockerBuildEnvs.includes( 'export' ) || ! dockerBuildEnvs.includes( '=' ) ) {
+		console.error( chalk.bold.redBright( 'Error:' ),
+			`Invalid format for the ${ chalk.bold( 'docker-build-env' ) } argument. ` );
+		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		process.exit( 1 );
+	}
+	// Store it
+	siteOptions.set( 'dockerBuildEnvs', dockerBuildEnvs );
 }
 
 // Get from .env, if exists

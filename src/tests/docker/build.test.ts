@@ -14,6 +14,14 @@ export default class DockerBuild extends Test {
 		// Get required variables
 		this.nodeVersion = this.getSiteOption( 'nodejsVersion' );
 		this.envVariables = this.getEnvironmentVariables();
+
+		// Check for extra build variables
+		try {
+			const buildEnvVars = this.getSiteOption( 'dockerBuildEnvs' );
+			this.setEnvVar( 'NODE_BUILD_DOCKER_ENV', buildEnvVars );
+		} catch ( error ) {
+			// If there is an error (KeyDontExistError), simply ignore it, and don't set any env variable
+		}
 	}
 
 	async run() {
@@ -25,6 +33,7 @@ export default class DockerBuild extends Test {
 				NODE_VERSION: this.nodeVersion,
 			} );
 
+			subprocess.stdout?.pipe( process.stdout );
 			await subprocess; // Wait for the Promise to finish.
 		} catch ( error ) {
 			// TODO: better error classification, given on the build output
