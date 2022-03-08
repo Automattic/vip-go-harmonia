@@ -51,7 +51,6 @@ fi
 # export var2=value2
 #
 # This environment variable is provided by vip-go-api and properly escaped.
-printenv
 docker build \
   --build-arg NODE_IMAGE_TAG="$NODE_VERSION" \
   --build-arg NODE_BUILD_DOCKER_ENV \
