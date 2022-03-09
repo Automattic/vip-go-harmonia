@@ -155,12 +155,6 @@ if ( options.path ) {
 	setCwd( options.path );
 }
 
-// If output file was passed, try to create it.
-let outputStream;
-if ( options.output ) {
-	outputStream = fs.createWriteStream( options.output );
-}
-
 // Create the Harmonia object
 const harmonia = new Harmonia();
 
@@ -349,18 +343,21 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 } );
 
 harmonia.run().then( ( results: TestResult[] ) => {
+	// If there is a output file, write the JSON to the file
+	if ( options.output ) {
+		// If output file was passed, try to create it.
+		try {
+			fs.writeFileSync( options.output, harmonia.resultsJSON() );
+		} catch ( error ) {
+			console.error( `Error writing to output file at ${ options.output }: ${ ( error as Error ).message }` );
+		}
+	}
+
 	// If the output is JSON, reenable the console.log output and print-out the json format.
 	if ( options.json ) {
 		enableOutput();
 		console.log( harmonia.resultsJSON() );
 		process.exit( 0 );
-	}
-
-	// If there is a output file, write the JSON to the file
-	if ( options.output ) {
-		outputStream.write( harmonia.resultsJSON() );
-		outputStream.on( 'error', err => console.error( `Error writing to output file at ${ options.output }: ${ err.message }` ) );
-		outputStream.end();
 	}
 
 	// Calculate the results
