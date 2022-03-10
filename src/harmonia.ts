@@ -16,6 +16,7 @@ import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
 import HealthSuite from './tests/health/suite';
+import TestSuiteResult from './lib/results/testsuiteresult';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -99,17 +100,37 @@ export default class Harmonia {
 		}, [] );
 	}
 
-	public resultsJSON( strip: boolean = true ) {
-		// Get the results of the tests, but not go deep, ie, if it's a test suite, simply get and store the testSuiteResult
-		const resultsNotDeep = this.tests.reduce( ( results: TestResult[], test: Test ) => {
-			if ( test.result().getType() === TestResultType.NotStarted ) {
-				return results;
+	public getResultsSummary( results: TestResult[] ) {
+		const resultCounter = results.reduce( ( counter: object, result: TestResult ) => {
+			if ( ! counter[ result.getTypeString() ] ) {
+				counter[ result.getTypeString() ] = 0;
 			}
-			results.push( test.result() );
-			return results;
-		}, [] );
+			counter[ result.getTypeString() ]++;
+			return counter;
+		}, { } );
 
-		return JSON.stringify( resultsNotDeep, ( key, value ) => {
+		const testSuiteResults = results.filter( result => result instanceof TestSuiteResult );
+
+		return {
+			total: results.length,
+			suites: testSuiteResults.length,
+			results: resultCounter,
+		};
+	}
+
+	public resultsJSON( strip: boolean = true ) {
+		const object = {
+			summary: this.getResultsSummary( this.results( true ) ),
+			results: this.tests.reduce( ( results: TestResult[], test: Test ) => {
+				if ( test.result().getType() === TestResultType.NotStarted ) {
+					return results;
+				}
+				results.push( test.result() );
+				return results;
+			}, [] ),
+		};
+
+		return JSON.stringify( object, ( key, value ) => {
 			if ( strip && typeof value === 'string' ) {
 				return stripAnsi( value );
 			}
