@@ -23,9 +23,11 @@ export default class DockerRun extends Test {
 		this.envVariables = this.getEnvironmentVariables();
 		this.port = this.getEnvVar( 'PORT' ) as number;
 
-		// Get the image tag
-		const commitSHA = ( await executeShell( 'git rev-parse HEAD' ) ).stdout;
-		this.imageTag = `vip-harmonia:${ commitSHA }`;
+		// Get the docker image tag
+		if ( ! this.get( 'dockerImage' ) ) {
+			return this.blocker( "There isn't any valid Docker image that can be used to start the container." );
+		}
+		this.imageTag = this.get( 'dockerImage' );
 
 		// Generate a container name
 		this.containerName = 'vip_harmonia_' + Md5.hashStr( Date.now().toString() );

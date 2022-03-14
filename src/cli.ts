@@ -41,6 +41,7 @@ const optionDefinitions = [
 	{ name: 'test-url', lazyMultiple: true, type: String },
 	{ name: 'help', alias: 'h', type: Boolean },
 	{ name: 'docker-build-env', type: String },
+	{ name: 'docker-image', type: String },
 ];
 
 const options = commandLineArgs( optionDefinitions );
@@ -125,6 +126,11 @@ const optionsSections = [
 				typeLabel: '{underline String}',
 				description: 'Environment variables exports to be used in the docker build. The format must match a Linux variable definition, e.g.:\n' +
 					'export var1="value1"\\nexport var2="value2"',
+			},
+			{
+				name: 'docker-image',
+				typeLabel: '{underline String}',
+				description: 'Bypass the Docker build step, and use a specific already built docker image to run the tests',
 			},
 		],
 	},
@@ -218,16 +224,21 @@ if ( options[ 'docker-build-env' ] ) {
 	siteOptions.set( 'dockerBuildEnvs', dockerBuildEnvs );
 }
 
+// Set the Docker image, if exists
+if ( options[ 'docker-image' ] ) {
+	siteOptions.set( 'dockerImage', options[ 'docker-image' ] );
+}
+
 // Get from .env, if exists
 let dotenvOptions: object = {};
 try {
 	const dotenvPath = path.resolve( options.path, '.env' );
 	const dotenvContent = readFileSync( dotenvPath );
 	dotenvOptions = dotenv.parse( dotenvContent );
-	// Save dotenv in the site config
 } catch ( error ) {
 	// nothing
 }
+// Save dotenv in the site config
 siteOptions.set( 'dotenv', dotenvOptions );
 
 // Create the EnviornmentVariables object

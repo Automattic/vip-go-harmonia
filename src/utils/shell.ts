@@ -32,6 +32,18 @@ export function executeShell( command, envVars = {} ) {
 	return promise;
 }
 
+export function executeShellSync( command, envVars = {} ) {
+	const envVariables = {
+		VIP_GO_APP_ID: 'unknown',
+	};
+
+	return execa.commandSync( command, {
+		all: true,
+		cwd,
+		env: Object.assign( {}, envVariables, envVars ),
+	} );
+}
+
 export function cleanUp() {
 	subprocesses.forEach( subprocess => {
 		if ( null !== subprocess.exitCode ) {

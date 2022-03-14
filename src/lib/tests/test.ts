@@ -79,8 +79,12 @@ export default abstract class Test {
 		return true;
 	}
 
-	public get( key: string ): any {
-		return this._options.get( key );
+	public get( key: string ): any|boolean {
+		try {
+			return this._options.get( key );
+		} catch {
+			return false;
+		}
 	}
 
 	public setOptions( value: Store<any> ) {
