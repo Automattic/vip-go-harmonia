@@ -71,7 +71,7 @@ export default class DockerBuild extends Test {
 	 */
 	private getDockerImage( dockerImage: string ): string|boolean {
 		try {
-			const subprocess = executeShellSync( `docker images --filter reference=${ dockerImage } --format {{.Repository}}:{{.Tag}}` );
+			const subprocess = executeShellSync( `docker images --filter reference=*${ dockerImage } --format {{.Repository}}:{{.Tag}}` );
 
 			if ( subprocess.stdout === '' || subprocess.exitCode !== 0 ) {
 				return false;
