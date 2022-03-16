@@ -4,14 +4,15 @@
   "description": "Provide a set of automated tests (or checks) that can test and validate the application functionality and responsiveness with an environment as close to production as possible, before the actual deployment to an environment.",
   "main": "dist/index.js",
   "bin": {
-    "harmonia": "dist/cli.js"
+    "harmonia": "dist/cli.js",
+    "harmonia-ci": "dist/ci.js"
   },
   "scripts": {
     "exec": "ts-node src/index.ts",
     "exec:debug": "DEBUG=* npm run exec",
     "test": "npm run check-types && npm run lint && jest",
     "check-types": "tsc",
-    "build": "babel src -d dist --extensions '.ts,.js' --copy-files --no-copy-ignored && chmod +x dist/cli.js",
+    "build": "babel src -d dist --extensions '.ts,.js' --copy-files --no-copy-ignored && chmod +x dist/cli.js dist/ci.js",
     "build:watch": "babel src -d dist --watch",
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .ts"
