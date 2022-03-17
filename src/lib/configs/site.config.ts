@@ -12,6 +12,7 @@ export interface SiteConfigArgs {
 	// Docker specific arguments
 	dockerBuildEnvs?: string,
 	dockerImage?: string,
+	dataOnlyImage?: string,
 }
 
 export const ALLOWED_NODEJS_VERSIONS = [ 12, 14, 16 ];

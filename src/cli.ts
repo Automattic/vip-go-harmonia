@@ -42,6 +42,7 @@ const optionDefinitions = [
 	{ name: 'help', alias: 'h', type: Boolean },
 	{ name: 'docker-build-env', type: String },
 	{ name: 'docker-image', type: String },
+	{ name: 'use-data-only-image', type: String },
 ];
 
 const options = commandLineArgs( optionDefinitions );
@@ -131,6 +132,11 @@ const optionsSections = [
 				name: 'docker-image',
 				typeLabel: '{underline String}',
 				description: 'Bypass the Docker build step, and use a specific already built docker image to run the tests',
+			},
+			{
+				name: 'use-data-only-image',
+				typeLabel: '{underline String}',
+				description: 'Bypass the application build, and use a data-only image docker image to be mounted on the testing container',
 			},
 		],
 	},
@@ -227,6 +233,11 @@ if ( options[ 'docker-build-env' ] ) {
 // Set the Docker image, if exists
 if ( options[ 'docker-image' ] ) {
 	siteOptions.set( 'dockerImage', options[ 'docker-image' ] );
+}
+
+// Set the data-only image, if exists
+if ( options[ 'use-data-only-image' ] ) {
+	siteOptions.set( 'dataOnlyImage', options[ 'use-data-only-image' ] );
 }
 
 // Get from .env, if exists

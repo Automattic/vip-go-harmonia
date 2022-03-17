@@ -27,6 +27,15 @@ export default class DockerBuild extends Test {
 			return this.skip( `Using an already built Docker image tagged with '${ chalk.yellow( dockerImage ) }'. ` );
 		}
 
+		if ( this.getSiteOptions().exists( 'dataOnlyImage' ) ) {
+			const dataOnlyImage = this.getDockerImage( this.getSiteOption( 'dataOnlyImage' ) );
+			if ( ! dataOnlyImage ) {
+				return this.blocker( `Could not find a Docker image with the reference ${ chalk.bold( this.getSiteOption( 'dataOnlyImage' ) ) } ` );
+			}
+
+			this.save( 'dataOnlyImage', dataOnlyImage );
+		}
+
 		// Get required variables
 		this.nodeVersion = this.getSiteOption( 'nodejsVersion' );
 		this.envVariables = this.getEnvironmentVariables();
@@ -42,24 +51,73 @@ export default class DockerBuild extends Test {
 		this.notice( `Using Node.js ${ chalk.yellow( this.nodeVersion ) } to build the image` );
 		try {
 			this.notice( 'Building Docker image...' );
-			const subprocess = executeShell( `bash ${ __dirname }/scripts/build.sh`, {
-				...this.envVariables,
-				NODE_VERSION: this.nodeVersion,
-			} );
 
-			if ( Harmonia.isVerbose() ) {
-				subprocess.stdout?.pipe( process.stdout );
+			// If a data-only image is provided, build the container using it instead.
+			if ( this.get( 'dataOnlyImage' ) ) {
+				await this.buildWithData( this.get( 'dataOnlyImage' ) );
+				return;
 			}
 
-			// Store the image name for the next step
-			const commitSHA = executeShellSync( 'git rev-parse HEAD' ).stdout;
-			this.save( 'dockerImage', `vip-harmonia:${ commitSHA }` );
-
-			await subprocess; // Wait for the Promise to finish.
+			await this.buildApp();
 		} catch ( error ) {
 			// TODO: better error classification, given on the build output
 			this.blocker( 'There was an error building the Docker image', undefined, error as object );
 		}
+	}
+
+	/**
+	 * Builds the full application image, that is fully functional.
+	 *
+	 * @private
+	 */
+	private async buildApp(): Promise<string> {
+		const subprocess = executeShell( `bash ${ __dirname }/scripts/build-app/build.sh`, {
+			...this.envVariables,
+			NODE_VERSION: this.nodeVersion,
+		} );
+
+		if ( Harmonia.isVerbose() ) {
+			subprocess.stdout?.pipe( process.stdout );
+		}
+
+		// Store the image name for the next step
+		const commitSHA = executeShellSync( 'git rev-parse HEAD' ).stdout;
+		const imageTag = `vip-harmonia:${ commitSHA }`;
+
+		this.save( 'dockerImage', imageTag );
+
+		await subprocess; // Wait for the Promise to finish.
+
+		return imageTag;
+	}
+
+	/**
+	 * Builds the application image, using an existing data-only image to provide the application data and codebase.
+	 *
+	 * @param dataImage
+	 * @private
+	 */
+	private async buildWithData( dataImage: string ): Promise<string> {
+		this.notice( `Using a data-only image ${ chalk.yellow( dataImage ) } ` );
+
+		const subprocess = executeShell( `bash ${ __dirname }/scripts/data-only/build.sh`, {
+			NODE_VERSION: this.nodeVersion,
+			DATAONLY_IMAGE: dataImage,
+		} );
+
+		if ( Harmonia.isVerbose() ) {
+			subprocess.stdout?.pipe( process.stdout );
+		}
+
+		// Store the image name for the next step
+		const commitSHA = executeShellSync( 'git rev-parse HEAD' ).stdout;
+		const imageTag = `vip-harmonia:${ commitSHA }`;
+
+		this.save( 'dockerImage', imageTag );
+
+		await subprocess; // Wait for the Promise to finish.
+
+		return imageTag;
 	}
 
 	/**
