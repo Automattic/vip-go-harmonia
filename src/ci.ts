@@ -34,14 +34,16 @@ const [ repoOwner, repoName ] = options.repo.split( '/' );
 const repository = github.getRepo( repoOwner, repoName );
 
 // Read the file
-const filepath = options.file;
 let results;
-try {
-	const jsonfile = fs.readFileSync( filepath, 'utf-8' );
-	results = JSON.parse( jsonfile );
-} catch ( error ) {
-	console.error( `Error opening file ${ filepath }: ${ ( error as Error ).message }` );
-	process.exit( 1 );
+if ( options.file ) {
+	const filepath = options.file;
+	try {
+		const jsonfile = fs.readFileSync( filepath, 'utf-8' );
+		results = JSON.parse( jsonfile );
+	} catch ( error ) {
+		console.error( `Error opening file ${ filepath }: ${ ( error as Error ).message }` );
+		process.exit( 1 );
+	}
 }
 
 function updateBuildStatus( commitSHA, state, description ) {
@@ -218,7 +220,7 @@ async function main() {
 		return;
 	}
 
-	if ( options.failed ) {
+	if ( options.failed || ! options.file ) {
 		await updateBuildStatus( options.commit, 'failure', 'Unable to build application' );
 		return;
 	}
