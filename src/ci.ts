@@ -1,13 +1,14 @@
 #! /usr/bin/env node
 import * as fs from 'fs';
 import commandLineArgs from 'command-line-args';
-
+import GitHub from 'github-api';
 /**
  * Script that receives a Harmonia result JSON file, and creates the respective PRs comments
  */
 
 const optionDefinitions = [
 	{ name: 'failed', type: Boolean, defaultValue: false },
+	{ name: 'start', type: Boolean, defaultValue: false },
 	{ name: 'file', alias: 'f', type: String },
 	{ name: 'branch', alias: 'b', type: String },
 	{ name: 'repo', alias: 'r', type: String },
@@ -19,16 +20,18 @@ const optionDefinitions = [
 
 const options = commandLineArgs( optionDefinitions );
 
+// Prepare GitHub connection
 const GITHUB_USER = options[ 'github-user' ] || process.env.GITHUB_USER;
 const GITHUB_TOKEN = options[ 'github-token' ] || process.env.GITHUB_TOKEN;
 
-console.log( options );
-console.log( GITHUB_USER, GITHUB_TOKEN );
+const github = new GitHub( {
+	username: GITHUB_USER,
+	token: GITHUB_TOKEN,
+} );
 
-if ( options.failed ) {
-	console.log( 'The build process failed. Github feedback not yet implemented. Exiting' );
-	process.exit();
-}
+// Break repo owner and repo name
+const [ repoOwner, repoName ] = options.repo.split( '/' );
+const repository = github.getRepo( repoOwner, repoName );
 
 // Read the file
 const filepath = options.file;
@@ -39,6 +42,14 @@ try {
 } catch ( error ) {
 	console.error( `Error opening file ${ filepath }: ${ ( error as Error ).message }` );
 	process.exit( 1 );
+}
+
+function updateBuildStatus( commitSHA, state, description ) {
+	return repository.updateStatus( commitSHA, {
+		state,
+		description,
+		context: 'Harmonia',
+	} );
 }
 
 function getResultBadge( resultType ) {
@@ -198,4 +209,44 @@ function createMarkdown() {
 	return prettyResult;
 }
 
-console.log( createMarkdown() );
+/**
+ * START OF THE MAIN BLOCK
+ */
+async function main() {
+	if ( options.start ) {
+		await updateBuildStatus( options.commit, 'pending', 'Preparing to run Harmonia tests' );
+		return;
+	}
+
+	if ( options.failed ) {
+		await updateBuildStatus( options.commit, 'failure', 'Unable to build application' );
+		return;
+	}
+
+	// Update the commit build status
+	const summary = results.summary.results;
+
+	if ( summary.Aborted && summary.Aborted > 1 ) {
+		// State: failure, message: aborted
+		await updateBuildStatus( options.commit, 'failure', 'Harmonia didn\'t finish run all the tests' );
+	} else if ( summary.Failed && summary.Failed > 1 ) {
+		// State: error, message: X errors found
+		await updateBuildStatus( options.commit, 'failure', `${ summary.Failed } errors found` );
+	} else if ( summary.PartialSuccess && summary.PartialSuccess > 1 ) {
+		// State: success, message: Partial success
+		await updateBuildStatus( options.commit, 'success', 'Passed, but there are warnings.' );
+	} else {
+		// State: success, message: success
+		await updateBuildStatus( options.commit, 'success', 'Application passes all tests.' );
+	}
+
+	//  Create the Pull Request comment
+	const pullRequestID = options[ 'pull-request' ] ?? false;
+	if ( pullRequestID ) {
+		const issues = github.getIssues( repoOwner, repoName );
+		await issues.createIssueComment( pullRequestID, createMarkdown() );
+		return;
+	}
+}
+
+main().then( () => console.log( 'done' ) ).catch( err => console.error( err ) );
