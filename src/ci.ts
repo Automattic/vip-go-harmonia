@@ -230,10 +230,10 @@ async function main() {
 
 	if ( summary.Aborted && summary.Aborted > 1 ) {
 		// State: failure, message: aborted
-		await updateBuildStatus( options.commit, 'failure', 'Harmonia didn\'t finish run all the tests' );
+		await updateBuildStatus( options.commit, 'failure', 'Harmonia didn\'t finish running all the tests' );
 	} else if ( summary.Failed && summary.Failed > 1 ) {
 		// State: error, message: X errors found
-		await updateBuildStatus( options.commit, 'failure', `${ summary.Failed } errors found` );
+		await updateBuildStatus( options.commit, 'failure', `${ summary.Failed } tests failed` );
 	} else if ( summary.PartialSuccess && summary.PartialSuccess > 1 ) {
 		// State: success, message: Partial success
 		await updateBuildStatus( options.commit, 'success', 'Passed, but there are warnings.' );
