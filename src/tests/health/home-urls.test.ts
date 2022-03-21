@@ -1,7 +1,7 @@
-import fetch from 'node-fetch';
+import fetch, { FetchError } from 'node-fetch';
 import BaseHealthTest from './base.test';
 import getUrls from 'get-urls';
-import { TimedResponse } from '../../utils/http';
+import { HarmoniaFetchError, TimedResponse } from '../../utils/http';
 import Issue from '../../lib/issue';
 import chalk from 'chalk';
 
@@ -42,7 +42,9 @@ export default class HomeURLsTest extends BaseHealthTest {
 				Array.from( getUrls( homepageContent, { extractFromQueryString: true, requireSchemeOrWww: true } ) ) );
 			return allURLs.slice( 0, limit );
 		} catch ( error ) {
-			// TODO
+			if ( error instanceof FetchError ) {
+				throw this.blocker( `Error fetching ${ this.baseURL }: ${ ( error as FetchError ).message }` );
+			}
 			throw error;
 		}
 	}

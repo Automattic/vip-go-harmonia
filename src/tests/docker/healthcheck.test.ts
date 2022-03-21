@@ -2,7 +2,7 @@ import chalk from 'chalk';
 
 import Test from '../../lib/tests/test';
 import { executeShell } from '../../utils/shell';
-import fetchWithTiming from '../../utils/http';
+import fetchWithTiming, { HarmoniaFetchError } from '../../utils/http';
 
 const CACHE_HEALTHCHECK_ROUTE = '/cache-healthcheck?';
 
@@ -44,9 +44,15 @@ export default class HealthcheckTest extends Test {
 		const cacheURL = `http://localhost:${ this.port }${ CACHE_HEALTHCHECK_ROUTE }`;
 		this.notice( `Sending a GET request to ${ chalk.yellow( cacheURL ) }...` );
 
-		const request = await fetchWithTiming( cacheURL );
-		const response = request.response;
+		let request;
+		try {
+			request = await fetchWithTiming( cacheURL );
+		} catch ( error ) {
+			this.blocker( `Error fetching ${ cacheURL }: ${ ( error as HarmoniaFetchError ).message }` );
+			return;
+		}
 
+		const response = request.response;
 		this.notice( `Got a ${ chalk.bgWhite.black.bold( response.status ) } response in ${ request.duration }ms` );
 
 		// Get the logs

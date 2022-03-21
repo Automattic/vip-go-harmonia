@@ -79,8 +79,12 @@ export default abstract class Test {
 		return true;
 	}
 
-	public get( key: string ): any {
-		return this._options.get( key );
+	public get( key: string ): any|boolean {
+		try {
+			return this._options.get( key );
+		} catch {
+			return false;
+		}
 	}
 
 	public setOptions( value: Store<any> ) {
@@ -97,6 +101,10 @@ export default abstract class Test {
 
 	protected getEnvVar( name ): string|boolean|number {
 		return this._options.get( 'env' ).get( name );
+	}
+
+	protected setEnvVar( name, value ) {
+		this._options.get( 'env' ).set( name, value );
 	}
 
 	protected getEnvironmentVariables(): { [key: string]: string } {

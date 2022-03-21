@@ -15,6 +15,7 @@ import { setCwd } from './utils/shell';
 import { readFileSync } from 'fs';
 import dotenv from 'dotenv';
 import { isWebUri } from 'valid-url';
+import * as fs from 'fs';
 
 let consolelog;
 function supressOutput() {
@@ -35,9 +36,13 @@ const optionDefinitions = [
 	{ name: 'wait', alias: 'w', type: Number, defaultValue: 3000 },
 	{ name: 'verbose', type: Boolean, defaultValue: false },
 	{ name: 'json', type: Boolean, defaultValue: false },
+	{ name: 'output', alias: 'o', type: String, defaultValue: '' },
 	{ name: 'path', type: String, defaultValue: process.cwd() },
 	{ name: 'test-url', lazyMultiple: true, type: String },
 	{ name: 'help', alias: 'h', type: Boolean },
+	{ name: 'docker-build-env', type: String },
+	{ name: 'docker-image', type: String },
+	{ name: 'use-data-only-image', type: String },
 ];
 
 const options = commandLineArgs( optionDefinitions );
@@ -84,8 +89,15 @@ const optionsSections = [
 			},
 			{
 				name: 'json',
+				type: Boolean,
 				defaultOption: 'false',
 				description: 'Output only the JSON results of the tests',
+			},
+			{
+				name: 'output',
+				alias: 'o',
+				typeLabel: '{underline path/to/file.json}',
+				description: 'Save the test results on the specified JSON file',
 			},
 			{
 				name: 'path',
@@ -101,7 +113,30 @@ const optionsSections = [
 			},
 			{
 				name: 'help',
+				type: Boolean,
 				description: 'Print this usage guide',
+			},
+		],
+	},
+	{
+		header: 'Docker-specific options',
+		content: 'Docker-specific options',
+		optionList: [
+			{
+				name: 'docker-build-env',
+				typeLabel: '{underline String}',
+				description: 'Environment variables exports to be used in the docker build. The format must match a Linux variable definition, e.g.:\n' +
+					'export var1="value1"\\nexport var2="value2"',
+			},
+			{
+				name: 'docker-image',
+				typeLabel: '{underline String}',
+				description: 'Bypass the Docker build step, and use a specific already built docker image to run the tests',
+			},
+			{
+				name: 'use-data-only-image',
+				typeLabel: '{underline String}',
+				description: 'Bypass the application build, and use a data-only image docker image to be mounted on the testing container',
 			},
 		],
 	},
@@ -122,6 +157,10 @@ console.log();
 if ( options.help ) {
 	console.log( commandLineUsage( optionsSections ) );
 	process.exit();
+}
+
+if ( options.verbose && ! options.json ) {
+	Harmonia.setVerbosity( true );
 }
 
 if ( options.path ) {
@@ -177,16 +216,40 @@ try {
 	process.exit( 1 );
 }
 
+// Get the Docker build environment variables
+if ( options[ 'docker-build-env' ] ) {
+	// Very ugly format validation
+	const dockerBuildEnvs = options[ 'docker-build-env' ];
+	if ( ! dockerBuildEnvs.includes( 'export' ) || ! dockerBuildEnvs.includes( '=' ) ) {
+		console.error( chalk.bold.redBright( 'Error:' ),
+			`Invalid format for the ${ chalk.bold( 'docker-build-env' ) } argument. ` );
+		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		process.exit( 1 );
+	}
+	// Store it
+	siteOptions.set( 'dockerBuildEnvs', dockerBuildEnvs );
+}
+
+// Set the Docker image, if exists
+if ( options[ 'docker-image' ] ) {
+	siteOptions.set( 'dockerImage', options[ 'docker-image' ] );
+}
+
+// Set the data-only image, if exists
+if ( options[ 'use-data-only-image' ] ) {
+	siteOptions.set( 'dataOnlyImage', options[ 'use-data-only-image' ] );
+}
+
 // Get from .env, if exists
 let dotenvOptions: object = {};
 try {
 	const dotenvPath = path.resolve( options.path, '.env' );
 	const dotenvContent = readFileSync( dotenvPath );
 	dotenvOptions = dotenv.parse( dotenvContent );
-	// Save dotenv in the site config
 } catch ( error ) {
 	// nothing
 }
+// Save dotenv in the site config
 siteOptions.set( 'dotenv', dotenvOptions );
 
 // Create the EnviornmentVariables object
@@ -302,6 +365,16 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 } );
 
 harmonia.run().then( ( results: TestResult[] ) => {
+	// If there is a output file, write the JSON to the file
+	if ( options.output ) {
+		// If output file was passed, try to create it.
+		try {
+			fs.writeFileSync( options.output, harmonia.resultsJSON() );
+		} catch ( error ) {
+			console.error( `Error writing to output file at ${ options.output }: ${ ( error as Error ).message }` );
+		}
+	}
+
 	// If the output is JSON, reenable the console.log output and print-out the json format.
 	if ( options.json ) {
 		enableOutput();

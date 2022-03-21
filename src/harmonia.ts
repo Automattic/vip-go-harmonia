@@ -5,6 +5,9 @@ import Test from './lib/tests/test';
 import TestResult, { TestResultType } from './lib/results/testresult';
 import eventEmitter from './lib/events';
 import stripAnsi from 'strip-ansi';
+import { cleanUp } from './utils/shell';
+import Issue from './lib/issue';
+
 /**
  * Test imports
  */
@@ -12,8 +15,8 @@ import NpmScriptsTest from './tests/npm-scripts.test';
 import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
-import Issue from './lib/issue';
 import HealthSuite from './tests/health/suite';
+import TestSuiteResult from './lib/results/testsuiteresult';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -21,11 +24,17 @@ export default class Harmonia {
 	private options: Store<any>;
 	private tests: Test[];
 
+	private static verbose: boolean = false;
+
 	public constructor() {
 		this.options = new Store();
 		this.tests = [];
 
 		log( 'Harmonia class initialized' );
+
+		// Shutdown handlers
+		process.on( 'SIGINT', this.shutdownHandler.bind( this ) );
+		process.on( 'SIGTERM', this.shutdownHandler.bind( this ) );
 	}
 
 	public bootstrap( siteOptions: SiteConfig, envVars: EnvironmentVariables ) {
@@ -58,6 +67,9 @@ export default class Harmonia {
 		}
 		this.emit( 'testsDone', this.results() );
 		log( 'All tests have been executed' );
+
+		this.shutdown();
+
 		return this.results( true );
 	}
 
@@ -88,17 +100,37 @@ export default class Harmonia {
 		}, [] );
 	}
 
-	public resultsJSON( strip: boolean = true ) {
-		// Get the results of the tests, but not go deep, ie, if it's a test suite, simply get and store the testSuiteResult
-		const resultsNotDeep = this.tests.reduce( ( results: TestResult[], test: Test ) => {
-			if ( test.result().getType() === TestResultType.NotStarted ) {
-				return results;
+	public getResultsSummary( results: TestResult[] ) {
+		const resultCounter = results.reduce( ( counter: object, result: TestResult ) => {
+			if ( ! counter[ result.getTypeString() ] ) {
+				counter[ result.getTypeString() ] = 0;
 			}
-			results.push( test.result() );
-			return results;
-		}, [] );
+			counter[ result.getTypeString() ]++;
+			return counter;
+		}, { } );
 
-		return JSON.stringify( resultsNotDeep, ( key, value ) => {
+		const testSuiteResults = results.filter( result => result instanceof TestSuiteResult );
+
+		return {
+			total: results.length,
+			suites: testSuiteResults.length,
+			results: resultCounter,
+		};
+	}
+
+	public resultsJSON( strip: boolean = true ) {
+		const object = {
+			summary: this.getResultsSummary( this.results( true ) ),
+			results: this.tests.reduce( ( results: TestResult[], test: Test ) => {
+				if ( test.result().getType() === TestResultType.NotStarted ) {
+					return results;
+				}
+				results.push( test.result() );
+				return results;
+			}, [] ),
+		};
+
+		return JSON.stringify( object, ( key, value ) => {
 			if ( strip && typeof value === 'string' ) {
 				return stripAnsi( value );
 			}
@@ -127,6 +159,23 @@ export default class Harmonia {
 		this.tests.push( test );			// Store the test
 	}
 
+	/**
+	 * Runs when Harmonia shutdowns. Used to clean-up.
+	 * @private
+	 */
+	private shutdown() {
+		log( 'Shutting down Harmonia' );
+		this.emit( 'shutdown' );
+
+		// Clean-up any lingering shell processes
+		cleanUp();
+	}
+
+	private shutdownHandler() {
+		this.shutdown();
+		process.exit( 1 );
+	}
+
 	public on( eventName: string, listener: ( ...args: any[] ) => void ) {
 		log( `Registered event listener on harmonia:${ eventName }` );
 		eventEmitter.on( `harmonia:${ eventName }`, listener );
@@ -134,6 +183,14 @@ export default class Harmonia {
 
 	private emit( eventName: string, ...args: any[] ): boolean {
 		return eventEmitter.emit( `harmonia:${ eventName }`, ...args );
+	}
+
+	public static setVerbosity( flag = true ) {
+		Harmonia.verbose = true;
+	}
+
+	public static isVerbose(): boolean {
+		return this.verbose;
 	}
 }
 

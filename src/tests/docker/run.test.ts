@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { executeShell } from '../../utils/shell';
 import waait from 'waait';
 import { Md5 } from 'ts-md5/dist/md5';
+import Harmonia from '../../harmonia';
 
 export default class DockerRun extends Test {
 	private nodeVersion: string = '';
@@ -22,9 +23,11 @@ export default class DockerRun extends Test {
 		this.envVariables = this.getEnvironmentVariables();
 		this.port = this.getEnvVar( 'PORT' ) as number;
 
-		// Get the image tag
-		const commitSHA = ( await executeShell( 'git rev-parse HEAD' ) ).stdout;
-		this.imageTag = `vip-harmonia:${ commitSHA }`;
+		// Get the docker image tag
+		if ( ! this.get( 'dockerImage' ) ) {
+			return this.blocker( "There isn't any valid Docker image that can be used to start the container." );
+		}
+		this.imageTag = this.get( 'dockerImage' );
 
 		// Generate a container name
 		this.containerName = 'vip_harmonia_' + Md5.hashStr( Date.now().toString() );
@@ -33,7 +36,7 @@ export default class DockerRun extends Test {
 	async run() {
 		this.notice( `Running Docker image on PORT ${ chalk.yellow( this.port ) } for image ${ chalk.yellow( this.imageTag ) }...` );
 		try {
-			const subprocess = executeShell( `docker run -t --name ${ this.containerName } -e PORT -p ${ this.port }:${ this.port } ${ this.imageTag }`, {
+			const subprocess = executeShell( `docker run -t --rm --network host --name ${ this.containerName } -e PORT ${ this.imageTag }`, {
 				...this.envVariables,
 				NODE_VERSION: this.nodeVersion,
 				PORT: this.port,
@@ -45,6 +48,10 @@ export default class DockerRun extends Test {
 			// By awaiting the subprocess, we force it to resolve and handle the error in the catch block
 			if ( subprocess.exitCode ) {
 				await subprocess;
+			}
+
+			if ( Harmonia.isVerbose() ) {
+				subprocess.stdout?.pipe( process.stdout );
 			}
 
 			// Save the container ID

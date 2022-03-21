@@ -105,7 +105,7 @@ export default abstract class BaseHealthTest extends Test {
 		const logs = subprocess.all;
 
 		if ( request.response.status !== 200 ) {
-			return this.error( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( request.url ) }.\n`,
+			return this.error( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( request.url ) }.`,
 				undefined, { all: logs } );
 		}
 
