@@ -2,6 +2,7 @@
 import * as fs from 'fs';
 import commandLineArgs from 'command-line-args';
 import GitHub from 'github-api';
+
 /**
  * Script that receives a Harmonia result JSON file, and creates the respective PRs comments
  */
@@ -59,7 +60,7 @@ function getResultBadge( resultType ) {
 		case 'Skipped':
 			return ':next_track_button:';
 		case 'Success':
-			return ':heavy_check_mark:';
+			return ':white_check_mark:';
 		case 'PartialSuccess':
 			return ':warning:';
 		case 'Failed':
@@ -80,7 +81,7 @@ function getResultLabel( resultType ) {
 		case 'PartialSuccess':
 			return 'PARTIAL SUCCESS';
 		case 'Failed':
-			return 'FAILED';
+			return 'FAILURE';
 		case 'Aborted':
 			return 'ABORTED';
 		default:
@@ -91,11 +92,11 @@ function getResultLabel( resultType ) {
 function formatIssueType( issueType ) {
 	switch ( issueType ) {
 		case 'Blocker':
-			return ':stop_sign: Blocker';
+			return ':stop_sign: &nbsp;&nbsp; Blocker';
 		case 'Error':
-			return ':x: Error';
+			return ':x: &nbsp;&nbsp; Error';
 		case 'Warning':
-			return ':warning: Warning';
+			return ':warning: &nbsp;&nbsp; Warning';
 	}
 }
 
@@ -143,7 +144,7 @@ function createMarkdown() {
 			if ( issue.type === 'Notice' ) {
 				continue;
 			}
-			result += `__${ formatIssueType( issue.type ) }__ - ${ issue.message }\n`;
+			result += `* __${ formatIssueType( issue.type ) }__ - ${ issue.message }\n`;
 			result += `    _In \`${ test.name }\`_\n`;
 			if ( issue.documentation ) {
 				result += `    [Read more in the documentation](${ issue.documentation })\n`;
@@ -155,59 +156,57 @@ function createMarkdown() {
 	}
 
 	// Convert json to markup/html
-	let prettyResult = '## Harmonia Results\n' +
+	let prettyResult = '# Harmonia Results\n' +
 		'This is an example of a small paragraph that we can include in the pull request comment to give further information about ' +
-		'Harmonia, the tests and the results.\n\n';
+		'Harmonia, the tests and the results. __Expand each test suite to view detailed results__ _(failures/blockers are expanded by default)_.\n\n';
 
 	// Add result summary
 	const summary = results.summary;
 
-	if ( summary.results.Success ) {
-		prettyResult += ` * :heavy_check_mark: **PASSED** :heavy_check_mark: - ${ summary.results.Success } tests  \n`;
-	}
+	prettyResult += '#### TESTS SUMMARY\n';
 
-	if ( summary.results.PartialSuccess ) {
-		prettyResult += ` * :warning: **PARTIAL SUCCESS** :warning: - ${ summary.results.PartialSuccess } tests  \n`;
-	}
+	prettyResult += `:white_check_mark: &nbsp;&nbsp;  **PASSED** - ${ summary.results.Success ?? 0 } tests \n`;
 
-	if ( summary.results.Failed ) {
-		prettyResult += ` * :x: **FAILED** :x: - ${ summary.results.Failed } tests  \n`;
-	}
+	prettyResult += `:warning: &nbsp;&nbsp;  **PARTIAL SUCCESS** - ${ summary.results.PartialSuccess ?? 0 } tests  \n`;
+
+	prettyResult += `:x: &nbsp;&nbsp;  **FAILED** - ${ summary.results.Failed ?? 0 } tests  \n`;
 
 	if ( summary.results.Aborted ) {
-		prettyResult += ` * :stop_sign: **ABORTED** :stop_sign: - ${ summary.results.Aborted } tests  \n`;
+		prettyResult += `:stop_sign: &nbsp;&nbsp;  **ABORTED** - ${ summary.results.Aborted } tests  \n`;
 	}
 
-	// TODO: quick summary of the results interpretation
-	if ( summary.results.Failed + summary.results.Aborted + summary.results.PartialSuccess === 0 ) {
-		prettyResult += '\n\nThe PR passes all the tests!\n';
-	}
+	prettyResult += '\n\n<br/>\n\n## Test suite details\n<br/>\n';
 
-	prettyResult += '\n### Tests summary\n\n';
-
+	let counter = 1;
 	for ( const test of results.results ) {
-		prettyResult += `\n__${ test.name } Test Suite__\n`;
+		prettyResult += `\n${ counter++ }. __${ test.name }__\n`;
 		prettyResult += `_${ test.description }_\n\n`;
-		prettyResult += `<details><summary>${ getResultBadge( test.result ) } ${ getResultLabel( test.result ) }. Click to expand.</summary>\n\n`;
 
-		prettyResult += '--- | Test | Description | Issues \n' +
-			'--- | --- | --- | --- \n';
+		const open = test.result !== 'Success' ? 'open' : '';
+		prettyResult += `<details ${ open }><summary>${ getResultBadge( test.result ) } &nbsp;&nbsp; ${ getResultLabel( test.result ) }. ` +
+			'<em>Click to toggle details view - </em>&nbsp;:arrow_down:</summary>\n\n\n\n';
+
+		prettyResult += '|  | Test | Description | Issues \n' +
+			':--- | :--- | :--- | :--: \n';
 
 		// Create the test summary entry
 		prettyResult += formatTest( test );
 
 		// Print out the issues
 		const issuesPretty = formatIssues( test );
+		prettyResult += '\n__Issues Found:__\n';
 		if ( issuesPretty ) {
-			prettyResult += '\n__Issues Found:__\n\n';
-			prettyResult += formatIssues( test );
+			prettyResult += '\n' + formatIssues( test );
+		} else {
+			prettyResult += '_None_\n\n';
 		}
 
 		prettyResult += '</details>\n';
 
-		prettyResult += '\n---\n';
+		prettyResult += '\n#   \n<br/>\n';
 	}
 
+	prettyResult += '<br/>';
 	return prettyResult;
 }
 
