@@ -89,6 +89,29 @@ function getResultLabel( resultType ) {
 	}
 }
 
+function getResultEmojis( resultType, numTests ) {
+	let emoji = '';
+	switch ( resultType ) {
+		case 'Success':
+			emoji = '🟩';
+			break;
+		case 'PartialSuccess':
+			emoji = '🟨';
+			break;
+		case 'Failed':
+		case 'Aborted':
+			emoji = '🟥';
+			break;
+	}
+
+	let result = '';
+	for ( let i = 0; i < numTests; i++ ) {
+		result += emoji;
+	}
+
+	return result;
+}
+
 function formatIssueType( issueType ) {
 	switch ( issueType ) {
 		case 'Blocker':
@@ -165,14 +188,14 @@ function createMarkdown() {
 
 	prettyResult += '#### TESTS SUMMARY\n';
 
-	prettyResult += `:white_check_mark: &nbsp;&nbsp;  **PASSED** - ${ summary.results.Success ?? 0 } tests \n`;
+	prettyResult += `:white_check_mark: &nbsp;&nbsp; ${ getResultEmojis( 'Success', summary.results.Success ) }  **PASSED** - ${ summary.results.Success ?? 0 } tests \n`;
 
-	prettyResult += `:warning: &nbsp;&nbsp;  **PARTIAL SUCCESS** - ${ summary.results.PartialSuccess ?? 0 } tests  \n`;
+	prettyResult += `:warning: &nbsp;&nbsp; ${ getResultEmojis( 'PartialSuccess', summary.results.PartialSuccess ) }  **PARTIAL SUCCESS** - ${ summary.results.PartialSuccess ?? 0 } tests  \n`;
 
-	prettyResult += `:x: &nbsp;&nbsp;  **FAILED** - ${ summary.results.Failed ?? 0 } tests  \n`;
+	prettyResult += `:x: &nbsp;&nbsp; ${ getResultEmojis( 'Failed', summary.results.Failed ) }  **FAILURE** - ${ summary.results.Failed ?? 0 } tests  \n`;
 
 	if ( summary.results.Aborted ) {
-		prettyResult += `:stop_sign: &nbsp;&nbsp;  **ABORTED** - ${ summary.results.Aborted } tests  \n`;
+		prettyResult += `:stop_sign: &nbsp;&nbsp; ${ getResultEmojis( 'Aborted', summary.results.Aborted ) }  **ABORTED** - ${ summary.results.Aborted } tests  \n`;
 	}
 
 	prettyResult += '\n\n<br/>\n\n## Test suite details\n<br/>\n';
