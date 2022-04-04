@@ -101,8 +101,13 @@ export default abstract class BaseHealthTest extends Test {
 	 */
 	protected async handleRequest( request: TimedResponse ): Promise<Issue> {
 		// Check for logs
-		const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ request.startDate.toISOString() }` );
-		const logs = subprocess.all;
+		let logs;
+		try {
+			const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ request.startDate.toISOString() }` );
+			logs = subprocess.all;
+		} catch ( err ) {
+			this.log( 'Error getting docker logs: ' + ( err as Error ).message );
+		}
 
 		if ( request.response.status !== 200 ) {
 			return this.error( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( request.url ) }.`,

@@ -56,8 +56,14 @@ export default class HealthcheckTest extends Test {
 		this.notice( `Got a ${ chalk.bgWhite.black.bold( response.status ) } response in ${ request.duration }ms` );
 
 		// Get the logs
-		const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ this.startDate }` );
-		const logs = subprocess.all;
+
+		let logs;
+		try {
+			const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ this.startDate }` );
+			logs = subprocess.all;
+		} catch ( err ) {
+			this.log( 'Error getting docker logs: ' + ( err as Error ).message );
+		}
 
 		const is200 = response.status === 200;
 
