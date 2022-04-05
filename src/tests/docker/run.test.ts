@@ -36,7 +36,7 @@ export default class DockerRun extends Test {
 	async run() {
 		this.notice( `Running Docker image on PORT ${ chalk.yellow( this.port ) } for image ${ chalk.yellow( this.imageTag ) }...` );
 		try {
-			const subprocess = executeShell( `docker run -t --rm --network host --name ${ this.containerName } -e PORT ${ this.imageTag }`, {
+			const subprocess = executeShell( `docker run -t --network host --name ${ this.containerName } -e PORT ${ this.imageTag }`, {
 				...this.envVariables,
 				NODE_VERSION: this.nodeVersion,
 				PORT: this.port,
