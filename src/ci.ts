@@ -182,7 +182,7 @@ function createMarkdown() {
 	const summary = results.summary;
 
 	let stamp;
-	let initialMessage = `We have tested the application using the commit \`${ options.commit }\` and `;
+	let initialMessage = `We have tested the application using the commit \`${ options.commit.substring( 0, 7 ) }\` and `;
 	if ( summary.results.Failed || summary.results.aborted ) {
 		// Failed
 		stamp = 'https://cldup.com/GQ-AjSRSzb.png';
