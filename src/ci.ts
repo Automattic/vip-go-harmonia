@@ -229,7 +229,18 @@ function createMarkdown() {
 		prettyResult += '\n#   \n<br/>\n';
 	}
 
-	prettyResult += '<br/>';
+	prettyResult += '<br/>\n';
+
+	// Add feedback link
+	if ( options[ 'pull-request' ] ) {
+		const pullRequestURL = `https://github.com/${ repoOwner }/${ repoName }/pull/${ options[ 'pull-request' ] }`;
+		const feedbackLink = 'https://docs.google.com/forms/d/e/1FAIpQLSeBRLrqiLp9giLr9BISifxd2L3xg1e7D0Vp3uJ2zzqOQwLw1w/' +
+			`viewform?usp=pp_url&entry.1524908984=${ pullRequestURL }`;
+
+		prettyResult += "  :arrow_right:  __This tool is under active development and it's not final__. If you have any feedback, " +
+			`you are invited to [fill this very short form](${ feedbackLink }).`;
+	}
+
 	return prettyResult;
 }
 
