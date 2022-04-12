@@ -178,13 +178,29 @@ function createMarkdown() {
 		return result;
 	}
 
-	// Convert json to markup/html
-	let prettyResult = '# Harmonia Results\n' +
-		'This is an example of a small paragraph that we can include in the pull request comment to give further information about ' +
-		'Harmonia, the tests and the results. __Expand each test suite to view detailed results__ _(failures/blockers are expanded by default)_.\n\n';
-
 	// Add result summary
 	const summary = results.summary;
+
+	let stamp;
+	let initialMessage = `We have tested the application using the commit \`${ options.commit.substring( 0, 7 ) }\` and `;
+	if ( summary.results.Failed || summary.results.Aborted ) {
+		// Failed
+		stamp = 'https://cldup.com/GQ-AjSRSzb.png';
+		initialMessage += '__issues were found__ that prevent the application from working. You can review the issues below.';
+	} else if ( summary.results.PartialSuccess ) {
+		// Partial Success
+		stamp = 'https://cldup.com/bL0eXSSJyF.png';
+		initialMessage += 'no significant issues were found. There were, however, __some partial successes__, that you can review' +
+			' in the full report below.';
+	} else if ( summary.results.Success ) {
+		// Success
+		stamp = 'https://cldup.com/WhvxXikKLB.png';
+		initialMessage += '__no issues were found__.';
+	}
+
+	// Convert json to markup/html
+	let prettyResult = `<img align="right" width="200" src="${ stamp }">\n\n${ initialMessage }\n\n`;
+	prettyResult += '__Expand each test suite to view detailed results__ _(failures/blockers are expanded by default)_.\n\n';
 
 	prettyResult += '#### TESTS SUMMARY\n';
 
@@ -229,7 +245,18 @@ function createMarkdown() {
 		prettyResult += '\n#   \n<br/>\n';
 	}
 
-	prettyResult += '<br/>';
+	prettyResult += '<br/>\n';
+
+	// Add feedback link
+	if ( options[ 'pull-request' ] ) {
+		const pullRequestURL = `https://github.com/${ repoOwner }/${ repoName }/pull/${ options[ 'pull-request' ] }`;
+		const feedbackLink = 'https://docs.google.com/forms/d/e/1FAIpQLSeBRLrqiLp9giLr9BISifxd2L3xg1e7D0Vp3uJ2zzqOQwLw1w/' +
+			`viewform?usp=pp_url&entry.1524908984=${ pullRequestURL }`;
+
+		prettyResult += "\n  :arrow_right:  __This tool is under active development and it's not final__. If you have any feedback, " +
+			`you are invited to [fill this very short form](${ feedbackLink }).`;
+	}
+
 	return prettyResult;
 }
 
