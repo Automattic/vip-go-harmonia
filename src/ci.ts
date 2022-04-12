@@ -186,16 +186,16 @@ function createMarkdown() {
 	if ( summary.results.Failed || summary.results.aborted ) {
 		// Failed
 		stamp = 'https://cldup.com/GQ-AjSRSzb.png';
-		initialMessage = ' __issues were found__ that prevent the application from working. You can review the issues below.';
+		initialMessage += '__issues were found__ that prevent the application from working. You can review the issues below.';
 	} else if ( summary.results.PartialSuccess ) {
 		// Partial Success
 		stamp = 'https://cldup.com/bL0eXSSJyF.png';
-		initialMessage = 'no significant issues were found. There were, however, __some partial successes__, that you can review' +
+		initialMessage += 'no significant issues were found. There were, however, __some partial successes__, that you can review' +
 			' in the full report below.';
 	} else if ( summary.results.Success ) {
 		// Success
 		stamp = 'https://cldup.com/WhvxXikKLB.png';
-		initialMessage = '__no issues were found__.';
+		initialMessage += '__no issues were found__.';
 	}
 
 	// Convert json to markup/html
@@ -253,7 +253,7 @@ function createMarkdown() {
 		const feedbackLink = 'https://docs.google.com/forms/d/e/1FAIpQLSeBRLrqiLp9giLr9BISifxd2L3xg1e7D0Vp3uJ2zzqOQwLw1w/' +
 			`viewform?usp=pp_url&entry.1524908984=${ pullRequestURL }`;
 
-		prettyResult += "  :arrow_right:  __This tool is under active development and it's not final__. If you have any feedback, " +
+		prettyResult += "\n  :arrow_right:  __This tool is under active development and it's not final__. If you have any feedback, " +
 			`you are invited to [fill this very short form](${ feedbackLink }).`;
 	}
 
