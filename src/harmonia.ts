@@ -146,8 +146,7 @@ export default class Harmonia {
 		log( 'Setting up the tests' );
 		// Register all the necessary tests
 		this.registerTest( new TestSuite( 'Node.JS', 'Test a node.JS site' )
-			.addTest( new NpmScriptsTest() )
-			.addTest( new PackageValidationTest() ) );
+			.addTest( new NpmScriptsTest() ) );
 
 		this.registerTest( new DockerSuite() );
 		this.registerTest( new HealthSuite() );
