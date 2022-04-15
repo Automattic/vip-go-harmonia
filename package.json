@@ -11,9 +11,9 @@
     "exec": "ts-node src/index.ts",
     "exec:debug": "DEBUG=* npm run exec",
     "test": "npm run check-types && npm run lint && jest",
-    "check-types": "tsc",
-    "build": "babel src -d dist --extensions '.ts,.js' --copy-files --no-copy-ignored && chmod +x dist/cli.js dist/ci.js",
-    "build:watch": "babel src -d dist --watch",
+    "check-types": "tsc --noEmit",
+    "build": "tsc && chmod +x dist/cli.js dist/ci.js",
+    "build:watch": "tsc --watch",
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .ts"
   },
