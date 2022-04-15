@@ -1,18 +1,21 @@
 {
   "compilerOptions": {
+    // Output modern JS with CommonJS modules so that we can run it with Node.js.
     "target": "ESNext",
-    // Target CommonJS modules ("require").
     "module": "CommonJS",
+
+    "baseUrl": "src",
+    "outDir": "dist",
+
     // Search under node_modules for non-relative imports.
     "moduleResolution": "node",
-    // Enable strictest settings like strictNullChecks & noImplicitAny.
-    "strict": true,
     // Disallow features that require cross-file information for emit.
     "isolatedModules": true,
     // Import non-ES modules as default imports.
     "esModuleInterop": true,
-    "baseUrl": "src",
-    "outDir": "dist",
+
+    // Enable strictest settings like strictNullChecks & noImplicitAny.
+    "strict": true,
     "noImplicitAny": false
   },
   "include": [ "src" ]
