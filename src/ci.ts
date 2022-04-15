@@ -2,6 +2,8 @@
 import * as fs from 'fs';
 import commandLineArgs from 'command-line-args';
 import GitHub from 'github-api';
+import { IssueType } from 'lib/issue';
+import { TestResultType } from 'lib/results/testresult';
 
 /**
  * Script that receives a Harmonia result JSON file, and creates the respective PRs comments
@@ -55,51 +57,51 @@ function updateBuildStatus( commitSHA, state, description ) {
 	} );
 }
 
-function getResultBadge( resultType ) {
+function getResultBadge( resultType: TestResultType ) {
 	switch ( resultType ) {
-		case 'Skipped':
+		case TestResultType.Skipped:
 			return ':next_track_button:';
-		case 'Success':
+		case TestResultType.Success:
 			return ':white_check_mark:';
-		case 'PartialSuccess':
+		case TestResultType.PartialSuccess:
 			return ':warning:';
-		case 'Failed':
+		case TestResultType.Failed:
 			return ':x:';
-		case 'Aborted':
+		case TestResultType.Aborted:
 			return ':stop_sign:';
 		default:
 			return '';
 	}
 }
 
-function getResultLabel( resultType ) {
+function getResultLabel( resultType: TestResultType ) {
 	switch ( resultType ) {
-		case 'Skipped':
+		case TestResultType.Skipped:
 			return 'SKIPPED';
-		case 'Success':
+		case TestResultType.Success:
 			return 'PASSED';
-		case 'PartialSuccess':
+		case TestResultType.PartialSuccess:
 			return 'PARTIAL SUCCESS';
-		case 'Failed':
-			return 'FAILURE';
-		case 'Aborted':
+		case TestResultType.Failed:
+			return 'FAILED';
+		case TestResultType.Aborted:
 			return 'ABORTED';
 		default:
 			return '';
 	}
 }
 
-function getResultEmojis( resultType, numTests ) {
+function getResultEmojis( resultType: TestResultType, numTests: number ) {
 	let emoji = '';
 	switch ( resultType ) {
-		case 'Success':
+		case TestResultType.Success:
 			emoji = '🟩';
 			break;
-		case 'PartialSuccess':
+		case TestResultType.PartialSuccess:
 			emoji = '🟨';
 			break;
-		case 'Failed':
-		case 'Aborted':
+		case TestResultType.Failed:
+		case TestResultType.Aborted:
 			emoji = '🟥';
 			break;
 	}
@@ -112,13 +114,13 @@ function getResultEmojis( resultType, numTests ) {
 	return result;
 }
 
-function formatIssueType( issueType ) {
+function formatIssueType( issueType: IssueType ) {
 	switch ( issueType ) {
-		case 'Blocker':
+		case IssueType.Blocker:
 			return ':stop_sign: &nbsp;&nbsp; Blocker';
-		case 'Error':
+		case IssueType.Error:
 			return ':x: &nbsp;&nbsp; Error';
-		case 'Warning':
+		case IssueType.Warning:
 			return ':warning: &nbsp;&nbsp; Warning';
 	}
 }
@@ -182,44 +184,53 @@ function createMarkdown() {
 	const summary = results.summary;
 
 	let stamp;
-	let initialMessage = `We have tested the application using the commit \`${ options.commit.substring( 0, 7 ) }\` and `;
 	if ( summary.results.Failed || summary.results.Aborted ) {
 		// Failed
 		stamp = 'https://cldup.com/GQ-AjSRSzb.png';
-		initialMessage += '__issues were found__ that prevent the application from working. You can review the issues below.';
 	} else if ( summary.results.PartialSuccess ) {
 		// Partial Success
 		stamp = 'https://cldup.com/bL0eXSSJyF.png';
-		initialMessage += 'no significant issues were found. There were, however, __some partial successes__, that you can review' +
-			' in the full report below.';
 	} else if ( summary.results.Success ) {
 		// Success
 		stamp = 'https://cldup.com/WhvxXikKLB.png';
-		initialMessage += '__no issues were found__.';
 	}
+
+	let prettyResult: string;
 
 	// Convert json to markup/html
-	let prettyResult = `<img align="right" width="200" src="${ stamp }">\n\n${ initialMessage }\n\n`;
-	prettyResult += '__Expand each test suite to view detailed results__ _(failures/blockers are expanded by default)_.\n\n';
+	prettyResult = `<img align="right" width="200" src="${ stamp }">\n\n`;
 
-	prettyResult += '#### TESTS SUMMARY\n';
+	prettyResult += '## Test summary for commit \`${ options.commit.substring( 0, 7 ) }\`\n\n';
 
-	prettyResult += `:white_check_mark: &nbsp;&nbsp; ${ getResultEmojis( 'Success', summary.results.Success ) }  **PASSED** - ${ summary.results.Success ?? 0 } tests \n`;
-
-	prettyResult += `:warning: &nbsp;&nbsp; ${ getResultEmojis( 'PartialSuccess', summary.results.PartialSuccess ) }  **PARTIAL SUCCESS** - ${ summary.results.PartialSuccess ?? 0 } tests  \n`;
-
-	prettyResult += `:x: &nbsp;&nbsp; ${ getResultEmojis( 'Failed', summary.results.Failed ) }  **FAILURE** - ${ summary.results.Failed ?? 0 } tests  \n`;
-
-	if ( summary.results.Aborted ) {
-		prettyResult += `:stop_sign: &nbsp;&nbsp; ${ getResultEmojis( 'Aborted', summary.results.Aborted ) }  **ABORTED** - ${ summary.results.Aborted } tests  \n`;
+	if ( summary.results.Success ) {
+		prettyResult += ':white_check_mark: &nbsp;&nbsp;';
+		prettyResult += getResultEmojis( TestResultType.Success, summary.results.Success );
+		prettyResult += ` ${ summary.results.Success } tests\n`;
 	}
 
-	prettyResult += '\n\n<br/>\n\n## Test suite details\n<br/>\n';
+	if ( summary.results.PartialSuccess ) {
+		prettyResult += ':warning: &nbsp;&nbsp;';
+		prettyResult += getResultEmojis( TestResultType.PartialSuccess, summary.results.PartialSuccess );
+		prettyResult += ` ${ summary.results.PartialSuccess } tests\n`;
+	}
 
-	let counter = 1;
+	if ( summary.results.Failed ) {
+		prettyResult += ':x: &nbsp;&nbsp;';
+		prettyResult += getResultEmojis( TestResultType.Failed, summary.results.Failed );
+		prettyResult += ` ${ summary.results.Failed } tests\n`;
+	}
+
+	if ( summary.results.Aborted ) {
+		prettyResult += ':stop_sign: &nbsp;&nbsp;';
+		prettyResult += getResultEmojis( TestResultType.Aborted, summary.results.Aborted );
+		prettyResult += ` ${ summary.results.Aborted } tests\n`;
+	}
+
+	prettyResult += '\n## Test suites\n\n';
+
 	for ( const test of results.results ) {
-		prettyResult += `\n${ counter++ }. __${ test.name }__\n`;
-		prettyResult += `_${ test.description }_\n\n`;
+		prettyResult += `### ${ test.name }\n\n`;
+		prettyResult += `${ test.description }\n\n`;
 
 		const open = test.result !== 'Success' ? 'open' : '';
 		prettyResult += `<details ${ open }><summary>${ getResultBadge( test.result ) } &nbsp;&nbsp; ${ getResultLabel( test.result ) }. ` +
@@ -253,7 +264,7 @@ function createMarkdown() {
 		const feedbackLink = 'https://docs.google.com/forms/d/e/1FAIpQLSeBRLrqiLp9giLr9BISifxd2L3xg1e7D0Vp3uJ2zzqOQwLw1w/' +
 			`viewform?usp=pp_url&entry.1524908984=${ pullRequestURL }`;
 
-		prettyResult += "\n  :arrow_right:  __This tool is under active development and it's not final__. If you have any feedback, " +
+		prettyResult += '\n  :arrow_right:  __This tool is under active development__. If you have any feedback, ' +
 			`you are invited to [fill this very short form](${ feedbackLink }).`;
 	}
 
