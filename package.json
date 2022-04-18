@@ -15,7 +15,7 @@
     "build": "babel src -d dist --extensions '.ts,.js' --copy-files --no-copy-ignored && chmod +x dist/cli.js dist/ci.js",
     "build:watch": "babel src -d dist --watch",
     "clean": "rm -rf dist",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts --max-warnings=0"
   },
   "repository": {
     "type": "git",

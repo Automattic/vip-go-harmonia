@@ -1,18 +1,9 @@
 import fetch, { FetchError } from 'node-fetch';
 import BaseHealthTest from './base.test';
 import getUrls from 'get-urls';
-import { HarmoniaFetchError, TimedResponse } from '../../utils/http';
+import { TimedResponse } from '../../utils/http';
 import Issue from '../../lib/issue';
 import chalk from 'chalk';
-
-/**
- * Maximum desired duration of a cache-healthcheck request, in ms.
- */
-const REQUEST_MAX_DESIRED_DURATION = 1000;
-/**
- * Maximum allowed duration of a cache-healthcheck request, in ms.
- */
-const REQUEST_MAX_ALLOWED_DURATION = 2000;
 
 export default class HomeURLsTest extends BaseHealthTest {
 	protected paths: string[] = []

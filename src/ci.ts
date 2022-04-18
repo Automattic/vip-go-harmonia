@@ -104,12 +104,7 @@ function getResultEmojis( resultType, numTests ) {
 			break;
 	}
 
-	let result = '';
-	for ( let i = 0; i < numTests; i++ ) {
-		result += emoji;
-	}
-
-	return result;
+	return emoji.repeat( numTests );
 }
 
 function formatIssueType( issueType ) {

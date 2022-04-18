@@ -138,7 +138,7 @@ export default class DockerBuild extends Test {
 			// `docker images` might return a list of all the images matching. Since we want the newest one, get the first
 			const images = subprocess.stdout.split( '\n' );
 			return images[ 0 ];
-		} catch ( e ) {
+		} catch ( err ) {
 			return false;
 		}
 	}

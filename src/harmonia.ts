@@ -12,7 +12,6 @@ import Issue from './lib/issue';
  * Test imports
  */
 import NpmScriptsTest from './tests/npm-scripts.test';
-import PackageValidationTest from './tests/package-validation.test';
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
 import HealthSuite from './tests/health/suite';
@@ -185,7 +184,7 @@ export default class Harmonia {
 	}
 
 	public static setVerbosity( flag = true ) {
-		Harmonia.verbose = true;
+		Harmonia.verbose = flag;
 	}
 
 	public static isVerbose(): boolean {
