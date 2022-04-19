@@ -2,8 +2,8 @@
 import * as fs from 'fs';
 import commandLineArgs from 'command-line-args';
 import GitHub from 'github-api';
-import { IssueType } from 'lib/issue';
-import { TestResultType } from 'lib/results/testresult';
+import { IssueType } from './lib/issue';
+import { TestResultType } from './lib/results/testresult';
 
 /**
  * Script that receives a Harmonia result JSON file, and creates the respective PRs comments
@@ -57,8 +57,8 @@ function updateBuildStatus( commitSHA, state, description ) {
 	} );
 }
 
-function getResultBadge( resultType: TestResultType ) {
-	switch ( resultType ) {
+function getResultBadge( resultType: string|TestResultType ) {
+	switch ( TestResultType[ resultType ] ) {
 		case TestResultType.Skipped:
 			return ':next_track_button:';
 		case TestResultType.Success:
@@ -74,8 +74,8 @@ function getResultBadge( resultType: TestResultType ) {
 	}
 }
 
-function getResultLabel( resultType: TestResultType ) {
-	switch ( resultType ) {
+function getResultLabel( resultType: string|TestResultType ) {
+	switch ( TestResultType[ resultType ] ) {
 		case TestResultType.Skipped:
 			return 'SKIPPED';
 		case TestResultType.Success:
@@ -109,8 +109,8 @@ function getResultEmojis( resultType: TestResultType, numTests: number ) {
 	return emoji.repeat( numTests );
 }
 
-function formatIssueType( issueType: IssueType ) {
-	switch ( issueType ) {
+function formatIssueType( issueType: string|IssueType ) {
+	switch ( IssueType[ issueType ] ) {
 		case IssueType.Blocker:
 			return ':stop_sign: &nbsp;&nbsp; Blocker';
 		case IssueType.Error:
@@ -195,7 +195,7 @@ function createMarkdown() {
 	// Convert json to markup/html
 	prettyResult = `<img align="right" width="200" src="${ stamp }">\n\n`;
 
-	prettyResult += '## Test summary for commit \`${ options.commit.substring( 0, 7 ) }\`\n\n';
+	prettyResult += `## Test summary for commit \`${ options.commit.substring( 0, 7 ) }\`\n\n`;
 
 	if ( summary.results.Success ) {
 		prettyResult += ':white_check_mark: &nbsp;&nbsp;';
@@ -224,7 +224,7 @@ function createMarkdown() {
 	prettyResult += '\n## Test suites\n\n';
 
 	for ( const test of results.results ) {
-		prettyResult += `### ${ test.name }\n\n`;
+		prettyResult += `\n### ${ test.name }\n\n`;
 		prettyResult += `${ test.description }\n\n`;
 
 		const open = test.result !== 'Success' ? 'open' : '';
@@ -248,7 +248,7 @@ function createMarkdown() {
 
 		prettyResult += '</details>\n';
 
-		prettyResult += '\n#   \n<br/>\n';
+		prettyResult += '\n#   \n\n';
 	}
 
 	prettyResult += '<br/>\n';
