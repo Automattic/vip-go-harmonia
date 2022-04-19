@@ -109,8 +109,8 @@ function getResultEmojis( resultType: TestResultType, numTests: number ) {
 	return emoji.repeat( numTests );
 }
 
-function formatIssueType( issueType: IssueType ) {
-	switch ( +IssueType[ issueType ] ) {
+function formatIssueType( issueType: string|IssueType ) {
+	switch ( IssueType[ issueType ] ) {
 		case IssueType.Blocker:
 			return ':stop_sign: &nbsp;&nbsp; Blocker';
 		case IssueType.Error:
