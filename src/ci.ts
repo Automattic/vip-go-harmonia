@@ -306,5 +306,4 @@ async function main() {
 	}
 }
 
-// main().then( () => console.log( 'done' ) ).catch( err => console.error( err ) );
-console.log( createMarkdown() );
+main().then( () => console.log( 'done' ) ).catch( err => console.error( err ) );
