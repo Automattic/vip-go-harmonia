@@ -18,7 +18,6 @@ import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
 import HealthSuite from './tests/health/suite';
 import TestSuiteResult from './lib/results/testsuiteresult';
-import chalk from 'chalk';
 
 const log = require( 'debug' )( 'harmonia' );
 
