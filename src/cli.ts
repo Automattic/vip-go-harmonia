@@ -30,6 +30,7 @@ function enableOutput() {
 const randomPort = Math.floor( Math.random() * 1000 ) + 3001; // Get a PORT from 3001 and 3999
 
 const optionDefinitions = [
+	{ name: 'ci', type: Boolean, defaultValue: false },
 	{ name: 'site', alias: 's', type: Number },
 	{ name: 'node-version', alias: 'n', type: String },
 	{ name: 'port', alias: 'p', type: Number, defaultValue: randomPort },
@@ -169,6 +170,12 @@ if ( options.path ) {
 
 // Create the Harmonia object
 const harmonia = new Harmonia();
+
+if ( options.ci ) {
+	harmonia.setSource( 'ci' );
+} else {
+	harmonia.setSource( 'cli' );
+}
 
 // Register some events handlers
 harmonia.on( 'ready', () => {
