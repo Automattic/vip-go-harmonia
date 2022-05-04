@@ -383,13 +383,7 @@ harmonia.run().then( ( results: TestResult[] ) => {
 	}
 
 	// Calculate the results
-	const resultCounter = results.reduce( ( counter: object, result: TestResult ) => {
-		if ( ! counter[ result.getType() ] ) {
-			counter[ result.getType() ] = 0;
-		}
-		counter[ result.getType() ]++;
-		return counter;
-	}, { } );
+	const resultCounter = harmonia.countResults( true );
 
 	const testSuiteResults = results.filter( result => result instanceof TestSuiteResult );
 

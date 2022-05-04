@@ -76,7 +76,7 @@ export default class Harmonia {
 		// Send analytics event
 		await Analytics.trackEvent( 'run_finished', {
 			total_tests: this.results( false ).length,
-			...this.countResults(),
+			...this.countResults( false, true ),
 		} );
 
 		this.shutdown();
@@ -104,10 +104,10 @@ export default class Harmonia {
 		}, [] );
 	}
 
-	public countResults( includeSuites: boolean = false ): {} {
+	public countResults( includeSuites: boolean = false, typeString: boolean = false ): {} {
 		return this.results( includeSuites ).reduce( ( counter: object, result: TestResult ) => {
-			const type = result.getTypeString();
-			const currentCount = count[ type ] || 0;
+			const type = typeString ? result.getTypeString() : result.getType();
+			const currentCount = counter[ type ] || 0;
 
 			return {
 				...counter,
