@@ -22,6 +22,7 @@ import TestSuiteResult from './lib/results/testsuiteresult';
 const log = require( 'debug' )( 'harmonia' );
 
 export default class Harmonia {
+	private uid: string;
 	private options: Store<any>;
 	private tests: Test[];
 
@@ -30,6 +31,7 @@ export default class Harmonia {
 	public constructor() {
 		this.options = new Store();
 		this.tests = [];
+		this.uid = '';
 
 		log( 'Harmonia class initialized' );
 
@@ -40,6 +42,7 @@ export default class Harmonia {
 
 	public bootstrap( siteOptions: SiteConfig, envVars: EnvironmentVariables ) {
 		this.emit( 'harmonia:bootstraping', this );
+
 		// Validate the arguments
 		siteOptions.runValidation();
 		envVars.runValidation();
@@ -47,6 +50,9 @@ export default class Harmonia {
 		// Store the arguments
 		this.options.add( 'site', siteOptions )
 			.add( 'env', envVars );
+
+		// Generate unique id for this test execution
+		this.generateUID();
 
 		this.setupTests();
 
@@ -181,10 +187,31 @@ export default class Harmonia {
 		this.tests.push( test );			// Store the test
 	}
 
+	private generateUID(): string {
+		if ( this.uid ) {
+			throw new Error( `Cannot regenerate an existing UID. (${ this.uid })` );
+		}
+
+		const md5 = require( 'ts-md5/dist/md5' ).Md5;
+		this.uid = md5.hashStr( JSON.stringify( this.options ) + Date.now() );
+
+		log( `Harmonia UID set to ${ this.uid }` );
+		return this.uid;
+	}
+
+	public UID(): string {
+		if ( ! this.uid ) {
+			return this.generateUID();
+		}
+		return this.uid;
+	}
+
 	private setupAnalytics() {
 		// Setup base configurations
 		Analytics.setUser( '0', 'anon' );
-		Analytics.setBaseParams( { this_is_a_test: 'test' } );
+		Analytics.setBaseParams( {
+			uid: this.UID(),
+		} );
 
 		// Send analytics event on test aborted
 		this.on( 'testAborted', async ( test, testResult ) => {

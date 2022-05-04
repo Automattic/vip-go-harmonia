@@ -31,6 +31,12 @@ class Analytics {
 	}
 
 	setBaseParams( params: {} ) {
+		// Convert the parameters to Tracks valid HTTP parameters
+		Object.keys( params ).forEach( param => {
+			params[ `events[0][${ param }]` ] = params[ param ];
+			delete params[ param ];
+		} );
+
 		this.baseParams = { ...this.baseParams, ...params };
 	}
 
