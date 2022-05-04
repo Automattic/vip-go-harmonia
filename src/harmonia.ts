@@ -25,6 +25,7 @@ export default class Harmonia {
 	private uid: string;
 	private options: Store<any>;
 	private tests: Test[];
+	private source: string = 'module';
 
 	private static verbose: boolean = false;
 
@@ -208,9 +209,12 @@ export default class Harmonia {
 
 	private setupAnalytics() {
 		// Setup base configurations
-		Analytics.setUser( '0', 'anon' );
+		// While we don't have a way to link the execution to a (VIP Go) user, use the UID as the user
+		Analytics.setUser( this.UID(), 'anon' );
 		Analytics.setBaseParams( {
 			uid: this.UID(),
+			source: this.source,
+			...this.options.get( 'site' ).all(),
 		} );
 
 		// Send analytics event on test aborted
@@ -249,6 +253,10 @@ export default class Harmonia {
 	private shutdownHandler() {
 		this.shutdown();
 		process.exit( 1 );
+	}
+
+	public setSource( source: string ) {
+		this.source = source;
 	}
 
 	public on( eventName: string, listener: ( ...args: any[] ) => void ) {

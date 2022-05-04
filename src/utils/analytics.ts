@@ -11,32 +11,41 @@ class Analytics {
 	private eventPrefix: string;
 	private userAgent: string = 'vip-harmonia-cli';
 
-	private baseParams: {};
+	private commonProps: {
+		_ui: string,
+		_ut: string,
+		// eslint-disable-next-line camelcase
+		_via_ua: string,
+	};
+	private baseParams: {} = {};
+	private readonly ENDPOINT = 'https://public-api.wordpress.com/rest/v1.1/tracks/record?http_envelope=1';
 
-	private readonly ENDPOINT = 'https://public-api.wordpress.com/rest/v1.1/tracks/record';
-
-	constructor( eventPrefix ) {
+	private constructor( eventPrefix ) {
 		this.eventPrefix = eventPrefix;
 
-		this.baseParams = {
-			'commonProps[_ui]': '0', // TODO: replace with the user id, if running from CLI
-			'commonProps[_ut]': 'anon', // TODO: replace with user type
-			'commonProps[_via_ua]': this.userAgent,
+		this.commonProps = {
+			_ui: '0', // TODO: replace with the user id, if running from CLI
+			_ut: 'anon', // TODO: replace with user type
+			_via_ua: this.userAgent,
 		};
 	}
 
 	setUser( userId: string, userType: string ) {
-		this.baseParams[ 'commonProps[_ui]' ] = userId;
-		this.baseParams[ 'commonProps[_ut]' ] = userType;
+		this.commonProps._ui = userId;
+		this.commonProps._ut = userType;
 	}
 
 	setBaseParams( params: {} ) {
-		// Convert the parameters to Tracks valid HTTP parameters
 		Object.keys( params ).forEach( param => {
-			params[ `events[0][${ param }]` ] = params[ param ];
-			delete params[ param ];
+			const sanitizedParam = this.sanitizeName( param );
+			if ( [ 'number', 'boolean', 'string' ].includes( typeof params[ param ] ) &&
+				validEventOrPropNamePattern.test( sanitizedParam ) ) {
+				params[ sanitizedParam ] = params[ param ];
+			}
+			if ( sanitizedParam !== param ) {
+				delete params[ param ];
+			}
 		} );
-
 		this.baseParams = { ...this.baseParams, ...params };
 	}
 
@@ -65,7 +74,7 @@ class Analytics {
 		}
 
 		// Create and sanitize event props
-		const props = {};
+		const props = this.baseParams;
 		Object.keys( eventProps ).forEach( propName => {
 			if ( validEventOrPropNamePattern.test( propName ) ) {
 				props[ propName ] = eventProps[ propName ];
@@ -81,38 +90,18 @@ class Analytics {
 			debug( `Error: Invalid prop name detected: ${ propName } -- this event will be rejected during ETL` );
 		} );
 
-		const event = Object.assign( {
-			_en: name,
-		}, props );
+		const tracksEvents = {
+			commonProps: this.commonProps,
+			events: [ {
+				_en: name,
+				...props,
+			} ],
+		};
 
-		// For when we want to support batched events
-		const events = [ event ];
-
-		/**
-		 * The API expects an indexed events array with event data.
-		 *
-		 * `querystring.stringify` does not handle nested arrays and objects very well.
-		 *
-		 * So we can just do it ourselves instead.
-		 *
-		 * Should end up with something like:
-		 *  - events[0][_en]=clickButton // event name
-		 *  - events[0][buttonName]=Deploy // event custom prop
-		 *  - events[1][_en]=loadPage
-		 */
-		const params = events.reduce( ( reduced, ev, index ) => {
-			Object.keys( ev ).forEach( key => {
-				const param = `events[${ index }][${ key }]`;
-				reduced[ param ] = event[ key ];
-			} );
-
-			return reduced;
-		}, {} );
-
-		debug( 'trackEvent()', params );
+		debug( 'trackEvent()', tracksEvents );
 
 		try {
-			return await this.send( params );
+			return await this.send( tracksEvents );
 		} catch ( error ) {
 			debug( error );
 		}
@@ -121,36 +110,40 @@ class Analytics {
 		return Promise.resolve( false );
 	}
 
-	send( extraParams: {} ): Promise<any> {
+	async send( params: {} ): Promise<any> {
 		if ( process.env.DO_NOT_TRACK ) {
 			debug( 'send() => skipping per DO_NOT_TRACK variable' );
 
 			return Promise.resolve( 'tracks disabled per DO_NOT_TRACK variable' );
 		}
 
-		const params = Object.assign( {}, this.baseParams, extraParams );
-
 		const method = 'POST';
-		const body = new URLSearchParams( params ).toString();
+		const body = JSON.stringify( params );
 		const headers = {
-			'Content-Type': 'application/x-www-form-urlencoded',
+			'Accept-Encoding': 'gzip, deflate',
+			'Content-Type': 'application/json',
+			Accept: 'application/json',
 			'User-Agent': this.userAgent,
 		};
 
-		debug( 'send()', body );
+		const bodyUniqueString = require( 'ts-md5/dist/md5' ).Md5.hashStr( body );
+		debug( `send() (${ bodyUniqueString }) `, body );
 
 		// eslint-disable-next-line no-undef
-		return fetch( this.ENDPOINT, {
+		const response = await fetch( this.ENDPOINT, {
 			method,
 			body,
 			headers,
 		} );
+		const responseBody = await response.text();
+
+		debug( `response (${ bodyUniqueString }) `, responseBody );
 	}
 }
 
 export async function trackEvent( name: string, props = {} ) {
 	const analytics = Analytics.getInstance();
-	return analytics.trackEvent( name, props );
+	return await analytics.trackEvent( name, props );
 }
 
 export function setUser( userId, userType ) {
