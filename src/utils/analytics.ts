@@ -37,12 +37,15 @@ class Analytics {
 	setBaseParams( params: {} ) {
 		Object.keys( params ).forEach( param => {
 			const sanitizedParam = this.sanitizeName( param );
-			if ( [ 'number', 'boolean', 'string' ].includes( typeof params[ param ] ) &&
-				validEventOrPropNamePattern.test( sanitizedParam ) ) {
-				params[ sanitizedParam ] = params[ param ];
+
+			if ( ! [ 'number', 'boolean', 'string' ].includes( typeof params[ param ] ) ) {
+				return delete params[ param ];
 			}
-			if ( sanitizedParam !== param ) {
-				delete params[ param ];
+
+			if ( validEventOrPropNamePattern.test( sanitizedParam ) &&
+				sanitizedParam !== param ) {
+				params[ sanitizedParam ] = params[ param ];
+				return delete params[ param ];
 			}
 		} );
 		this.baseParams = { ...this.baseParams, ...params };
