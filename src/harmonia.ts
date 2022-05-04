@@ -106,11 +106,13 @@ export default class Harmonia {
 
 	public countResults( includeSuites: boolean = false ): {} {
 		return this.results( includeSuites ).reduce( ( counter: object, result: TestResult ) => {
-			if ( ! counter[ result.getTypeString() ] ) {
-				counter[ result.getTypeString() ] = 0;
-			}
-			counter[ result.getTypeString() ]++;
-			return counter;
+			const type = result.getTypeString();
+			const currentCount = count[ type ] || 0;
+
+			return {
+				...counter,
+				[ type ]: currentCount + 1,
+			};
 		}, { } );
 	}
 
