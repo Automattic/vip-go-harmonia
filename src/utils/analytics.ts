@@ -1,4 +1,3 @@
-import { URLSearchParams } from 'url';
 import fetch, { Response } from 'node-fetch';
 import snakeCase from 'lodash.snakecase';
 
