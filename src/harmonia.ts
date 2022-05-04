@@ -81,7 +81,7 @@ export default class Harmonia {
 		log( 'All tests have been executed' );
 
 		// Send analytics event
-		await Analytics.trackEvent( 'run_finished', {
+		await Analytics.trackEvent( 'run_finish', {
 			total_tests: this.results( false ).length,
 			...this.countResults( false, true ),
 		} );
@@ -219,7 +219,7 @@ export default class Harmonia {
 
 		// Send analytics event on test aborted
 		this.on( 'testAborted', async ( test, testResult ) => {
-			await Analytics.trackEvent( 'test_aborted', {
+			await Analytics.trackEvent( 'test_abort', {
 				test: stripAnsi( test.constructor.name ),
 				reason: stripAnsi( testResult.getLastIssue().message ),
 			} );
