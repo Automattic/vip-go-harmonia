@@ -15,7 +15,7 @@ export interface SiteConfigArgs {
 	dataOnlyImage?: string,
 }
 
-export const ALLOWED_NODEJS_VERSIONS = [ 12, 14, 16, 18 ];
+export const ALLOWED_NODEJS_VERSIONS = [ 14, 16, 18 ];
 
 export default class SiteConfig extends BaseConfig<any> {
 	constructor( args: SiteConfigArgs ) {
