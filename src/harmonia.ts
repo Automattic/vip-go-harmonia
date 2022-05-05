@@ -11,11 +11,11 @@ import Issue from './lib/issue';
 /**
  * Test imports
  */
-import NpmScriptsTest from './tests/npm-scripts.test';
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
 import HealthSuite from './tests/health/suite';
 import TestSuiteResult from './lib/results/testsuiteresult';
+import NPMSuite from './tests/npm/suite';
 
 const log = require( 'debug' )( 'harmonia' );
 
@@ -144,9 +144,7 @@ export default class Harmonia {
 	private setupTests() {
 		log( 'Setting up the tests' );
 		// Register all the necessary tests
-		this.registerTest( new TestSuite( 'Node.JS', 'Test a node.JS site' )
-			.addTest( new NpmScriptsTest() ) );
-
+		this.registerTest( new NPMSuite() );
 		this.registerTest( new DockerSuite() );
 		this.registerTest( new HealthSuite() );
 	}
