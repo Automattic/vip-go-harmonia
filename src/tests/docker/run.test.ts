@@ -36,11 +36,24 @@ export default class DockerRun extends Test {
 	async run() {
 		this.notice( `Running Docker image on PORT ${ chalk.yellow( this.port ) } for image ${ chalk.yellow( this.imageTag ) }...` );
 		try {
-			const subprocess = executeShell( `docker run -t --network host --name ${ this.containerName } -e PORT ${ this.imageTag }`, {
+			const environmentVars = {
 				...this.envVariables,
+				...this.getSiteOption( 'dotenv' ),
 				NODE_VERSION: this.nodeVersion,
 				PORT: this.port,
-			} );
+			};
+
+			// Build the `--env` string of options for Docker with the environment variable keys
+			const environmentVarDockerOption = Object.keys( environmentVars ).reduce( ( string, envVarName ) => {
+				return string + ` -e ${ envVarName }`;
+			}, '' );
+
+			const subprocess = executeShell( `docker run -t --network host --name ${ this.containerName } ${ environmentVarDockerOption } ${ this.imageTag }`,
+				environmentVars );
+
+			if ( Harmonia.isVerbose() ) {
+				subprocess.stdout?.pipe( process.stdout );
+			}
 
 			await waait( 3000 ); // Wait a little, giving time for the server to boot up
 
@@ -48,10 +61,6 @@ export default class DockerRun extends Test {
 			// By awaiting the subprocess, we force it to resolve and handle the error in the catch block
 			if ( subprocess.exitCode ) {
 				await subprocess;
-			}
-
-			if ( Harmonia.isVerbose() ) {
-				subprocess.stdout?.pipe( process.stdout );
 			}
 
 			// Save the container ID
