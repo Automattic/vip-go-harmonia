@@ -45,7 +45,7 @@ export default class DockerRun extends Test {
 
 			// Build the `--env` string of options for Docker with the environment variable keys
 			const environmentVarDockerOption = Object.keys( environmentVars ).reduce( ( string, envVarName ) => {
-				return string + ` -e ${ envVarName }`;
+				return `${ string } -e ${ envVarName }`;
 			}, '' );
 
 			const subprocess = executeShell( `docker run -t --network host --name ${ this.containerName } ${ environmentVarDockerOption } ${ this.imageTag }`,
