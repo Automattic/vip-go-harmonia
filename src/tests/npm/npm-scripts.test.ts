@@ -1,4 +1,4 @@
-import Test from '../lib/tests/test';
+import Test from '../../lib/tests/test';
 import chalk from 'chalk';
 
 export default class NpmScriptsTest extends Test {
