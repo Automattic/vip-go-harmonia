@@ -54,7 +54,8 @@ export default async function fetchWithTiming( url, options? ): Promise<TimedRes
 	}
 
 	// Divide by a million to get from ns to ms
-	const elaspedTime = process.hrtime( startTime )[ 1 ] / 1000000;
+	const endTime = process.hrtime( startTime );
+	const elaspedTime = endTime[ 0 ] * 1000 + endTime[ 1 ] / 1000000;
 
 	return {
 		url: url,
