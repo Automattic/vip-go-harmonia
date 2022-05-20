@@ -41,7 +41,6 @@ export default class HomeURLsTest extends BaseHealthTest {
 				Array.from( getUrls( homepageContent, { extractFromQueryString: true, requireSchemeOrWww: true } ) ) );
 			return allURLs.slice( 0, limit );
 		} catch ( error ) {
-			console.log( 'c' );
 			if ( error instanceof HarmoniaFetchError ) {
 				throw this.blocker( `Error fetching ${ this.baseURL }: ${ ( error as HarmoniaFetchError ).message }` );
 			}
