@@ -1,7 +1,6 @@
-import fetch, { FetchError } from 'node-fetch';
 import BaseHealthTest from './base.test';
 import getUrls from 'get-urls';
-import { TimedResponse } from '../../utils/http';
+import fetchWithTiming, { HarmoniaFetchError, TimedResponse } from '../../utils/http';
 import Issue from '../../lib/issue';
 import chalk from 'chalk';
 
@@ -24,17 +23,27 @@ export default class HomeURLsTest extends BaseHealthTest {
 		}
 	}
 
-	async getHomepagePaths( limit = 10 ) {
+	async getHomepagePaths( limit = 10 ): Promise<string[]> {
 		try {
 			// Get random URLs from homepage
-			const homepageRequest = await fetch( this.baseURL );
-			const homepageContent = await homepageRequest.text();
+			const homepageRequest = await fetchWithTiming( this.baseURL );
+
+			if ( homepageRequest.response.status !== 200 ) {
+				this.warning( 'Error getting URLs from homepage. ' +
+					`${ chalk.yellow( homepageRequest.response.status + ' - ' + homepageRequest.response.statusText ) } ` +
+					`response from ${ chalk.bold( this.baseURL ) }` );
+				return [];
+			}
+
+			const homepageContent = await homepageRequest.response.text();
+
 			const allURLs = this.filterPaths(
 				Array.from( getUrls( homepageContent, { extractFromQueryString: true, requireSchemeOrWww: true } ) ) );
 			return allURLs.slice( 0, limit );
 		} catch ( error ) {
-			if ( error instanceof FetchError ) {
-				throw this.blocker( `Error fetching ${ this.baseURL }: ${ ( error as FetchError ).message }` );
+			console.log( 'c' );
+			if ( error instanceof HarmoniaFetchError ) {
+				throw this.blocker( `Error fetching ${ this.baseURL }: ${ ( error as HarmoniaFetchError ).message }` );
 			}
 			throw error;
 		}

@@ -88,9 +88,10 @@ export default abstract class BaseHealthTest extends Test {
 	 * @param url
 	 * @protected
 	 */
-	protected async request( url ) {
+	protected async request( url: string ): Promise<TimedResponse> {
 		const request = await fetchWithTiming( url );
 		await this.handleRequest( request );
+		return request;
 	}
 
 	/**
@@ -110,8 +111,9 @@ export default abstract class BaseHealthTest extends Test {
 		}
 
 		if ( request.response.status !== 200 ) {
-			return this.error( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( request.url ) }.`,
-				undefined, { all: logs } );
+			return this.error( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( request.url ) }, ` +
+				`got ${ chalk.yellow( request.response.status + ' - ' + request.response.statusText ) } instead.`,
+			undefined, { all: logs } );
 		}
 
 		if ( request.duration > REQUEST_MAX_ALLOWED_DURATION ) {
