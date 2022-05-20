@@ -12,7 +12,9 @@ export class HarmoniaFetchError extends HarmoniaError {
 	public startDate;
 	public endDate = new Date();
 	public url;
-	public constructor( error: FetchError ) {
+	public timeout: boolean = false;
+
+	public constructor( error: Error ) {
 		super();
 		Object.assign( this, error );
 	}
@@ -34,6 +36,25 @@ export class HarmoniaFetchError extends HarmoniaError {
 	public getURL() {
 		return this.url;
 	}
+	public flagAsTimeout() {
+		this.timeout = true;
+	}
+}
+
+async function fetchWithTimeout( url, options = {} ) {
+	// @ts-ignore
+	const { timeout = 10000 } = options;
+
+	const controller = new AbortController();
+	const id = setTimeout( () => controller.abort(), timeout );
+
+	const response = await fetch( url, {
+		...options,
+		signal: controller.signal,
+	} );
+	clearTimeout( id );
+
+	return response;
 }
 
 export default async function fetchWithTiming( url, options? ): Promise<TimedResponse> {
@@ -42,7 +63,7 @@ export default async function fetchWithTiming( url, options? ): Promise<TimedRes
 	const startDate = new Date();
 	let response;
 	try {
-		response = await fetch( url, options );
+		response = await fetchWithTimeout( url, options );
 	} catch ( error ) {
 		if ( error instanceof FetchError ) {
 			const harmoniaError: HarmoniaFetchError = new HarmoniaFetchError( error );
@@ -50,6 +71,16 @@ export default async function fetchWithTiming( url, options? ): Promise<TimedRes
 			harmoniaError.setURL( url );
 			throw harmoniaError;
 		}
+
+		// If timeout
+		if ( ( error as Error ).name === 'AbortError' ) {
+			const harmoniaError: HarmoniaFetchError = new HarmoniaFetchError( error as Error );
+			harmoniaError.setStartDate( startDate );
+			harmoniaError.setURL( url );
+			harmoniaError.flagAsTimeout();
+			throw harmoniaError;
+		}
+
 		throw error;
 	}
 
