@@ -3,7 +3,7 @@ import BaseHealthTest from './base.test';
 export default class StaticRequestsTest extends BaseHealthTest {
 	protected paths = [
 		'/',
-		'/cache-healthcheck',
+		'/cache-healthcheck?',
 	]
 
 	constructor() {
