@@ -16,6 +16,7 @@ import { readFileSync } from 'fs';
 import dotenv from 'dotenv';
 import { isWebUri } from 'valid-url';
 import * as fs from 'fs';
+import isBase64 from 'is-base64';
 
 let consolelog;
 function supressOutput() {
@@ -125,8 +126,8 @@ const optionsSections = [
 		optionList: [
 			{
 				name: 'docker-build-env',
-				typeLabel: '{underline String}',
-				description: 'Environment variables exports to be used in the docker build. The format must match a Linux variable definition, e.g.:\n' +
+				typeLabel: '{underline Base64 encoded string}',
+				description: 'Environment variables exports to be used in the docker build. The format must be base64 encoded and match a Linux variable definition, e.g.:\n' +
 					'export var1="value1"\\nexport var2="value2"',
 			},
 			{
@@ -225,8 +226,18 @@ try {
 
 // Get the Docker build environment variables
 if ( options[ 'docker-build-env' ] ) {
+	// Try to decode base64 string
+	if ( ! isBase64( options[ 'docker-build-env' ] ) ) {
+		console.error( chalk.bold.redBright( 'Error:' ),
+			`The ${ chalk.bold( 'docker-build-env' ) } argument must be encoded in Base64.` );
+		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		process.exit( 1 );
+	}
+
+	const buffer = Buffer.from( options[ 'docker-build-env' ], 'base64' );
+	const dockerBuildEnvs = buffer.toString();
+
 	// Very ugly format validation
-	const dockerBuildEnvs = options[ 'docker-build-env' ];
 	if ( ! dockerBuildEnvs.includes( 'export' ) || ! dockerBuildEnvs.includes( '=' ) ) {
 		console.error( chalk.bold.redBright( 'Error:' ),
 			`Invalid format for the ${ chalk.bold( 'docker-build-env' ) } argument. ` );

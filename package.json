@@ -65,6 +65,7 @@
     "execa": "^5.1.1",
     "get-urls": "^10.0.1",
     "github-api": "^3.4.0",
+    "is-base64": "^1.1.0",
     "lodash.snakecase": "^4.1.1",
     "node-fetch": "^2.6.7",
     "semver": "^7.3.5",
