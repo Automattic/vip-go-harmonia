@@ -18,6 +18,8 @@ import { isWebUri } from 'valid-url';
 import * as fs from 'fs';
 import { isBase64 } from './utils/base64';
 
+const log = require( 'debug' )( 'harmonia-cli' );
+
 let consolelog;
 function supressOutput() {
 	consolelog = console.log;
@@ -226,6 +228,7 @@ try {
 
 // Get the Docker build environment variables
 if ( options[ 'docker-build-env' ] ) {
+	log( 'Using `docker-build-env` option.' );
 	// Try to decode base64 string
 	if ( ! isBase64( options[ 'docker-build-env' ] ) ) {
 		console.error( chalk.bold.redBright( 'Error:' ),
@@ -236,6 +239,8 @@ if ( options[ 'docker-build-env' ] ) {
 
 	const buffer = Buffer.from( options[ 'docker-build-env' ], 'base64' );
 	const dockerBuildEnvs = buffer.toString();
+
+	log( '`docker-build-env` decoded successfully. Value: ' + dockerBuildEnvs );
 
 	// Very ugly format validation
 	if ( ! dockerBuildEnvs.includes( 'export' ) || ! dockerBuildEnvs.includes( '=' ) ) {
