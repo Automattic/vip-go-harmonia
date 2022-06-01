@@ -16,7 +16,7 @@ import { readFileSync } from 'fs';
 import dotenv from 'dotenv';
 import { isWebUri } from 'valid-url';
 import * as fs from 'fs';
-import isBase64 from 'is-base64';
+import { isBase64 } from './utils/base64';
 
 let consolelog;
 function supressOutput() {
