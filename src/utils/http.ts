@@ -51,6 +51,8 @@ async function fetchWithTimeout( url, options = {} ) {
 	const response = await fetch( url, {
 		...options,
 		signal: controller.signal,
+		redirect: 'manual',
+		follow: 0,
 	} );
 	clearTimeout( id );
 
