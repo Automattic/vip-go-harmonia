@@ -45,6 +45,7 @@ const optionDefinitions = [
 	{ name: 'test-url', lazyMultiple: true, type: String },
 	{ name: 'help', alias: 'h', type: Boolean },
 	{ name: 'docker-build-env', type: String },
+	{ name: 'docker-env-vars', type: String },
 	{ name: 'docker-image', type: String },
 	{ name: 'use-data-only-image', type: String },
 ];
@@ -130,6 +131,12 @@ const optionsSections = [
 				name: 'docker-build-env',
 				typeLabel: '{underline Base64 encoded string}',
 				description: 'Environment variables exports to be used in the docker build. The format must be base64 encoded and match a Linux variable definition, e.g.:\n' +
+					'export var1="value1"\\nexport var2="value2"',
+			},
+			{
+				name: 'docker-env-vars',
+				typeLabel: '{underline Base64 encoded string}',
+				description: 'Environment variables exports to be injected to the application container. The format must be base64 encoded and match a Linux variable definition, e.g.:\n' +
 					'export var1="value1"\\nexport var2="value2"',
 			},
 			{
@@ -253,6 +260,50 @@ if ( options[ 'docker-build-env' ] ) {
 	siteOptions.set( 'dockerBuildEnvs', dockerBuildEnvs );
 }
 
+// Create the EnviornmentVariables object
+const envVars = new EnvironmentVariables( {
+	PORT: options.port,
+} );
+
+// Get the Docker application env variables
+if ( options[ 'docker-env-vars' ] ) {
+	log( 'Using `docker-env-vars` option.' );
+
+	// Try to decode base64 string
+	if ( ! isBase64( options[ 'docker-env-vars' ] ) ) {
+		console.error( chalk.bold.redBright( 'Error:' ),
+			`The ${ chalk.bold( 'docker-env-vars' ) } argument must be encoded in Base64.` );
+		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		process.exit( 1 );
+	}
+
+	const buffer = Buffer.from( options[ 'docker-env-vars' ], 'base64' );
+	const dockerEnvVars = buffer.toString();
+
+	log( '`docker-env-vars` decoded successfully. Value: ' + dockerEnvVars );
+
+	// Very ugly format validation
+	if ( ! dockerEnvVars.includes( 'export' ) || ! dockerEnvVars.includes( '=' ) ) {
+		console.error( chalk.bold.redBright( 'Error:' ),
+			`Invalid format for the ${ chalk.bold( 'docker-env-vars' ) } argument. ` );
+		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		process.exit( 1 );
+	}
+
+	// Convert from `export` notation to key-value object
+	const envMatches = dockerEnvVars.matchAll( /export (?<key>\w+)=(?:"|')(?<value>.*)(?:"|')/gm );
+	for ( const match of envMatches ) {
+		if ( ! match.groups?.key ) {
+			continue;
+		}
+		const key = match.groups.key;
+		const value = match.groups?.value;
+		// Save env var
+		envVars.set( key, value );
+		log( `Environment variable set. ${ key }=${ value }` );
+	}
+}
+
 // Set the Docker image, if exists
 if ( options[ 'docker-image' ] ) {
 	siteOptions.set( 'dockerImage', options[ 'docker-image' ] );
@@ -274,11 +325,6 @@ try {
 }
 // Save dotenv in the site config
 siteOptions.set( 'dotenv', dotenvOptions );
-
-// Create the EnviornmentVariables object
-const envVars = new EnvironmentVariables( {
-	PORT: options.port,
-} );
 
 // Bootstrap
 try {
