@@ -65,7 +65,7 @@ export default class HealthcheckTest extends Test {
 			this.log( 'Error getting docker logs: ' + ( err as Error ).message );
 		}
 
-		const isGoodResponse = response.status === 200 || ( response.status >= 300 && response.status <= 399 );
+		const isGoodResponse = response.status === 200;
 
 		if ( ! isGoodResponse ) {
 			this.blocker( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( CACHE_HEALTHCHECK_ROUTE ) }.\n` +
