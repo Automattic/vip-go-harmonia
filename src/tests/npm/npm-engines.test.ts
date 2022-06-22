@@ -27,7 +27,7 @@ export default class NpmEnginesTest extends Test {
 		if ( engines.node ) {
 			const nodeSemVer = semver.coerce( this.nodeVersion ).version;
 			if ( ! semver.satisfies( nodeSemVer, engines.node ) ) {
-				this.blocker( `The ${ chalk.italic( 'engine.node' ) } version in your ${ chalk.bold( 'package.json' ) } ` +
+				this.warning( `The ${ chalk.italic( 'engine.node' ) } version in your ${ chalk.bold( 'package.json' ) } ` +
 					`(${ chalk.yellow( engines.node ) }) does not satisfies the production Node.js version (${ chalk.yellow( nodeSemVer ) })`,
 				this.npmEnginesDoc );
 			}
