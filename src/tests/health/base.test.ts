@@ -110,9 +110,14 @@ export default abstract class BaseHealthTest extends Test {
 			this.log( 'Error getting docker logs: ' + ( err as Error ).message );
 		}
 
-		const isGoodResponse = request.response.status === 200 || ( request.response.status >= 300 && request.response.status <= 399 );
+		// If it's a redirect (3XX) or client error (4XX), throw warning
+		if ( request.response.status >= 300 && request.response.status <= 499 ) {
+			return this.warning( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( request.url ) }, ` +
+				`got ${ chalk.yellow( request.response.status + ' - ' + request.response.statusText ) } instead.`, undefined, { all: logs } );
+		}
 
-		if ( ! isGoodResponse ) {
+		// If it's a server error (5XX), throw error
+		if ( 200 !== request.response.status ) {
 			return this.error( `Could not get a ${ chalk.yellow( '200 - OK' ) } response from ${ chalk.bold( request.url ) }, ` +
 				`got ${ chalk.yellow( request.response.status + ' - ' + request.response.statusText ) } instead.`,
 			undefined, { all: logs } );
