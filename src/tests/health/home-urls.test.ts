@@ -28,7 +28,8 @@ export default class HomeURLsTest extends BaseHealthTest {
 			// Get random URLs from homepage
 			const homepageRequest = await fetchWithTiming( this.baseURL );
 
-			if ( homepageRequest.response.status !== 200 ) {
+			const isGoodResponse = homepageRequest.response.status === 200 || ( homepageRequest.response.status >= 300 && homepageRequest.response.status <= 399 );
+			if ( ! isGoodResponse ) {
 				this.warning( 'Error getting URLs from homepage. ' +
 					`${ chalk.yellow( homepageRequest.response.status + ' - ' + homepageRequest.response.statusText ) } ` +
 					`response from ${ chalk.bold( this.baseURL ) }` );
