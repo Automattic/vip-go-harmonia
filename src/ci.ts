@@ -178,24 +178,22 @@ function createMarkdown() {
 	// Add result summary
 	const summary = results.summary;
 
-	let stamp;
+	let resultString;
 	if ( summary.results.Failed || summary.results.Aborted ) {
 		// Failed
-		stamp = 'https://cldup.com/GQ-AjSRSzb.png';
+		resultString = 'have failed';
 	} else if ( summary.results.PartialSuccess ) {
 		// Partial Success
-		stamp = 'https://cldup.com/bL0eXSSJyF.png';
+		resultString = 'passed with warnings';
 	} else if ( summary.results.Success ) {
 		// Success
-		stamp = 'https://cldup.com/WhvxXikKLB.png';
+		resultString = 'passed';
 	}
 
 	let prettyResult: string;
 
 	// Convert json to markup/html
-	prettyResult = `<img align="right" width="200" src="${ stamp }">\n\n`;
-
-	prettyResult += `## Test summary for commit \`${ options.commit.substring( 0, 7 ) }\`\n\n`;
+	prettyResult = `## Tests for commit \`${ options.commit.substring( 0, 7 ) }\` ${ resultString }\n\n`;
 
 	if ( summary.results.Success ) {
 		prettyResult += ':white_check_mark: &nbsp;&nbsp;';
