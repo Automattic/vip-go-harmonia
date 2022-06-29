@@ -112,11 +112,11 @@ function getResultEmojis( resultType: TestResultType, numTests: number ) {
 function formatIssueType( issueType: string|IssueType ) {
 	switch ( IssueType[ issueType ] ) {
 		case IssueType.Blocker:
-			return ':stop_sign: &nbsp;&nbsp; Blocker';
+			return 'Blocker';
 		case IssueType.Error:
-			return ':x: &nbsp;&nbsp; Error';
+			return 'Error';
 		case IssueType.Warning:
-			return ':warning: &nbsp;&nbsp; Warning';
+			return 'Warning';
 	}
 }
 
@@ -164,10 +164,10 @@ function createMarkdown() {
 			if ( issue.type === 'Notice' ) {
 				continue;
 			}
-			result += `* __${ formatIssueType( issue.type ) }__ - ${ issue.message }\n`;
+			result += `* __${ formatIssueType( issue.type ) }__. ${ issue.message }\n`;
 			result += `    _In \`${ test.name }\`_\n`;
 			if ( issue.documentation ) {
-				result += `    [Read more in the documentation](${ issue.documentation })\n`;
+				result += ` [Read more in the documentation](${ issue.documentation })\n`;
 			}
 			result += '\n';
 		}
@@ -196,25 +196,25 @@ function createMarkdown() {
 	prettyResult = `## Tests for commit \`${ options.commit.substring( 0, 7 ) }\` ${ resultString }\n\n`;
 
 	if ( summary.results.Success ) {
-		prettyResult += ':white_check_mark: &nbsp;&nbsp;';
+		prettyResult += ':white_check_mark: &nbsp;';
 		prettyResult += getResultEmojis( TestResultType.Success, summary.results.Success );
 		prettyResult += ` ${ summary.results.Success } tests\n`;
 	}
 
 	if ( summary.results.PartialSuccess ) {
-		prettyResult += ':warning: &nbsp;&nbsp;';
+		prettyResult += ':warning: &nbsp;';
 		prettyResult += getResultEmojis( TestResultType.PartialSuccess, summary.results.PartialSuccess );
 		prettyResult += ` ${ summary.results.PartialSuccess } tests\n`;
 	}
 
 	if ( summary.results.Failed ) {
-		prettyResult += ':x: &nbsp;&nbsp;';
+		prettyResult += ':x: &nbsp;';
 		prettyResult += getResultEmojis( TestResultType.Failed, summary.results.Failed );
 		prettyResult += ` ${ summary.results.Failed } tests\n`;
 	}
 
 	if ( summary.results.Aborted ) {
-		prettyResult += ':stop_sign: &nbsp;&nbsp;';
+		prettyResult += ':stop_sign: &nbsp;';
 		prettyResult += getResultEmojis( TestResultType.Aborted, summary.results.Aborted );
 		prettyResult += ` ${ summary.results.Aborted } tests\n`;
 	}
@@ -223,11 +223,13 @@ function createMarkdown() {
 
 	for ( const test of results.results ) {
 		prettyResult += `\n### ${ test.name }\n\n`;
-		prettyResult += `${ test.description }\n\n`;
+
+		if ( test.description ) {
+			prettyResult += `${ test.description }\n\n`;
+		}
 
 		const open = test.result !== 'Success' ? 'open' : '';
-		prettyResult += `<details ${ open }><summary>${ getResultBadge( test.result ) } &nbsp;&nbsp; ${ getResultLabel( test.result ) }. ` +
-			'<em>Click to toggle details view - </em>&nbsp;:arrow_down:</summary>\n\n\n\n';
+		prettyResult += `<details ${ open }><summary>${ getResultBadge( test.result ) } &nbsp;${ getResultLabel( test.result ) }\n\n`;
 
 		prettyResult += '|  | Test | Description | Issues \n' +
 			':--- | :--- | :--- | :--: \n';
@@ -237,11 +239,9 @@ function createMarkdown() {
 
 		// Print out the issues
 		const issuesPretty = formatIssues( test );
-		prettyResult += '\n__Issues Found:__\n';
 		if ( issuesPretty ) {
+			prettyResult += '\n__Issues found:__\n';
 			prettyResult += '\n' + formatIssues( test );
-		} else {
-			prettyResult += '_None_\n\n';
 		}
 
 		prettyResult += '</details>\n';

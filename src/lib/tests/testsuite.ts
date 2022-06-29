@@ -9,7 +9,7 @@ export default class TestSuite extends Test {
 
 	protected readonly testResult: TestSuiteResult;
 
-	constructor( name: string, description: string ) {
+	constructor( name: string, description?: string ) {
 		super( name, description );
 		this._tests = [];
 		this.testResult = new TestSuiteResult( this );

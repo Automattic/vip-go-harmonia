@@ -13,8 +13,7 @@ export default class DockerRun extends Test {
 	private containerName: string = '';
 
 	constructor() {
-		super( 'Start and run the Docker image',
-			'Tries to start the application in the built Docker image' );
+		super( 'Docker run', 'Starts the application using the built Docker image' );
 	}
 
 	async prepare() {

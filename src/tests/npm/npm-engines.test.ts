@@ -8,7 +8,7 @@ export default class NpmEnginesTest extends Test {
 
 	private npmEnginesDoc = 'https://docs.wpvip.com/technical-references/node-js/managing-node-js-versions/';
 	constructor() {
-		super( 'NPM `package.json` engine', 'Checks if the `engine` propriety is set and a valid version' );
+		super( 'NPM `engine`', 'Validates the `engine` property, if present' );
 	}
 
 	prepare() {

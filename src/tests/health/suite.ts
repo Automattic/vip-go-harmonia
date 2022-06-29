@@ -5,7 +5,7 @@ import TopRequestsTest from './top-requests.test';
 
 export default class HealthSuite extends TestSuite {
 	constructor() {
-		super( 'Health Check', 'Tests a number of HTTP requests and looks at the response time' );
+		super( 'Application health' );
 	}
 
 	setupTests() {

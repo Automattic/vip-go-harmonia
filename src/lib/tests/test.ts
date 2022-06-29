@@ -6,12 +6,12 @@ import SiteConfig from '../configs/site.config';
 
 export default abstract class Test {
 	private readonly _name: string;
-	private readonly _description: string;
+	private readonly _description?: string;
 
 	protected readonly testResult: TestResult;
 	protected _options: Store<any>;
 
-	protected constructor( name: string, description: string ) {
+	protected constructor( name: string, description?: string ) {
 		this._name = name;
 		this._description = description;
 
@@ -67,7 +67,7 @@ export default abstract class Test {
 		return this._name;
 	}
 
-	get description(): string {
+	get description(): string | undefined {
 		return this._description;
 	}
 
