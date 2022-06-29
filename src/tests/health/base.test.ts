@@ -57,7 +57,7 @@ export default abstract class BaseHealthTest extends Test {
 					`--until ${ error.getEndDate().toISOString() }` );
 				const logs = subprocess.all;
 
-				this.blocker( `Error fetching ${ error.getURL() }: ${ error.message }`, undefined, { all: logs } );
+				this.error( `Error fetching ${ error.getURL() }: ${ error.message }`, undefined, { all: logs } );
 			}
 			console.log( error );
 		}
