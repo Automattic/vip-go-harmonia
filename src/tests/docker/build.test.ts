@@ -8,8 +8,7 @@ export default class DockerBuild extends Test {
 	private envVariables: object = {};
 
 	constructor() {
-		super( 'Builds the Docker image',
-			'Tries to build the docker image and the application' );
+		super( 'Docker build', 'Builds the Docker image' );
 	}
 
 	async prepare() {

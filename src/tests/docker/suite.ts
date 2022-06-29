@@ -7,7 +7,7 @@ import HealthcheckTest from './healthcheck.test';
 
 export default class DockerSuite extends TestSuite {
 	constructor() {
-		super( 'Docker', 'Builds and executes the docker environment' );
+		super( 'Docker', 'Builds and runs the application in a Docker container' );
 	}
 
 	setupTests() {

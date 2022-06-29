@@ -25,8 +25,8 @@ export default class HealthcheckTest extends Test {
 	private cacheHealthcheckDoc = 'https://docs.wpvip.com/technical-references/node-js/#h-requirement-1-exposing-a-health-check-endpoint';
 
 	constructor() {
-		super( 'Testing application availability and health-check endpoint',
-			'Checking if your app accepts a PORT and responds to /cache-healthcheck' );
+		super( 'Health check',
+			'Validates dynamic `PORT` environment variable and `/cache-healthcheck?` implementation' );
 	}
 
 	async prepare() {

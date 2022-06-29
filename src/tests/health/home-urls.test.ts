@@ -8,8 +8,8 @@ export default class HomeURLsTest extends BaseHealthTest {
 	protected paths: string[] = []
 
 	constructor() {
-		super( 'Testing with home URLs',
-			'Fetches URLS from the index and check their availability' );
+		super( 'Home page',
+			'Checks the responsiveness of the home page and linked pages' );
 	}
 
 	async prepare() {

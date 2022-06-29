@@ -7,7 +7,7 @@ export default class NpmScriptsTest extends Test {
 
 	private npmScriptDoc = 'https://docs.wpvip.com/technical-references/node-js/#h-requirement-2-production-dependencies-and-npm-scripts';
 	constructor() {
-		super( 'Check NPM script in the project', 'Checks your package.json for `npm build` and `npm start`' );
+		super( 'NPM `scripts`', 'Checks `package.json` for `build` and `start` scripts' );
 	}
 
 	prepare() {

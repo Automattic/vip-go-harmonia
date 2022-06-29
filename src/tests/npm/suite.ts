@@ -4,7 +4,7 @@ import NpmEnginesTest from './npm-engines.test';
 
 export default class NPMSuite extends TestSuite {
 	constructor() {
-		super( 'NPM package.json', 'Checks for valid `package.json` configuration' );
+		super( 'NPM `package.json`' );
 	}
 
 	setupTests() {
