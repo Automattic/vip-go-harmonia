@@ -258,7 +258,11 @@ function createMarkdown() {
 			`viewform?usp=pp_url&entry.1524908984=${ pullRequestURL }`;
 
 		prettyResult += '\n  :arrow_right:  __This tool is under active development__. If you have any feedback, ' +
-			`you are invited to [fill this very short form](${ feedbackLink }).`;
+			`you are invited to [fill this very short form](${ feedbackLink }).\n`;
+
+		prettyResult += '\n  :question:  __Want to learn more?__ Take a look at the [documentation page]' +
+			'(https://docs.wpvip.com/technical-references/nodejs-deployment-validation/) for more information about ' +
+			'these tests and the automatic testing process.';
 	}
 
 	return prettyResult;
