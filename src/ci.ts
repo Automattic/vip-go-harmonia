@@ -229,7 +229,7 @@ function createMarkdown() {
 		}
 
 		const open = test.result !== 'Success' ? 'open' : '';
-		prettyResult += `<details ${ open }><summary>${ getResultBadge( test.result ) } &nbsp;${ getResultLabel( test.result ) }\n\n`;
+		prettyResult += `<details ${ open }><summary>${ getResultBadge( test.result ) } &nbsp;${ getResultLabel( test.result ) }</summary>\n\n`;
 
 		prettyResult += '|  | Test | Description | Issues \n' +
 			':--- | :--- | :--- | :--: \n';
