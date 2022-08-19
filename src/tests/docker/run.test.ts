@@ -1,7 +1,7 @@
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
 import { executeShell } from '../../utils/shell';
-import waait from 'waait';
+import { wait } from '../../utils/wait';
 import { Md5 } from 'ts-md5/dist/md5';
 import Harmonia from '../../harmonia';
 
@@ -54,7 +54,7 @@ export default class DockerRun extends Test {
 				subprocess.stdout?.pipe( process.stdout );
 			}
 
-			await waait( 3000 ); // Wait a little, giving time for the server to boot up
+			await wait( 3000 ); // Wait a little, giving time for the server to boot up
 
 			// If subprocess has an exit code, it means that it exited prematurely.
 			// By awaiting the subprocess, we force it to resolve and handle the error in the catch block
