@@ -1,4 +1,5 @@
 import fetch, { Response } from 'node-fetch';
+import { createHash } from 'crypto';
 import snakeCase from 'lodash.snakecase';
 
 const debug = require( 'debug' )( 'analytics' );
@@ -128,7 +129,7 @@ class Analytics {
 			'User-Agent': this.userAgent,
 		};
 
-		const bodyUniqueString = require( 'ts-md5/dist/md5' ).Md5.hashStr( body );
+		const bodyUniqueString = createHash( 'md5' ).update( body ).digest( 'hex' );
 		debug( `send() (${ bodyUniqueString }) `, body );
 
 		// eslint-disable-next-line no-undef
