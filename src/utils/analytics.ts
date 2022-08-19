@@ -1,5 +1,4 @@
 import fetch, { Response } from 'node-fetch';
-import snakeCase from 'lodash.snakecase';
 
 const debug = require( 'debug' )( 'analytics' );
 const validEventOrPropNamePattern = /^[a-z_][a-z0-9_]*$/;
@@ -59,7 +58,6 @@ class Analytics {
 	}
 
 	private sanitizeName( currentName: string ): string {
-		currentName = currentName.replace( ':', '_' );
 		return snakeCase( currentName );
 	}
 
@@ -156,4 +154,8 @@ export function setUser( userId, userType ) {
 export function setBaseParams( params ) {
 	const analytics = Analytics.getInstance();
 	analytics.setBaseParams( params );
+}
+
+export function snakeCase( str: string ) {
+	return str.trim().toLowerCase().replace( /[^a-z0-9]+/g, '_' );
 }
