@@ -9,10 +9,10 @@ export interface TimedResponse {
 }
 
 export class HarmoniaFetchError extends HarmoniaError {
-	public startDate;
+	public startDate = new Date();
 	public endDate = new Date();
-	public url;
-	public timeout: boolean = false;
+	public url = '';
+	public timeout = false;
 
 	public constructor( error: Error ) {
 		super();
@@ -21,16 +21,16 @@ export class HarmoniaFetchError extends HarmoniaError {
 	public setStartDate( date: Date ) {
 		this.startDate = date;
 	}
-	public getStartDate(): Date {
+	public getStartDate() {
 		return this.startDate;
 	}
 	public setEndDate( date: Date ) {
 		this.endDate = date;
 	}
-	public getEndDate(): Date {
+	public getEndDate() {
 		return this.endDate;
 	}
-	public setURL( url ) {
+	public setURL( url: string ) {
 		this.url = url;
 	}
 	public getURL() {
@@ -41,8 +41,7 @@ export class HarmoniaFetchError extends HarmoniaError {
 	}
 }
 
-async function fetchWithTimeout( url, options = {} ) {
-	// @ts-ignore
+async function fetchWithTimeout( url, options: any = {} ) {
 	const { timeout = 10000 } = options;
 
 	const controller = new AbortController();
@@ -88,12 +87,12 @@ export default async function fetchWithTiming( url, options? ): Promise<TimedRes
 
 	// Divide by a million to get from ns to ms
 	const endTime = process.hrtime( startTime );
-	const elaspedTime = endTime[ 0 ] * 1000 + endTime[ 1 ] / 1000000;
+	const elaspedTime = ( endTime[ 0 ] * 1000 ) + ( endTime[ 1 ] / 1000000 );
 
 	return {
-		url: url,
-		response: response,
-		startDate: startDate,
+		url,
+		response,
+		startDate,
 		duration: Math.round( elaspedTime ),
 	};
 }

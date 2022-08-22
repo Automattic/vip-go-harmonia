@@ -5,7 +5,7 @@ import Issue from '../../lib/issue';
 import chalk from 'chalk';
 
 export default class HomeURLsTest extends BaseHealthTest {
-	protected paths: string[] = []
+	protected paths: string[] = [];
 
 	constructor() {
 		super( 'Home page',
@@ -16,7 +16,7 @@ export default class HomeURLsTest extends BaseHealthTest {
 		await super.prepare();
 
 		// Get all the homepage URLs
-		this.paths = await this.getHomepagePaths( );
+		this.paths = await this.getHomepagePaths();
 
 		if ( ! this.paths || this.paths?.length === 0 ) {
 			this.skip( 'No URLs available for testing' );

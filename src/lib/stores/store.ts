@@ -20,7 +20,6 @@ export default class Store<TYPE=any> {
 
 	/**
 	 * Validates if a given key exists in the store
-	 * @param key
 	 */
 	exists( key: string ) {
 		return key in this.store;
@@ -28,8 +27,6 @@ export default class Store<TYPE=any> {
 
 	/**
 	 * Add a new key-value to the store. If it exists, throw an Exception
-	 * @param key
-	 * @param value
 	 */
 	add( key: string, value: TYPE ) {
 		if ( this.exists( key ) ) {
@@ -42,7 +39,6 @@ export default class Store<TYPE=any> {
 
 	/**
 	 * Retrieves a value for a given key.
-	 * @param key
 	 */
 	get( key: string ) {
 		if ( ! this.exists( key ) ) {
@@ -55,8 +51,6 @@ export default class Store<TYPE=any> {
 	/**
 	 * Sets a key to a given value. If the key already exists, will update it. Otherwise, the key-value pair will be
 	 * created.
-	 * @param key
-	 * @param value
 	 */
 	set( key: string, value: TYPE ) {
 		this.store[ key ] = value;
@@ -65,7 +59,6 @@ export default class Store<TYPE=any> {
 
 	/**
 	 * Merge a existing object to the current store
-	 * @param object
 	 */
 	merge( object: { [key: string]: TYPE } ) {
 		// Remove undefined values

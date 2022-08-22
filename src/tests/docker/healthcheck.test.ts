@@ -16,12 +16,10 @@ const CACHE_HEALTHCHECK_MAX_DESIRED_DURATION = 100;
 const CACHE_HEALTHCHECK_MAX_ALLOWED_DURATION = 200;
 
 export default class HealthcheckTest extends Test {
-	private port: number = 0;
-	private imageTag: string = '';
-	private containerName: string = '';
-
-	private startDate: string = '';
-
+	private port = 0;
+	private imageTag = '';
+	private containerName = '';
+	private startDate = '';
 	private cacheHealthcheckDoc = 'https://docs.wpvip.com/technical-references/node-js/#h-requirement-1-exposing-a-health-check-endpoint';
 
 	constructor() {
@@ -85,7 +83,6 @@ export default class HealthcheckTest extends Test {
 		if ( request.duration > CACHE_HEALTHCHECK_MAX_DESIRED_DURATION ) {
 			this.warning( `The request to ${ chalk.bold( CACHE_HEALTHCHECK_ROUTE ) } took longer than ` +
 				`${ chalk.bold( CACHE_HEALTHCHECK_MAX_DESIRED_DURATION + 'ms' ) } (${ chalk.yellow( request.duration + 'ms' ) })` );
-			return;
 		}
 	}
 }

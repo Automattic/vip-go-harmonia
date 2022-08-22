@@ -1,3 +1,4 @@
+import debug from 'debug';
 import TestResult, { TestResultType } from '../results/testresult';
 import Issue, { IssueType } from '../issue';
 import eventEmitter from '../events';
@@ -10,6 +11,7 @@ export default abstract class Test {
 
 	protected readonly testResult: TestResult;
 	protected _options: Store<any>;
+	protected log: ( message: string ) => void;
 
 	protected constructor( name: string, description?: string ) {
 		this._name = name;
@@ -17,6 +19,8 @@ export default abstract class Test {
 
 		this._options = new Store<any>();
 		this.testResult = new TestResult( this );
+
+		this.log = debug( `test:${ this.constructor.name }` );
 		this.log( `${ this.constructor.name } has been initialized` );
 	}
 
@@ -199,10 +203,6 @@ export default abstract class Test {
 			name: this._name,
 			description: this._description,
 		};
-	}
-
-	protected log( message ) {
-		require( 'debug' )( `test:${ this.constructor.name }` )( message );
 	}
 
 	protected emit( eventName: string, ...args: any[] ): boolean {

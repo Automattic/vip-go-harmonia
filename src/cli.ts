@@ -17,17 +17,17 @@ import dotenv from 'dotenv';
 import { isWebUri } from 'valid-url';
 import * as fs from 'fs';
 import { isBase64 } from './utils/base64';
+import debug from 'debug';
 
-const log = require( 'debug' )( 'harmonia-cli' );
+const log = debug( 'harmonia-cli' );
 
-let consolelog;
-function supressOutput() {
-	consolelog = console.log;
-	console.log = () => {};
-}
+let suppressOutput = false;
+function logToConsole( ...messages: string[] ) {
+	if ( suppressOutput ) {
+		return;
+	}
 
-function enableOutput() {
-	console.log = consolelog;
+	messages.forEach( console.log );
 }
 
 const randomPort = Math.floor( Math.random() * 1000 ) + 3001; // Get a PORT from 3001 and 3999
@@ -153,22 +153,22 @@ const optionsSections = [
 	},
 ];
 
-// If the JSON option is enabled, all the stdout should be suppressed to prevent polluting the output.
-if ( options.json ) {
-	supressOutput();
-}
-
-console.log( '  /\\  /\\__ _ _ __ _ __ ___   ___  _ __ (_) __ _ ' );
-console.log( ' / /_/ / _` | \'__| \'_ ` _ \\ / _ \\| \'_ \\| |/ _` |' );
-console.log( '/ __  / (_| | |  | | | | | | (_) | | | | | (_| |' );
-console.log( '\\/ /_/ \\__,_|_|  |_| |_| |_|\\___/|_| |_|_|\\__,_|' );
-console.log( 'VIP Harmonia - Application testing made easy' );
-console.log();
-
 if ( options.help ) {
-	console.log( commandLineUsage( optionsSections ) );
+	logToConsole( commandLineUsage( optionsSections ) );
 	process.exit();
 }
+
+// If the JSON option is enabled, all the stdout should be suppressed to prevent polluting the output.
+if ( options.json ) {
+	suppressOutput = true;
+}
+
+logToConsole( '  /\\  /\\__ _ _ __ _ __ ___   ___  _ __ (_) __ _ ' );
+logToConsole( ' / /_/ / _` | \'__| \'_ ` _ \\ / _ \\| \'_ \\| |/ _` |' );
+logToConsole( '/ __  / (_| | |  | | | | | | (_) | | | | | (_| |' );
+logToConsole( '\\/ /_/ \\__,_|_|  |_| |_| |_|\\___/|_| |_|_|\\__,_|' );
+logToConsole( 'VIP Harmonia - Application testing made easy' );
+logToConsole();
 
 if ( options.verbose && ! options.json ) {
 	Harmonia.setVerbosity( true );
@@ -189,7 +189,7 @@ if ( options.ci ) {
 
 // Register some events handlers
 harmonia.on( 'ready', () => {
-	console.log( 'Harmonia is ready! ' );
+	logToConsole( 'Harmonia is ready! ' );
 } );
 
 // Get extra URLs for testing
@@ -202,7 +202,7 @@ if ( options[ 'test-url' ]?.length === 1 ) {
 		const jsonURLs = JSON.parse( firstElem );
 
 		testURLs = jsonURLs;
-	} catch ( error ) {	}
+	} catch ( error ) { /* ignore error */ }
 }
 
 // Test the URLs array and make sure they are valid URLs
@@ -240,7 +240,7 @@ if ( options[ 'docker-build-env' ] ) {
 	if ( ! isBase64( options[ 'docker-build-env' ] ) ) {
 		console.error( chalk.bold.redBright( 'Error:' ),
 			`The ${ chalk.bold( 'docker-build-env' ) } argument must be encoded in Base64.` );
-		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		logToConsole( commandLineUsage( optionsSections[ 2 ] ) );
 		process.exit( 1 );
 	}
 
@@ -253,7 +253,7 @@ if ( options[ 'docker-build-env' ] ) {
 	if ( ! dockerBuildEnvs.includes( 'export' ) || ! dockerBuildEnvs.includes( '=' ) ) {
 		console.error( chalk.bold.redBright( 'Error:' ),
 			`Invalid format for the ${ chalk.bold( 'docker-build-env' ) } argument. ` );
-		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		logToConsole( commandLineUsage( optionsSections[ 2 ] ) );
 		process.exit( 1 );
 	}
 	// Store it
@@ -273,7 +273,7 @@ if ( options[ 'docker-env-vars' ] ) {
 	if ( ! isBase64( options[ 'docker-env-vars' ] ) ) {
 		console.error( chalk.bold.redBright( 'Error:' ),
 			`The ${ chalk.bold( 'docker-env-vars' ) } argument must be encoded in Base64.` );
-		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		logToConsole( commandLineUsage( optionsSections[ 2 ] ) );
 		process.exit( 1 );
 	}
 
@@ -286,7 +286,7 @@ if ( options[ 'docker-env-vars' ] ) {
 	if ( ! dockerEnvVars.includes( 'export' ) || ! dockerEnvVars.includes( '=' ) ) {
 		console.error( chalk.bold.redBright( 'Error:' ),
 			`Invalid format for the ${ chalk.bold( 'docker-env-vars' ) } argument. ` );
-		console.log( commandLineUsage( optionsSections[ 2 ] ) );
+		logToConsole( commandLineUsage( optionsSections[ 2 ] ) );
 		process.exit( 1 );
 	}
 
@@ -335,44 +335,43 @@ try {
 	} else {
 		console.error( error );
 	}
-	console.log( commandLineUsage( optionsSections ) );
+	logToConsole( commandLineUsage( optionsSections ) );
 	process.exit( 1 );
 }
 
 // Now we run the tests :)
-console.log( ` * Running tests for the ${ packageJSON.name } app (@${ options.site })...` );
-console.log();
+logToConsole( ` * Running tests for the ${ packageJSON.name } app (@${ options.site })...` );
+logToConsole();
 
 // Register the event handlers to output some information during the execution
 harmonia.on( 'beforeTestSuite', ( suite: TestSuite ) => {
-	console.log( ` >> Running test suite ${ chalk.bold( suite.name ) } - ${ chalk.italic( suite.description ) } ` );
-	console.log();
+	logToConsole( ` >> Running test suite ${ chalk.bold( suite.name ) } - ${ chalk.italic( suite.description ) } ` );
+	logToConsole();
 } );
 
 harmonia.on( 'beforeTest', ( test: Test ) => {
-	console.log( `  [ ${ chalk.bold( test.name ) } ] - ${ test.description }` );
+	logToConsole( `  [ ${ chalk.bold( test.name ) } ] - ${ test.description }` );
 } );
 
 harmonia.on( 'afterTest', ( test: Test, result: TestResult ) => {
 	switch ( result.getType() ) {
 		case TestResultType.Success:
-			console.log( `  ${ chalk.bgGreen( 'Test passed with no errors' ) }` );
+			logToConsole( `  ${ chalk.bgGreen( 'Test passed with no errors' ) }` );
 			break;
 		case TestResultType.Failed:
-			console.log( `  ${ chalk.bgRed( `Test failed with ${ result.getErrors().length } errors..` ) }` );
+			logToConsole( `  ${ chalk.bgRed( `Test failed with ${ result.getErrors().length } errors..` ) }` );
 			break;
 		case TestResultType.PartialSuccess:
-			console.log( `  ${ chalk.bgYellow( 'Test partially succeeded.' ) }` );
+			logToConsole( `  ${ chalk.bgYellow( 'Test partially succeeded.' ) }` );
 			break;
 		case TestResultType.Aborted:
-			console.log( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
+			logToConsole( `  ${ chalk.bgRedBright.underline( 'Test aborted!' ) } - There was a critical error that makes`,
 				'the application fully incompatible with VIP Go.' );
 			break;
 		case TestResultType.Skipped:
-			const skippedIssue = result.getLastNotice();
-			console.log( `  ${ chalk.bgGrey.bold( ' Skipped ' ) }\t${ skippedIssue.message }` );
+			logToConsole( `  ${ chalk.bgGrey.bold( ' Skipped ' ) }\t${ result.getLastNotice().message }` );
 	}
-	console.log();
+	logToConsole();
 } );
 
 harmonia.on( 'afterTestSuite', ( test: TestSuite, result: TestSuiteResult ) => {
@@ -393,8 +392,8 @@ harmonia.on( 'afterTestSuite', ( test: TestSuite, result: TestSuiteResult ) => {
 			break;
 	}
 
-	console.log( ` >> ${ badge } Finished running ${ chalk.bold( test.name ) } suite` );
-	console.log();
+	logToConsole( ` >> ${ badge } Finished running ${ chalk.bold( test.name ) } suite` );
+	logToConsole();
 } );
 
 harmonia.on( 'issue', ( issue: Issue ) => {
@@ -418,17 +417,17 @@ harmonia.on( 'issue', ( issue: Issue ) => {
 
 	// Replace \n with \n\t\t to keep new lines aligned
 	const message = issue.message.replace( '\n', '\n\t\t' );
-	console.log( `    ${ issueTypeString } \t${ message } ${ documentation }` );
+	logToConsole( `    ${ issueTypeString } \t${ message } ${ documentation }` );
 
 	// If it's a Blocker or Error, and the issue includes a stdout, print it out.
 	const issueData = issue.getData();
 	if ( issueData && [ IssueType.Blocker, IssueType.Error ].includes( issue.type ) ) {
 		if ( issueData.all ) {
-			console.log( issueData.all );
-			console.log();
+			logToConsole( issueData.all );
+			logToConsole();
 		} else if ( typeof issueData === 'string' ) {
-			console.log( issueData );
-			console.log();
+			logToConsole( issueData );
+			logToConsole();
 		}
 	}
 } );
@@ -444,10 +443,10 @@ harmonia.run().then( ( results: TestResult[] ) => {
 		}
 	}
 
-	// If the output is JSON, reenable the console.log output and print-out the json format.
+	// If the output is JSON, reenable the logToConsole output and print-out the json format.
 	if ( options.json ) {
-		enableOutput();
-		console.log( harmonia.resultsJSON() );
+		suppressOutput = false;
+		log( harmonia.resultsJSON() );
 		process.exit( 0 );
 	}
 
@@ -457,48 +456,48 @@ harmonia.run().then( ( results: TestResult[] ) => {
 	const testSuiteResults = results.filter( result => result instanceof TestSuiteResult );
 
 	// Print the results
-	console.log( '\n' + chalk.bgGray( '        HARMONIA RESULTS        \n' ) );
+	logToConsole( '\n' + chalk.bgGray( '        HARMONIA RESULTS        \n' ) );
 	if ( resultCounter[ TestResultType.Skipped ] ) {
-		console.log( ` ${ chalk.bold.bgGrey( ' SKIPPED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Skipped ] ) } tests` );
+		logToConsole( ` ${ chalk.bold.bgGrey( ' SKIPPED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Skipped ] ) } tests` );
 	}
 	if ( resultCounter[ TestResultType.Success ] ) {
-		console.log( ` ${ chalk.bold.bgGreen( ' PASSED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Success ] ) } tests` );
+		logToConsole( ` ${ chalk.bold.bgGreen( ' PASSED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Success ] ) } tests` );
 	}
 	if ( resultCounter[ TestResultType.PartialSuccess ] ) {
-		console.log( ` ${ chalk.bold.bgYellow( ' PARTIAL SUCCESS ' ) } - ${ chalk.bold( resultCounter[ TestResultType.PartialSuccess ] ) } tests` );
+		logToConsole( ` ${ chalk.bold.bgYellow( ' PARTIAL SUCCESS ' ) } - ${ chalk.bold( resultCounter[ TestResultType.PartialSuccess ] ) } tests` );
 	}
 	if ( resultCounter[ TestResultType.Failed ] ) {
-		console.log( ` ${ chalk.bold.bgRed( ' FAILED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Failed ] ) } tests` );
+		logToConsole( ` ${ chalk.bold.bgRed( ' FAILED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Failed ] ) } tests` );
 	}
 	if ( resultCounter[ TestResultType.Aborted ] ) {
-		console.log( ` ${ chalk.bold.bgRedBright( ' ABORTED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Aborted ] ) } tests` );
+		logToConsole( ` ${ chalk.bold.bgRedBright( ' ABORTED ' ) } - ${ chalk.bold( resultCounter[ TestResultType.Aborted ] ) } tests` );
 	}
 
-	console.log();
-	console.log( ` > Total of ${ chalk.bold( results.length ) } tests executed, ${ testSuiteResults.length } of which are Test Suites.` );
-	console.log();
+	logToConsole();
+	logToConsole( ` > Total of ${ chalk.bold( results.length ) } tests executed, ${ testSuiteResults.length } of which are Test Suites.` );
+	logToConsole();
 	// If there is a Aborted test result
 	if ( resultCounter[ TestResultType.Aborted ] ) {
-		console.log( `${ chalk.bold.bgRedBright( '  NOT PASS  ' ) } There was a critical failure that makes the application ` +
+		logToConsole( `${ chalk.bold.bgRedBright( '  NOT PASS  ' ) } There was a critical failure that makes the application ` +
 			'incompatible with VIP Go. Please review the results and re-run the tests.' );
 		process.exit( 1 );
 	}
 
 	// If there is only a partial success, but no failures
 	if ( resultCounter[ TestResultType.PartialSuccess ] && ! resultCounter[ TestResultType.Failed ] ) {
-		console.log( `${ chalk.bold.bgYellow( '  PASS  ' ) } The application has passed the required tests, but it does not follow all the recommendations.`,
-			'Please review the results.' );
+		logToConsole( `${ chalk.bold.bgYellow( '  PASS  ' ) } The application has passed the required tests, but it does not follow all the recommendations.` );
+		logToConsole( 'Please review the results.' );
 		process.exit( 0 );
 	}
 
 	// If there is a failure
 	if ( resultCounter[ TestResultType.Failed ] ) {
-		console.log( `${ chalk.bold.bgRed( '  NOT PASS  ' ) } The application has failed some tests, and will very likely have problems in a production ` +
+		logToConsole( `${ chalk.bold.bgRed( '  NOT PASS  ' ) } The application has failed some tests, and will very likely have problems in a production ` +
 			'environment. Please review all the errors found in the results.' );
 		process.exit( 0 );
 	}
 
-	console.log( `${ chalk.bold.bgGreen( '  PASS  ' ) } Congratulations. The application passes all the tests.` );
+	logToConsole( `${ chalk.bold.bgGreen( '  PASS  ' ) } Congratulations. The application passes all the tests.` );
 	process.exit( 0 );
 } );
 

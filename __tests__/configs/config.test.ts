@@ -1,15 +1,7 @@
 import BaseConfig from '../../src/lib/configs/config';
 
-class DummyStringConfig extends BaseConfig<string> {
-	constructor() {
-		super();
-	}
-}
-class DummyAnyConfig extends BaseConfig<any> {
-	constructor() {
-		super();
-	}
-}
+class DummyStringConfig extends BaseConfig<string> {}
+class DummyAnyConfig extends BaseConfig<any> {}
 
 describe( 'config store', () => {
 	it( 'should instantiate', () => {
@@ -18,5 +10,12 @@ describe( 'config store', () => {
 
 		expect( stringInstance ).toBeInstanceOf( BaseConfig );
 		expect( anyInstance ).toBeInstanceOf( BaseConfig );
+	} );
+
+	it( 'should allow access to store', () => {
+		const stringInstance = new DummyStringConfig();
+		stringInstance.set( 'treasure', '💎' );
+
+		expect( stringInstance.get( 'treasure' ) ).toBe( '💎' );
 	} );
 } );
