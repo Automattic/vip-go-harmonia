@@ -22,7 +22,7 @@ jobs:
       matrix:
         node-version:
           - 16
-          - lts/*
+          - 18
 
     steps:
       - name: Checkout
