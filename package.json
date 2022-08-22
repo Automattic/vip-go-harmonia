@@ -10,7 +10,8 @@
   "scripts": {
     "exec": "ts-node src/index.ts",
     "exec:debug": "DEBUG=* npm run exec",
-    "test": "npm run check-types && npm run lint && jest",
+    "test": "npm run check-types && npm run lint && npm run test:unit",
+    "test:unit": "jest",
     "check-types": "tsc",
     "build": "babel src -d dist --extensions '.ts,.js' --copy-files --no-copy-ignored && chmod +x dist/cli.js dist/ci.js",
     "build:watch": "babel src -d dist --watch",
@@ -65,11 +66,9 @@
     "execa": "^5.1.1",
     "get-urls": "^10.0.1",
     "github-api": "^3.4.0",
-    "lodash.snakecase": "^4.1.1",
     "node-fetch": "^2.6.7",
     "semver": "^7.3.5",
     "strip-ansi": "^6.0.1",
-    "supports-color": "^9.2.1",
     "valid-url": "^1.0.9"
   }
 }
