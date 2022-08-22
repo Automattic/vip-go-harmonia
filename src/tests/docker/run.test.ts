@@ -1,8 +1,8 @@
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
 import { executeShell } from '../../utils/shell';
+import { createHash } from 'crypto';
 import { wait } from '../../utils/wait';
-import { Md5 } from 'ts-md5/dist/md5';
 import Harmonia from '../../harmonia';
 
 export default class DockerRun extends Test {
@@ -29,7 +29,9 @@ export default class DockerRun extends Test {
 		this.imageTag = this.get( 'dockerImage' );
 
 		// Generate a container name
-		this.containerName = 'vip_harmonia_' + Md5.hashStr( Date.now().toString() );
+		this.containerName = 'vip_harmonia_' + createHash( 'md5' )
+			.update( this.imageTag + Date.now().toString() )
+			.digest( 'hex' );
 	}
 
 	async run() {

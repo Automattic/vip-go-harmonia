@@ -70,7 +70,6 @@
     "semver": "^7.3.5",
     "strip-ansi": "^6.0.1",
     "supports-color": "^9.2.1",
-    "ts-md5": "^1.2.11",
     "valid-url": "^1.0.9"
   }
 }
