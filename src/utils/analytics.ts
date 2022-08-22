@@ -1,4 +1,5 @@
 import fetch, { Response } from 'node-fetch';
+import { createHash } from 'crypto';
 
 const debug = require( 'debug' )( 'analytics' );
 const validEventOrPropNamePattern = /^[a-z_][a-z0-9_]*$/;
@@ -126,7 +127,7 @@ class Analytics {
 			'User-Agent': this.userAgent,
 		};
 
-		const bodyUniqueString = require( 'ts-md5/dist/md5' ).Md5.hashStr( body );
+		const bodyUniqueString = createHash( 'md5' ).update( body ).digest( 'hex' );
 		debug( `send() (${ bodyUniqueString }) `, body );
 
 		// eslint-disable-next-line no-undef

@@ -69,8 +69,6 @@
     "node-fetch": "^2.6.7",
     "semver": "^7.3.5",
     "strip-ansi": "^6.0.1",
-    "ts-md5": "^1.2.11",
-    "valid-url": "^1.0.9",
-    "waait": "^1.0.5"
+    "valid-url": "^1.0.9"
   }
 }

@@ -1,5 +1,5 @@
+import { createHash } from 'crypto';
 import stripAnsi from 'strip-ansi';
-
 import Store from './lib/stores/store';
 import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
@@ -191,8 +191,9 @@ export default class Harmonia {
 			throw new Error( `Cannot regenerate an existing UID. (${ this.uid })` );
 		}
 
-		const md5 = require( 'ts-md5/dist/md5' ).Md5;
-		this.uid = md5.hashStr( JSON.stringify( this.options ) + Date.now() );
+		this.uid = createHash( 'md5' )
+			.update( JSON.stringify( this.options ) + Date.now() )
+			.digest( 'hex' );
 
 		log( `Harmonia UID set to ${ this.uid }` );
 		return this.uid;
