@@ -4,5 +4,10 @@
 		"plugin:@automattic/wpvip/cli",
 		"plugin:@automattic/wpvip/testing",
 		"plugin:@automattic/wpvip/typescript"
-	]
+	],
+	"rules": {
+		"jsdoc/require-param": "off",
+		"no-await-in-loop": "warn",
+		"no-console": "off"
+	}
 }
