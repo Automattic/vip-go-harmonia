@@ -446,7 +446,7 @@ harmonia.run().then( ( results: TestResult[] ) => {
 	// If the output is JSON, reenable the logToConsole output and print-out the json format.
 	if ( options.json ) {
 		suppressOutput = false;
-		log( harmonia.resultsJSON() );
+		logToConsole( harmonia.resultsJSON() );
 		process.exit( 0 );
 	}
 
