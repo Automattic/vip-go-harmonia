@@ -21,19 +21,19 @@ export class HarmoniaFetchError extends HarmoniaError {
 	public setStartDate( date: Date ) {
 		this.startDate = date;
 	}
-	public getStartDate() {
+	public getStartDate(): Date {
 		return this.startDate;
 	}
 	public setEndDate( date: Date ) {
 		this.endDate = date;
 	}
-	public getEndDate() {
+	public getEndDate(): Date {
 		return this.endDate;
 	}
 	public setURL( url: string ) {
 		this.url = url;
 	}
-	public getURL() {
+	public getURL(): string {
 		return this.url;
 	}
 	public flagAsTimeout() {
