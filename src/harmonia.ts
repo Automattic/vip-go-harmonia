@@ -56,8 +56,6 @@ export default class Harmonia {
 		// Generate unique id for this test execution
 		this.generateUID();
 
-		this.setupTests();
-
 		this.setupAnalytics();
 
 		log( 'Harmonia bootstrap finished' );
@@ -173,8 +171,8 @@ export default class Harmonia {
 		return this.resultsJSON( true );
 	}
 
-	private setupTests() {
-		log( 'Setting up the tests' );
+	public registerDefaultTests() {
+		log( 'Setting up the default tests' );
 		// Register all the necessary tests
 		this.registerTest( new NPMSuite() );
 		this.registerTest( new DockerSuite() );

@@ -181,6 +181,9 @@ if ( options.path ) {
 // Create the Harmonia object
 const harmonia = new Harmonia();
 
+// Register the default tests.
+harmonia.registerDefaultTests();
+
 if ( options.ci ) {
 	harmonia.setSource( 'ci' );
 } else {
