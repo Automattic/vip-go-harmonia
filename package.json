@@ -18,6 +18,7 @@
     "clean": "rm -rf dist",
     "lint": "eslint . --ext .ts --max-warnings=0",
     "publish-please": "publish-please",
+    "publish-please:dry-run": "publish-please --dry-run",
     "prepublishOnly": "publish-please guard"
   },
   "repository": {
