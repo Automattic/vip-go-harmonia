@@ -1,6 +1,6 @@
 {
-  "name": "@automattic/vip-go-harmonia",
-  "version": "0.0.1",
+  "name": "@automattic/vip-go-preflight-checks",
+  "version": "2.0.0",
   "description": "Provide a set of automated tests (or checks) that can test and validate the application functionality and responsiveness with an environment as close to production as possible, before the actual deployment to an environment.",
   "main": "dist/index.js",
   "bin": {
@@ -16,7 +16,9 @@
     "build": "babel src -d dist --extensions '.ts,.js' --copy-files --no-copy-ignored && chmod +x dist/cli.js dist/ci.js",
     "build:watch": "babel src -d dist --watch",
     "clean": "rm -rf dist",
-    "lint": "eslint . --ext .ts --max-warnings=0"
+    "lint": "eslint . --ext .ts --max-warnings=0",
+    "publish-please": "publish-please",
+    "prepublishOnly": "publish-please guard"
   },
   "repository": {
     "type": "git",
@@ -53,7 +55,8 @@
     "jest": "^27.4.7",
     "ts-jest": "^27.1.3",
     "ts-node": "^10.4.0",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "publish-please": "^5.5.2"
   },
   "dependencies": {
     "@types/node-fetch": "^2.6.1",
