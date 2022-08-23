@@ -9,19 +9,17 @@ export default class PackageValidationTest extends Test {
 	/**
 	 * List of the required packages for the node.js environment.
 	 * Not having any of these packages will throw an Error.
-	 * @private
 	 */
 	private requiredPackages = [
 		'@automattic/vip-go',
-	]
+	];
 
 	/**
 	 * List of optional but recommended packages
-	 * @private
 	 */
 	private recommendedPackages = [
 		'jest',
-	]
+	];
 
 	constructor() {
 		super( 'Check usage of required and recommended packages',

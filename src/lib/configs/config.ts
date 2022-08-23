@@ -6,7 +6,7 @@ export class InvalidArgumentsConfig extends HarmoniaError {}
 export default abstract class BaseConfig<TYPE> {
 	private store: Store<TYPE>;
 
-	protected constructor() {
+	public constructor() {
 		this.store = new Store<TYPE>();
 	}
 

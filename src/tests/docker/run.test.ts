@@ -6,11 +6,11 @@ import { wait } from '../../utils/wait';
 import Harmonia from '../../harmonia';
 
 export default class DockerRun extends Test {
-	private nodeVersion: string = '';
-	private envVariables: object = {};
-	private imageTag: string = '';
-	private port: number = 0;
-	private containerName: string = '';
+	private nodeVersion = '';
+	private envVariables = {};
+	private imageTag = '';
+	private port = 0;
+	private containerName = '';
 
 	constructor() {
 		super( 'Docker run', 'Starts the application using the built Docker image' );

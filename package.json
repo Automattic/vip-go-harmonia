@@ -16,7 +16,7 @@
     "build": "babel src -d dist --extensions '.ts,.js' --copy-files --no-copy-ignored && chmod +x dist/cli.js dist/ci.js",
     "build:watch": "babel src -d dist --watch",
     "clean": "rm -rf dist",
-    "lint": "eslint . --ext .ts --max-warnings=0"
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/Automattic/vip-go-harmonia#readme",
   "devDependencies": {
+    "@automattic/eslint-plugin-wpvip": "^0.3.0",
     "@babel/cli": "^7.16.8",
     "@babel/core": "^7.16.12",
     "@babel/eslint-parser": "^7.13.14",
@@ -40,16 +41,8 @@
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
     "babel-plugin-module-resolver": "^4.1.0",
-    "eslint": "^7.26.0",
-    "eslint-config-wpvip": "github:automattic/eslint-config-wpvip#252c443",
-    "eslint-plugin-flowtype": "^3.13.0",
-    "eslint-plugin-import": "^2.25.4",
+    "eslint": "^8.22.0",
     "eslint-plugin-jest": "^26.0.0",
-    "eslint-plugin-json": "^3.1.0",
-    "eslint-plugin-jsx-a11y": "^6.5.1",
-    "eslint-plugin-no-async-foreach": "^0.1.1",
-    "eslint-plugin-react": "^7.28.0",
-    "eslint-plugin-wpcalypso": "^5.0.0",
     "jest": "^27.4.7",
     "ts-jest": "^27.1.3",
     "ts-node": "^10.4.0",

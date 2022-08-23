@@ -123,7 +123,6 @@ function formatIssueType( issueType: string|IssueType ) {
 function createMarkdown() {
 	/**
 	 * Given a Test object, generate the respective markdown
-	 * @param test
 	 */
 	function formatTest( test: any ) {
 		let result = '';
@@ -146,7 +145,6 @@ function createMarkdown() {
 
 	/**
 	 * Given an Issue object, generate the respective markdown
-	 * @param test
 	 */
 	function formatIssues( test ) {
 		let result = '';
@@ -304,7 +302,6 @@ async function main() {
 	if ( pullRequestID ) {
 		const issues = github.getIssues( repoOwner, repoName );
 		await issues.createIssueComment( pullRequestID, createMarkdown() );
-		return;
 	}
 }
 

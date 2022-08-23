@@ -53,14 +53,13 @@ export default class TestSuiteResult extends TestResult {
 	}
 
 	toJSON(): object {
-		const json = {
+		const json: any = {
 			...this.test().toJSON(),
 			result: this.getTypeString(),
 			tests: this.results(),
 		};
 
 		if ( this.getLastIssue() ) {
-			// @ts-ignore
 			json.issue = this.getLastIssue();
 		}
 		return json;
