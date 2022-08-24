@@ -1,5 +1,4 @@
 import Test from '../../lib/tests/test';
-// import chalk from 'chalk';
 import { executeShell } from '../../utils/shell';
 
 type PathRule = {
