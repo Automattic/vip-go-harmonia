@@ -27,7 +27,7 @@ function logToConsole( ...messages: string[] ) {
 		return;
 	}
 
-	messages.forEach( console.log );
+	messages.forEach( message => console.log( message ) );
 }
 
 const randomPort = Math.floor( Math.random() * 1000 ) + 3001; // Get a PORT from 3001 and 3999
