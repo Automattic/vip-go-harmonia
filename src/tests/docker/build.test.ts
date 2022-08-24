@@ -1,3 +1,4 @@
+import path from 'path';
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
 import { executeShell, executeShellSync } from '../../utils/shell';
@@ -68,7 +69,8 @@ export default class DockerBuild extends Test {
 	 * Builds the full application image, that is fully functional.
 	 */
 	private async buildApp(): Promise<string> {
-		const subprocess = executeShell( `bash ${ __dirname }/scripts/build-app/build.sh`, {
+		const script = path.resolve( __dirname, '../../..', 'scripts/build-app/build.sh' );
+		const subprocess = executeShell( `bash ${ script }`, {
 			...this.envVariables,
 			NODE_VERSION: this.nodeVersion,
 		} );
@@ -94,7 +96,8 @@ export default class DockerBuild extends Test {
 	private async buildWithData( dataImage: string ): Promise<string> {
 		this.notice( `Using a data-only image ${ chalk.yellow( dataImage ) } ` );
 
-		const subprocess = executeShell( `bash ${ __dirname }/scripts/data-only/build.sh`, {
+		const script = path.resolve( __dirname, '../../..', 'scripts/data-only/build.sh' );
+		const subprocess = executeShell( `bash ${ script }`, {
 			NODE_VERSION: this.nodeVersion,
 			DATAONLY_IMAGE: dataImage,
 		} );
