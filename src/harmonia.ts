@@ -15,6 +15,7 @@ import * as Analytics from './utils/analytics';
  */
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
+import GitSuite from './tests/git/suite';
 import HealthSuite from './tests/health/suite';
 import TestSuiteResult from './lib/results/testsuiteresult';
 import NPMSuite from './tests/npm/suite';
@@ -176,6 +177,7 @@ export default class Harmonia {
 		// Register all the necessary tests
 		this.registerTest( new NPMSuite() );
 		this.registerTest( new DockerSuite() );
+		this.registerTest( new GitSuite() );
 		this.registerTest( new HealthSuite() );
 	}
 
