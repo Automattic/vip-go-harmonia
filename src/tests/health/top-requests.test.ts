@@ -8,7 +8,11 @@ export default class TopRequestsTest extends BaseHealthTest {
 
 	async prepare() {
 		await super.prepare();
-		this.paths = this.filterPaths( this.getSiteOption( 'topRequests' ) );
+		try {
+			this.paths = this.filterPaths( this.getSiteOption( 'topRequests' ) );
+		} catch ( err ) {
+			this.skip( 'No URLs available for testing' );
+		}
 
 		if ( ! this.paths || this.paths?.length === 0 ) {
 			this.skip( 'No URLs available for testing' );
