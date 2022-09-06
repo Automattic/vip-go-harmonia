@@ -16,16 +16,12 @@ const REQUEST_MAX_DESIRED_DURATION = 1000;
 const REQUEST_MAX_ALLOWED_DURATION = 2000;
 
 export default abstract class BaseHealthTest extends Test {
-	private port: number = 0;
-	private containerName: string = '';
+	private port = 0;
+	private containerName = '';
 
-	protected baseURL: string = '';
-	protected paths: string[] = []
-	protected publicURL: string = '';
-
-	protected constructor( name, description ) {
-		super( name, description );
-	}
+	protected baseURL = '';
+	protected paths: string[] = [];
+	protected publicURL = '';
 
 	async prepare() {
 		// Get required variables
@@ -66,8 +62,6 @@ export default abstract class BaseHealthTest extends Test {
 	/**
 	 * Given an array of URLs, filter the URLs that are starting either with the local or the public URL,
 	 * and does a search-replace, converting full URLs into paths.
-	 * @param urls
-	 * @protected
 	 */
 	protected filterPaths( urls: string[] ): string[] {
 		return urls
@@ -85,8 +79,6 @@ export default abstract class BaseHealthTest extends Test {
 
 	/**
 	 * Performs and handles a request
-	 * @param url
-	 * @protected
 	 */
 	protected async request( url: string ): Promise<TimedResponse> {
 		const request = await fetchWithTiming( url );
@@ -96,9 +88,6 @@ export default abstract class BaseHealthTest extends Test {
 
 	/**
 	 * Handles a request, and returns the resulting issue.
-	 * @param request
-	 * @protected
-	 * @return Issue
 	 */
 	protected async handleRequest( request: TimedResponse ): Promise<Issue> {
 		// Check for logs

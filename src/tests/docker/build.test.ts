@@ -1,11 +1,12 @@
+import path from 'path';
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
 import { executeShell, executeShellSync } from '../../utils/shell';
 import Harmonia from '../../harmonia';
 
 export default class DockerBuild extends Test {
-	private nodeVersion: string = '';
-	private envVariables: object = {};
+	private nodeVersion = '';
+	private envVariables = {};
 
 	constructor() {
 		super( 'Docker build', 'Builds the Docker image' );
@@ -66,11 +67,10 @@ export default class DockerBuild extends Test {
 
 	/**
 	 * Builds the full application image, that is fully functional.
-	 *
-	 * @private
 	 */
 	private async buildApp(): Promise<string> {
-		const subprocess = executeShell( `bash ${ __dirname }/scripts/build-app/build.sh`, {
+		const script = path.resolve( __dirname, '../../..', 'scripts/build-app/build.sh' );
+		const subprocess = executeShell( `bash ${ script }`, {
 			...this.envVariables,
 			NODE_VERSION: this.nodeVersion,
 		} );
@@ -92,14 +92,12 @@ export default class DockerBuild extends Test {
 
 	/**
 	 * Builds the application image, using an existing data-only image to provide the application data and codebase.
-	 *
-	 * @param dataImage
-	 * @private
 	 */
 	private async buildWithData( dataImage: string ): Promise<string> {
 		this.notice( `Using a data-only image ${ chalk.yellow( dataImage ) } ` );
 
-		const subprocess = executeShell( `bash ${ __dirname }/scripts/data-only/build.sh`, {
+		const script = path.resolve( __dirname, '../../..', 'scripts/data-only/build.sh' );
+		const subprocess = executeShell( `bash ${ script }`, {
 			NODE_VERSION: this.nodeVersion,
 			DATAONLY_IMAGE: dataImage,
 		} );
@@ -122,11 +120,8 @@ export default class DockerBuild extends Test {
 	/**
 	 * Given a docker image reference, returns the image repository and tag, in the format
 	 * "vip-harmonia:32fdec3a94b66c43144999cb4834dee3caeb379e"
-	 *
-	 * @param dockerImage
-	 * @private
 	 */
-	private getDockerImage( dockerImage: string ): string|boolean {
+	private getDockerImage( dockerImage: string ): string | boolean {
 		try {
 			const subprocess = executeShellSync( `docker images --filter reference=${ dockerImage } --format {{.Repository}}:{{.Tag}}` );
 

@@ -4,7 +4,7 @@ export default class StaticRequestsTest extends BaseHealthTest {
 	protected paths = [
 		'/',
 		'/cache-healthcheck?',
-	]
+	];
 
 	constructor() {
 		super( 'Testing availability and response time for static URLs',

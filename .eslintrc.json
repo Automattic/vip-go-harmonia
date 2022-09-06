@@ -1,21 +1,13 @@
 {
-  "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint",
-    "jest"
-  ],
-  "extends": [
-    "wpvip"
-  ],
-  "rules": {
-    // this needs to be done because of @typescript-eslint - it reports false negative when no-shadow and no-unused-vars are set
-    // so we turn them off, and enable the @typescript-eslint version of those rules
-    "no-shadow": "off",
-    "@typescript-eslint/no-shadow": [ "error" ],
-    "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": [ "warn" ],
-    "valid-jsdoc": "off",
-    "wpcalypso/import-docblock": "off",
-    "no-console": "off"
-  }
+	"extends": [
+		"plugin:@automattic/wpvip/base",
+		"plugin:@automattic/wpvip/cli",
+		"plugin:@automattic/wpvip/testing",
+		"plugin:@automattic/wpvip/typescript"
+	],
+	"rules": {
+		"jsdoc/require-param": "off",
+		"no-await-in-loop": "warn",
+		"no-console": "off"
+	}
 }

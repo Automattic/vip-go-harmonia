@@ -29,7 +29,6 @@ describe( 'harmonia test', () => {
 		jest.spyOn( test, 'run' );
 		// Since processResult is private, we need to mock from the prototype
 		const processResultSpy = jest.spyOn( ExampleTest.prototype as any, 'processResult' );
-		processResultSpy.mockImplementation( () => {} );
 
 		// Execute
 		await test.execute();

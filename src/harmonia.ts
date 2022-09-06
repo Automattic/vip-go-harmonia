@@ -15,19 +15,21 @@ import * as Analytics from './utils/analytics';
  */
 import TestSuite from './lib/tests/testsuite';
 import DockerSuite from './tests/docker/suite';
+import GitSuite from './tests/git/suite';
 import HealthSuite from './tests/health/suite';
 import TestSuiteResult from './lib/results/testsuiteresult';
 import NPMSuite from './tests/npm/suite';
+import debug from 'debug';
 
-const log = require( 'debug' )( 'harmonia' );
+const log = debug( 'harmonia' );
 
 export default class Harmonia {
 	private uid: string;
 	private options: Store<any>;
 	private tests: Test[];
-	private source: string = 'module';
+	private source = 'module';
 
-	private static verbose: boolean = false;
+	private static verbose = false;
 
 	public constructor() {
 		this.options = new Store();
@@ -54,8 +56,6 @@ export default class Harmonia {
 
 		// Generate unique id for this test execution
 		this.generateUID();
-
-		this.setupTests();
 
 		this.setupAnalytics();
 
@@ -111,7 +111,7 @@ export default class Harmonia {
 		}, [] );
 	}
 
-	public countResults( includeSuites: boolean = false, typeString: boolean = false ): {} {
+	public countResults( includeSuites = false, typeString = false ): any {
 		return this.results( includeSuites ).reduce( ( counter: object, result: TestResult ) => {
 			const type = typeString ? result.getTypeString() : result.getType();
 			const currentCount = counter[ type ] || 0;
@@ -148,7 +148,7 @@ export default class Harmonia {
 		};
 	}
 
-	public resultsJSON( strip: boolean = true ) {
+	public resultsJSON( strip = true ) {
 		const object = {
 			summary: this.getResultsSummary( this.results( true ) ),
 			results: this.tests.reduce( ( results: TestResult[], test: Test ) => {
@@ -172,11 +172,12 @@ export default class Harmonia {
 		return this.resultsJSON( true );
 	}
 
-	private setupTests() {
-		log( 'Setting up the tests' );
+	public registerDefaultTests() {
+		log( 'Setting up the default tests' );
 		// Register all the necessary tests
 		this.registerTest( new NPMSuite() );
 		this.registerTest( new DockerSuite() );
+		this.registerTest( new GitSuite() );
 		this.registerTest( new HealthSuite() );
 	}
 
@@ -239,7 +240,6 @@ export default class Harmonia {
 
 	/**
 	 * Runs when Harmonia shutdowns. Used to clean-up.
-	 * @private
 	 */
 	private shutdown() {
 		log( 'Shutting down Harmonia' );

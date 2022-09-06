@@ -1,14 +1,15 @@
 import fetch, { Response } from 'node-fetch';
 import { createHash } from 'crypto';
+import debug from 'debug';
 
-const debug = require( 'debug' )( 'analytics' );
+const log = debug( 'analytics' );
 const validEventOrPropNamePattern = /^[a-z_][a-z0-9_]*$/;
 
 class Analytics {
 	private static instance: Analytics;
 
 	private eventPrefix: string;
-	private userAgent: string = 'vip-harmonia-cli';
+	private userAgent = 'vip-harmonia-cli';
 
 	private commonProps: {
 		_ui: string,
@@ -16,7 +17,7 @@ class Analytics {
 		// eslint-disable-next-line camelcase
 		_via_ua: string,
 	};
-	private baseParams: {} = {};
+	private baseParams = {};
 	private readonly ENDPOINT = 'https://public-api.wordpress.com/rest/v1.1/tracks/record?http_envelope=1';
 
 	private constructor( eventPrefix ) {
@@ -34,14 +35,13 @@ class Analytics {
 		this.commonProps._ut = userType;
 	}
 
-	setBaseParams( params: {} ) {
+	setBaseParams( params: any ) {
 		Object.keys( params ).forEach( param => {
-			const sanitizedParam = this.sanitizeName( param );
-
 			if ( ! [ 'number', 'boolean', 'string' ].includes( typeof params[ param ] ) ) {
 				return delete params[ param ];
 			}
 
+			const sanitizedParam = this.sanitizeName( param );
 			if ( validEventOrPropNamePattern.test( sanitizedParam ) &&
 				sanitizedParam !== param ) {
 				params[ sanitizedParam ] = params[ param ];
@@ -70,7 +70,7 @@ class Analytics {
 		if ( ! validEventOrPropNamePattern.test( name ) ) {
 			name = this.sanitizeName( name );
 			if ( ! validEventOrPropNamePattern.test( name ) ) {
-				debug( `Error: Invalid event name detected: ${ name } -- this event will be rejected during ETL` );
+				log( `Error: Invalid event name detected: ${ name } -- this event will be rejected during ETL` );
 			}
 		}
 
@@ -84,11 +84,11 @@ class Analytics {
 
 			const sanitezedPropName = this.sanitizeName( propName );
 			if ( validEventOrPropNamePattern.test( sanitezedPropName ) ) {
-				props[ sanitezedPropName ] = eventProps [ propName ];
+				props[ sanitezedPropName ] = eventProps[ propName ];
 				return;
 			}
 
-			debug( `Error: Invalid prop name detected: ${ propName } -- this event will be rejected during ETL` );
+			log( `Error: Invalid prop name detected: ${ propName } -- this event will be rejected during ETL` );
 		} );
 
 		const tracksEvents = {
@@ -99,21 +99,21 @@ class Analytics {
 			} ],
 		};
 
-		debug( 'trackEvent()', tracksEvents );
+		log( 'trackEvent()', tracksEvents );
 
 		try {
 			return await this.send( tracksEvents );
 		} catch ( error ) {
-			debug( error );
+			log( error );
 		}
 
 		// Resolve to false instead of rejecting
 		return Promise.resolve( false );
 	}
 
-	async send( params: {} ): Promise<any> {
+	async send( params: any ): Promise<any> {
 		if ( process.env.DO_NOT_TRACK ) {
-			debug( 'send() => skipping per DO_NOT_TRACK variable' );
+			log( 'send() => skipping per DO_NOT_TRACK variable' );
 
 			return Promise.resolve( 'tracks disabled per DO_NOT_TRACK variable' );
 		}
@@ -128,7 +128,7 @@ class Analytics {
 		};
 
 		const bodyUniqueString = createHash( 'md5' ).update( body ).digest( 'hex' );
-		debug( `send() (${ bodyUniqueString }) `, body );
+		log( `send() (${ bodyUniqueString }) `, body );
 
 		// eslint-disable-next-line no-undef
 		const response = await fetch( this.ENDPOINT, {
@@ -138,7 +138,7 @@ class Analytics {
 		} );
 		const responseBody = await response.text();
 
-		debug( `response (${ bodyUniqueString }) `, responseBody );
+		log( `response (${ bodyUniqueString }) `, responseBody );
 	}
 }
 
