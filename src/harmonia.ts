@@ -6,7 +6,7 @@ import EnvironmentVariables from './lib/configs/envvars.config';
 import Test from './lib/tests/test';
 import TestResult, { TestResultType } from './lib/results/testresult';
 import eventEmitter from './lib/events';
-import { cleanUp } from './utils/shell';
+import { cleanUp, setCwd } from './utils/shell';
 import Issue from './lib/issue';
 import * as Analytics from './utils/analytics';
 
@@ -60,7 +60,7 @@ export default class Harmonia {
 		this.setupAnalytics();
 
 		log( 'Harmonia bootstrap finished' );
-		this.emit( 'harmonia:ready', this );
+		this.emit( 'ready', this );
 	}
 
 	public async run(): Promise< TestResult[] > {
@@ -176,8 +176,8 @@ export default class Harmonia {
 		log( 'Setting up the default tests' );
 		// Register all the necessary tests
 		this.registerTest( new NPMSuite() );
-		this.registerTest( new DockerSuite() );
 		this.registerTest( new GitSuite() );
+		this.registerTest( new DockerSuite() );
 		this.registerTest( new HealthSuite() );
 	}
 
@@ -273,6 +273,10 @@ export default class Harmonia {
 
 	public static isVerbose(): boolean {
 		return this.verbose;
+	}
+
+	public static setCwd( cwd: string ) {
+		setCwd( cwd );
 	}
 }
 
