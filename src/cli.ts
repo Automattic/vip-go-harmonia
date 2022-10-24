@@ -27,6 +27,10 @@ function logToConsole( ...messages: string[] ) {
 		return;
 	}
 
+	if ( messages.length === 0 ) {
+		messages = [ '' ];
+	}
+
 	messages.forEach( message => console.log( message ) );
 }
 
@@ -190,11 +194,6 @@ if ( options.ci ) {
 	harmonia.setSource( 'cli' );
 }
 
-// Register some events handlers
-harmonia.on( 'ready', () => {
-	logToConsole( 'Harmonia is ready! ' );
-} );
-
 // Get extra URLs for testing
 let testURLs: string[] = options[ 'test-url' ] ?? [];
 // If it's an array of elements, use them
@@ -348,8 +347,8 @@ logToConsole();
 
 // Register the event handlers to output some information during the execution
 harmonia.on( 'beforeTestSuite', ( suite: TestSuite ) => {
-	logToConsole( ` >> Running test suite ${ chalk.bold( suite.name ) } - ${ chalk.italic( suite.description ) } ` );
-	logToConsole();
+	const description = suite.description ? `- ${ chalk.italic( suite.description ) }` : '';
+	logToConsole( ` >> Running test suite ${ chalk.bold( suite.name ) } ${ description } ` );
 } );
 
 harmonia.on( 'beforeTest', ( test: Test ) => {
