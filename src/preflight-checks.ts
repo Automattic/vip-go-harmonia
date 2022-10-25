@@ -35,7 +35,7 @@ const options = commandLineArgs( optionDefinitions );
 
 const optionsSections = [
 	{
-		header: 'VIP Go Node Preflight Checks',
+		header: 'VIP Go Node.js Preflight Checks',
 		content: 'Run preflight checks on Node.js applications on VIP Go',
 	},
 	{
