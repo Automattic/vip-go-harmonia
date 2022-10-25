@@ -1,15 +1,22 @@
-ARG NODE_IMAGE_TAG
+ARG NODE_VERSION
 
-FROM node:$NODE_IMAGE_TAG
+FROM node:$NODE_VERSION AS build
+
+# The default shell is provided by the upstream image and traditionally it has
+# always been set to /bin/sh, which is symlinked to /bin/dash (Debian Dash).
+#
+# However, for safety, explicitly set it to /bin/dash here. Having the correct
+# shell is important because it affects how the exported environment variables
+# are interpreted. Shells like Bash provide additional notations for expansion
+# within variables that we are not escaping. Using any shell besides a regular
+# Bourne shell will likely lead to build failures, mangled environment
+# variables, or unwanted command execution.
+SHELL ["/bin/dash", "-c"]
 
 WORKDIR /app
 
-# Helper script /create-npmrc.sh
-#
-# Create .npmrc with the content of the NPMRC_FILE build arg. This can be used in
-# a multipart RUN command to ensure that the token is not echoed or cached in
-# image layers.
-RUN echo 'printf "%b" "$NPMRC_FILE" > /app/.npmrc' > /create-npmrc.sh
+# Disable npm colorized output
+ENV NO_COLOR 1
 
 # Helper script /export-env.sh
 #
@@ -24,20 +31,17 @@ RUN echo 'printf "%b" "$NODE_BUILD_DOCKER_ENV"' > /export-env.sh
 
 RUN true # ====== START: VIP NODE BUILD ======
 
-COPY package*.json npm-shrinkwrap*.json ./
-
-ARG NPMRC_FILE
-
-RUN sh /create-npmrc.sh && \
-    npm install --production --no-color && \
-    rm .npmrc
-
-COPY . .
+COPY package*.json npm-shrinkwrap*.json /app/
 
 ARG NODE_BUILD_DOCKER_ENV
 
 RUN eval "$(sh /export-env.sh)" && \
-    npm run build --no-color
+    npm install --production
+
+COPY . .
+
+RUN eval "$(sh /export-env.sh)" && \
+    npm run build
 
 RUN true # ====== END: VIP NODE BUILD ======
 
