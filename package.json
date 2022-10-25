@@ -1,15 +1,16 @@
 {
-  "name": "@automattic/vip-go-harmonia",
-  "version": "0.0.1",
+  "name": "@automattic/vip-go-preflight-checks",
+  "version": "2.0.5",
   "description": "Provide a set of automated tests (or checks) that can test and validate the application functionality and responsiveness with an environment as close to production as possible, before the actual deployment to an environment.",
   "main": "dist/index.js",
   "bin": {
+    "vip-go-preflight-checks": "dist/preflight-checks.js",
     "harmonia": "dist/cli.js",
     "harmonia-ci": "dist/ci.js"
   },
   "scripts": {
     "build": "tsc",
-    "build:chmod": "chmod +x dist/cli.js dist/ci.js",
+    "build:chmod": "chmod +x dist/cli.js dist/ci.js dist/preflight-checks.js",
     "build:watch": "tsc --watch",
     "check-types": "tsc --noEmit",
     "clean": "rm -rf dist",
@@ -18,7 +19,8 @@
     "lint": "eslint .",
     "postbuild": "npm run build:chmod",
     "test": "npm run check-types && npm run lint && npm run test:unit",
-    "test:unit": "jest"
+    "test:unit": "jest",
+    "prepare": "npm run clean && npm run build && npm run postbuild"
   },
   "repository": {
     "type": "git",
