@@ -13,15 +13,16 @@ import childProcess from 'child_process';
 
 import { ALLOWED_NODEJS_VERSIONS } from './lib/configs/site.config';
 
-console.log( chalk.bold.redBright( '#### WARNING! ####' ) );
-console.log( ` Running preflight-checks using ${ chalk.italic( 'npx' ) } is deprecated and is not recommended.\n` +
-	' A new deployment validation tool is now bundled with VIP-CLI, and to prevent any issues with the checks,\n' +
-	' we recommend using the latest VIP-CLI version, and run the checks with the following command:\n\n' +
-	chalk.italic( '  # Replace 1234 with your app ID, and ' +
-		'production with the environment you want to validate.\n' ) +
-	chalk.italic.bold( '  $ vip @1234.production validate' )
-);
-console.log( chalk.bold.redBright( '##################\n' ) );
+/** Commented until `vip validate` is available in the CLI. */
+// console.log( chalk.bold.redBright( '#### WARNING! ####' ) );
+// console.log( ` Running preflight-checks using ${ chalk.italic( 'npx' ) } is deprecated and is not recommended.\n` +
+// 	' A new deployment validation tool is now bundled with VIP-CLI, and to prevent any issues with the checks,\n' +
+// 	' we recommend using the latest VIP-CLI version, and run the checks with the following command:\n\n' +
+// 	chalk.italic( '  # Replace 1234 with your app ID, and ' +
+// 		'production with the environment you want to validate.\n' ) +
+// 	chalk.italic.bold( '  $ vip @1234.production validate' )
+// );
+// console.log( chalk.bold.redBright( '##################\n' ) );
 
 const optionDefinitions = [
 	{ name: 'node-version', alias: 'n', type: Number, defaultValue: 0 },
