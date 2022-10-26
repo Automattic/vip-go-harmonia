@@ -18,24 +18,24 @@ cat << EOF > .dockerignore
 .dockerignore
 .git
 .npm
-.npmrc
 Dockerfile
 build.sh
 node_modules
 EOF
 
-# Some clients hardcode an NPM token and commit the file to their repo, while
-# others may define it in an environment variable. Support either workflow
-# without caching the .npmrc in image layers (see how NPMRC_FILE build arg is
-# handled).
-if [ -n "$NPM_TOKEN" ]; then
-  NPMRC_FILE="//registry.npmjs.org/:_authToken=${NPM_TOKEN}"
-elif [ -f .npmrc ]; then
-  NPMRC_FILE=`cat .npmrc`
+# If the customer has not committed an .npmrc file *and* supplies an NPM_TOKEN
+# environment variable, then create an .npmrc file that references that the
+# variable, pointing to the official NPM registry. This is a support and
+# documented workflow.
+#
+# It's important to escape this variable reference here so that it is
+# not expanded immediately. NPM will expand the reference at install time.
+if [ ! -f .npmrc ] && [ -n "$NPM_TOKEN" ]; then
+  echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
 fi
 
 # Inject provided environment variables into the build container as a list of
-# exported shell variables that can be sourced when running the build. We must do
+# exported shell variables that can be eval'd when running the build. We must do
 # it this way for two reasons:
 #
 # 1. Docker build RUN commands are not run in a login shell, so we have no
@@ -51,12 +51,14 @@ fi
 # export var2=value2
 #
 # This environment variable is provided by vip-go-api and properly escaped.
+
 docker build \
-  --build-arg NODE_IMAGE_TAG="$NODE_VERSION" \
   --build-arg NODE_BUILD_DOCKER_ENV \
-  --build-arg NPMRC_FILE="$NPMRC_FILE" \
-  -f $(dirname "$0")/Dockerfile \
-  -t "$IMAGE_TAG" .
+  --build-arg NODE_VERSION \
+  --progress plain \
+  -f "$(dirname "$0")/Dockerfile" \
+  -t "$IMAGE_TAG" \
+  .
 
 # Clean up
 # docker rmi -f "$IMAGE_TAG" || :
