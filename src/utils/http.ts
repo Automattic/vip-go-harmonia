@@ -1,5 +1,6 @@
 import fetch, { FetchError, Response } from 'node-fetch';
 import { HarmoniaError } from '../lib/errors';
+import { AbortController } from 'node-abort-controller';
 
 export interface TimedResponse {
 	url: string;
