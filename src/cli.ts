@@ -221,6 +221,7 @@ const siteOptions = new SiteConfig( {
 	repository: 'wpcom/test',
 	baseURL: 'http://localhost:' + options.port,
 	topRequests: testURLs,
+	wait: options.wait ?? 3000,
 } );
 
 // Get package.json
