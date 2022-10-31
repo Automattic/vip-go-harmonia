@@ -10,6 +10,7 @@ export default class DockerRun extends Test {
 	private envVariables = {};
 	private imageTag = '';
 	private port = 0;
+	private wait = 3000;
 	private containerName = '';
 
 	constructor() {
@@ -21,6 +22,7 @@ export default class DockerRun extends Test {
 		this.nodeVersion = this.getSiteOption( 'nodejsVersion' );
 		this.envVariables = this.getEnvironmentVariables();
 		this.port = this.getEnvVar( 'PORT' ) as number;
+		this.wait = this.getSiteOption( 'wait' );
 
 		// Get the docker image tag
 		if ( ! this.get( 'dockerImage' ) ) {
@@ -56,7 +58,8 @@ export default class DockerRun extends Test {
 				subprocess.stdout?.pipe( process.stdout );
 			}
 
-			await wait( 3000 ); // Wait a little, giving time for the server to boot up
+			this.notice( `Waiting ${ chalk.yellow( this.wait + 'ms' ) } for the container to start...` );
+			await wait( this.wait ); // Wait a little, giving time for the server to boot up
 
 			// If subprocess has an exit code, it means that it exited prematurely.
 			// By awaiting the subprocess, we force it to resolve and handle the error in the catch block

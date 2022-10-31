@@ -9,6 +9,7 @@ export interface SiteConfigArgs {
 	packageJson?: object,
 	dotenv?: object,
 	topRequests?: string[],
+	wait?: number,
 	// Docker specific arguments
 	dockerBuildEnvs?: string,
 	dockerImage?: string,
@@ -21,6 +22,11 @@ export default class SiteConfig extends BaseConfig<any> {
 	constructor( args: SiteConfigArgs ) {
 		super();
 		this.merge( args );
+
+		// Set default wait time of 3000ms
+		if ( ! args.wait ) {
+			this.set( 'wait', 3000 );
+		}
 	}
 
 	protected validate(): boolean {
