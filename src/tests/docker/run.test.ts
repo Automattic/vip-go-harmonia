@@ -49,7 +49,7 @@ export default class DockerRun extends Test {
 				return `${ string } -e ${ envVarName }`;
 			}, '' );
 
-			const subprocess = executeShell( `docker run -t --network host --name ${ this.containerName } ${ environmentVarDockerOption } ${ this.imageTag }`,
+			const subprocess = executeShell( `docker run -t --name ${ this.containerName } -p ${ this.port }:${ this.port } ${ environmentVarDockerOption } ${ this.imageTag }`,
 				environmentVars );
 
 			if ( Harmonia.isVerbose() ) {
