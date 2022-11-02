@@ -51,8 +51,16 @@ export default class DockerRun extends Test {
 				return `${ string } -e ${ envVarName }`;
 			}, '' );
 
-			const subprocess = executeShell( `docker run -t --name ${ this.containerName } -p ${ this.port }:${ this.port } ${ environmentVarDockerOption } ${ this.imageTag }`,
-				environmentVars );
+			let dockerNetwork = `-p ${ this.port }:${ this.port }`;
+			// If the command is running in CI context, force `host` network
+			if ( this.getHarmoniaInstance().getSource() === 'ci' ) {
+				dockerNetwork = '--network host';
+			}
+
+			const dockerCommand = `docker run -t ${ dockerNetwork } --name ${ this.containerName } ${ environmentVarDockerOption } ${ this.imageTag }`;
+			const subprocess = executeShell( dockerCommand,	environmentVars );
+
+			console.log( dockerCommand );
 
 			if ( Harmonia.isVerbose() ) {
 				subprocess.stdout?.pipe( process.stdout );

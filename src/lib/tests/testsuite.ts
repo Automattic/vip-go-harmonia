@@ -3,6 +3,7 @@ import TestResult, { TestResultType } from '../results/testresult';
 import Store from '../stores/store';
 import TestSuiteResult from '../results/testsuiteresult';
 import Issue from '../issue';
+import Harmonia from '../../harmonia';
 
 export default class TestSuite extends Test {
 	private readonly _tests: Test[];
@@ -83,7 +84,6 @@ export default class TestSuite extends Test {
 
 	addTest( test: Test ): TestSuite {
 		this.log( `Registering test ${ test.name } (${ test.constructor.name })` );
-
 		this._tests.push( test );
 		return this;
 	}
@@ -92,6 +92,13 @@ export default class TestSuite extends Test {
 		super.setOptions( value );
 		for ( const test of this._tests ) {
 			test.setOptions( value );
+		}
+	}
+
+	setHarmoniaInstance( harmonia: Harmonia ) {
+		super.setHarmoniaInstance( harmonia );
+		for ( const test of this._tests ) {
+			test.setHarmoniaInstance( harmonia );
 		}
 	}
 }

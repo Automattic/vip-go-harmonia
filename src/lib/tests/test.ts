@@ -4,18 +4,21 @@ import Issue, { IssueType } from '../issue';
 import eventEmitter from '../events';
 import Store from '../stores/store';
 import SiteConfig from '../configs/site.config';
+import Harmonia from '../../harmonia';
 
 export default abstract class Test {
 	private readonly _name: string;
 	private readonly _description?: string;
+	private _harmonia: Harmonia | undefined;
 
 	protected readonly testResult: TestResult;
 	protected _options: Store<any>;
 	protected log: ( message: string ) => void;
 
-	protected constructor( name: string, description?: string ) {
+	protected constructor( name: string, description?: string, harmonia?: Harmonia ) {
 		this._name = name;
 		this._description = description;
+		this._harmonia = harmonia;
 
 		this._options = new Store<any>();
 		this.testResult = new TestResult( this );
@@ -89,6 +92,17 @@ export default abstract class Test {
 		} catch {
 			return false;
 		}
+	}
+
+	protected getHarmoniaInstance(): Harmonia {
+		if ( ! this._harmonia ) {
+			throw new Error( 'Harmonia instance is not set.' );
+		}
+		return this._harmonia;
+	}
+
+	public setHarmoniaInstance( harmonia: Harmonia ) {
+		this._harmonia = harmonia;
 	}
 
 	public setOptions( value: Store<any> ) {
