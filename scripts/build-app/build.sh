@@ -34,6 +34,11 @@ if [ ! -f .npmrc ] && [ -n "$NPM_TOKEN" ]; then
   echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
 fi
 
+# Create a "packages" subfolder if it doesn't already exist. This is necessary
+# because conditional Dockerfile COPY / ADD commands are not possible and
+# workarounds are messy.
+mkdir -p packages
+
 # Inject provided environment variables into the build container as a list of
 # exported shell variables that can be eval'd when running the build. We must do
 # it this way for two reasons:

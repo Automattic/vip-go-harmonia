@@ -1,5 +1,8 @@
 ARG NODE_VERSION
 
+# Create a build stage to perform our build steps using Node.js. The result of
+# this build stage can be copied into the final "site code" image, which does
+# not need Node.js and can therefore be an extremely lightweight Alpine image.
 FROM node:$NODE_VERSION AS build
 
 # The default shell is provided by the upstream image and traditionally it has
@@ -31,15 +34,28 @@ RUN echo 'printf "%b" "$NODE_BUILD_DOCKER_ENV"' > /export-env.sh
 
 RUN true # ====== START: VIP NODE BUILD ======
 
-COPY package*.json npm-shrinkwrap*.json /app/
+# Copy dependency manifests and configuration so that we can run "npm install"
+# before copying in the rest of the application code. This increases the
+# cacheability of the build layers.
+COPY package*.json npm-shrinkwrap*.json .npmrc* /app/
 
+# Copy the "packages" subfolder, if it exists, which may contain npm workspaces
+# needed at install time.
+COPY packages/ /app/packages/
+
+# Do not introduce the build arguments until they are needed. This allows the
+# layers above to remain cached even when this build argument changes.
 ARG NODE_BUILD_DOCKER_ENV
 
+# Provide environment variables to install step.
 RUN eval "$(sh /export-env.sh)" && \
     npm install --production
 
+# Copy all of the application code -- except files matched by .dockerignore
+# (which is generated in "build.sh").
 COPY . .
 
+# Provide environment variables to build step.
 RUN eval "$(sh /export-env.sh)" && \
     npm run build
 
