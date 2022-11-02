@@ -46,13 +46,8 @@ export default abstract class BaseConfig<TYPE> {
 	all( redactSensitiveKeys = false ): { [key: string]: TYPE } {
 		if ( redactSensitiveKeys ) {
 			const allowed = Object.entries( this.store.all() ).reduce( ( acc, [ key, value ] ) => {
-				if ( this.sensitiveKeys.includes( key ) ) {
-					// eslint-disable-next-line security/detect-object-injection
-					acc[ key ] = this.redact( key, value );
-				} else {
-					// eslint-disable-next-line security/detect-object-injection
-					acc[ key ] = value;
-				}
+				// eslint-disable-next-line security/detect-object-injection
+				acc[ key ] = this.sensitiveKeys.includes( key ) ? this.redact( key, value ) : value;
 				return acc;
 			}, [] );
 			return Object.assign( {}, allowed ) as unknown as { [key: string]: TYPE };
