@@ -214,7 +214,7 @@ export default class Harmonia {
 		Analytics.setBaseParams( {
 			uid: this.UID(),
 			source: this.source,
-			...this.options.get( 'site' ).all(),
+			...this.options.get( 'site' ).all( true ),
 		} );
 
 		// Send analytics event on test aborted

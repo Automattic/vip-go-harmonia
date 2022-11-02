@@ -23,6 +23,9 @@ export default class SiteConfig extends BaseConfig<any> {
 		super();
 		this.merge( args );
 
+		// Make sure that sensitive information can be redacted if needed
+		this.addSensitiveKey( 'dockerBuildEnvs' );
+
 		// Set default wait time of 3000ms
 		if ( ! args.wait ) {
 			this.set( 'wait', 3000 );
