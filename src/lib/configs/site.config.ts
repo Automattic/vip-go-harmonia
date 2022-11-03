@@ -13,6 +13,7 @@ export interface SiteConfigArgs {
 	// Docker specific arguments
 	dockerBuildEnvs?: string,
 	dockerImage?: string,
+	dockerHostNetwork?: boolean,
 	dataOnlyImage?: string,
 }
 
@@ -26,6 +27,11 @@ export default class SiteConfig extends BaseConfig<any> {
 		// Set default wait time of 3000ms
 		if ( ! args.wait ) {
 			this.set( 'wait', 3000 );
+		}
+
+		// Do not use Docker host network by default
+		if ( ! args.dockerHostNetwork ) {
+			this.set( 'dockerHostNetwork', false );
 		}
 	}
 

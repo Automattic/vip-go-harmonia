@@ -51,6 +51,7 @@ const optionDefinitions = [
 	{ name: 'docker-build-env', type: String },
 	{ name: 'docker-env-vars', type: String },
 	{ name: 'docker-image', type: String },
+	{ name: 'docker-host-network', type: Boolean },
 	{ name: 'use-data-only-image', type: String },
 ];
 
@@ -147,6 +148,11 @@ const optionsSections = [
 				name: 'docker-image',
 				typeLabel: '{underline String}',
 				description: 'Bypass the Docker build step, and use a specific already built docker image to run the tests',
+			},
+			{
+				name: 'docker-host-network',
+				type: Boolean,
+				description: 'Run Docker images using the host network, instead of port mapping',
 			},
 			{
 				name: 'use-data-only-image',
@@ -315,6 +321,11 @@ if ( options[ 'docker-image' ] ) {
 // Set the data-only image, if exists
 if ( options[ 'use-data-only-image' ] ) {
 	siteOptions.set( 'dataOnlyImage', options[ 'use-data-only-image' ] );
+}
+
+// Set the docker to network, if enabled
+if ( options[ 'docker-host-network' ] ) {
+	siteOptions.set( 'dockerHostNetwork', true );
 }
 
 // Get from .env, if exists
