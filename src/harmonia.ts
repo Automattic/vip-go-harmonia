@@ -184,6 +184,7 @@ export default class Harmonia {
 	public registerTest( test: Test ) {
 		log( `Registering test ${ test.name } (${ test.constructor.name })` );
 		test.setOptions( this.options );	// Set the test options
+		test.setHarmoniaInstance( this ); 	// Set the Harmonia instance
 		this.tests.push( test );			// Store the test
 	}
 
@@ -256,6 +257,10 @@ export default class Harmonia {
 
 	public setSource( source: string ) {
 		this.source = source;
+	}
+
+	public getSource(): string {
+		return this.source;
 	}
 
 	public on( eventName: string, listener: ( ...args: any[] ) => void ) {

@@ -11,6 +11,7 @@ export default class DockerRun extends Test {
 	private imageTag = '';
 	private port = 0;
 	private wait = 3000;
+	private useDockerHostNetwork = false;
 	private containerName = '';
 
 	constructor() {
@@ -23,6 +24,8 @@ export default class DockerRun extends Test {
 		this.envVariables = this.getEnvironmentVariables();
 		this.port = this.getEnvVar( 'PORT' ) as number;
 		this.wait = this.getSiteOption( 'wait' );
+
+		this.useDockerHostNetwork = this.getSiteOption( 'dockerHostNetwork' );
 
 		// Get the docker image tag
 		if ( ! this.get( 'dockerImage' ) ) {
@@ -51,8 +54,14 @@ export default class DockerRun extends Test {
 				return `${ string } -e ${ envVarName }`;
 			}, '' );
 
-			const subprocess = executeShell( `docker run -t --name ${ this.containerName } -p ${ this.port }:${ this.port } ${ environmentVarDockerOption } ${ this.imageTag }`,
-				environmentVars );
+			let dockerNetwork = `-p ${ this.port }:${ this.port }`;
+			// If `--docker-host-network` is set, use the host network instead of port mapping
+			if ( this.useDockerHostNetwork ) {
+				dockerNetwork = '--network host';
+			}
+
+			const dockerCommand = `docker run -t ${ dockerNetwork } --name ${ this.containerName } ${ environmentVarDockerOption } ${ this.imageTag }`;
+			const subprocess = executeShell( dockerCommand,	environmentVars );
 
 			if ( Harmonia.isVerbose() ) {
 				subprocess.stdout?.pipe( process.stdout );
