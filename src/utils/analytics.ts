@@ -5,6 +5,8 @@ import debug from 'debug';
 const log = debug( 'analytics' );
 const validEventOrPropNamePattern = /^[a-z_][a-z0-9_]*$/;
 
+const HARMONIA_EVENT_PREFIX = 'vip_harmonia_';
+
 class Analytics {
 	private static instance: Analytics;
 
@@ -53,7 +55,7 @@ class Analytics {
 
 	static getInstance(): Analytics {
 		if ( ! Analytics.instance ) {
-			Analytics.instance = new Analytics( 'vip_harmonia_' );
+			Analytics.instance = new Analytics( HARMONIA_EVENT_PREFIX );
 		}
 		return Analytics.instance;
 	}
@@ -142,9 +144,28 @@ class Analytics {
 	}
 }
 
+let trackEventFunction: ( name: string, eventProps?: any ) => Promise<Response|boolean|string>;
+
 export async function trackEvent( name: string, props = {} ) {
-	const analytics = Analytics.getInstance();
-	return await analytics.trackEvent( name, props );
+	if ( ! trackEventFunction ) {
+		const analytics = Analytics.getInstance();
+		return await analytics.trackEvent( name, props );
+	}
+	log( 'Using custom trackEvent function' );
+	if ( ! name.startsWith( HARMONIA_EVENT_PREFIX ) ) {
+		name = HARMONIA_EVENT_PREFIX + name;
+	}
+	return await trackEventFunction( name, props );
+}
+
+/**
+ * Sets the trackEvent function to be used by the analytics module.
+ * This is useful for allowing the CLI to use a custom function for tracking events.
+ *
+ * @param  fn The function to be used for tracking events.
+ */
+export function setTrackEventFunction( fn: typeof trackEventFunction ) {
+	trackEventFunction = fn;
 }
 
 export function setUser( userId, userType ) {

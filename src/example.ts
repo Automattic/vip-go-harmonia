@@ -21,6 +21,11 @@ const envVars: EnvironmentVariables = new EnvironmentVariables( {
 } );
 
 harmonia.bootstrap( siteOptions, envVars );
+harmonia.setTrackEventFunction( ( eventName, eventProperties ) => {
+	console.log( 'Sending tracking events using custom function' );
+	console.log( eventName, eventProperties );
+	return Promise.resolve( true );
+} );
 
 harmonia.registerTest( new ExampleTest() );
 harmonia.registerTest( new ExampleTest() );
