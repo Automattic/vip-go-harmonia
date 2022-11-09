@@ -103,4 +103,8 @@ const args = Object.keys( options ).reduce( ( acc: string[], key: string ) => {
 	/* eslint-enable security/detect-object-injection */
 }, [] );
 
-childProcess.fork( __dirname + '/cli.js', args );
+const cliProcess = childProcess.fork( __dirname + '/cli.js', args );
+
+cliProcess.on( 'exit', ( code: number ) => {
+	process.exit( code );
+} );
