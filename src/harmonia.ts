@@ -1,5 +1,14 @@
+/**
+ * External Imports
+ */
 import { createHash } from 'crypto';
+import debug from 'debug';
+import { Response } from 'node-fetch';
 import stripAnsi from 'strip-ansi';
+
+/**
+ * Internal Imports
+ */
 import Store from './lib/stores/store';
 import SiteConfig from './lib/configs/site.config';
 import EnvironmentVariables from './lib/configs/envvars.config';
@@ -19,7 +28,6 @@ import GitSuite from './tests/git/suite';
 import HealthSuite from './tests/health/suite';
 import TestSuiteResult from './lib/results/testsuiteresult';
 import NPMSuite from './tests/npm/suite';
-import debug from 'debug';
 
 const log = debug( 'harmonia' );
 
@@ -237,6 +245,17 @@ export default class Harmonia {
 			};
 			await Analytics.trackEvent( 'run_test', data );
 		} );
+	}
+
+	/**
+	 * Sets the trackEvent function to be used by the analytics module.
+	 * This is useful for allowing the CLI to use a custom function for tracking events.
+	 *
+	 * @param  trackEventsFn The function to be used for tracking events.
+	 */
+	public setTrackEventFunction( trackEventsFn: ( name: string, eventProps?: any ) => Promise<Response|boolean|string> ) {
+		debug( 'Setting custom trackEvent function' );
+		Analytics.setTrackEventFunction( trackEventsFn );
 	}
 
 	/**
