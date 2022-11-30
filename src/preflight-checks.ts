@@ -14,7 +14,7 @@ import childProcess from 'child_process';
 import { ALLOWED_NODEJS_VERSIONS } from './lib/configs/site.config';
 
 console.log( chalk.bold.redBright( '#### WARNING! ####' ) );
-console.log( ` Running preflight-checks using ${ chalk.italic( 'npx' ) } is deprecated and is not recommended.\n` +
+console.log( ` Running preflight-checks using ${ chalk.italic( 'npx' ) } is outdated and will soon be deprecated.\n` +
 	' A new deployment validation tool is now bundled with VIP-CLI, and to prevent any issues with the checks,\n' +
 	' we recommend using VIP-CLI v2.23.0 or older, and run the checks with the following command:\n\n' +
 	chalk.italic( '  # Replace 1234 with your app ID, and ' +
