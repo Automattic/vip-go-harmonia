@@ -22,9 +22,3 @@ The command can be linked and installed on the environment using `npm link`:
 $ npm link
 $ harmonia --help
 ```
-
-## Links & References
- * [Project Thread](https://vipdecoupledp2.wordpress.com/2022/01/13/project-thread-preflight-checks-next-gen/)
- * [Initial project discovery](https://vipdecoupledp2.wordpress.com/2022/01/10/preflight-tests-next-gen-q1-2022-project/)
- * [Tests and User Experience](https://vipdecoupledp2.wordpress.com/2022/01/20/preflight-checks-tests-and-user-experience/)
- * [Proposed Architecture](https://vipdecoupledp2.wordpress.com/2022/01/26/preflight-checks-proposed-architecture/)
