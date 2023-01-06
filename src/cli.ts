@@ -14,7 +14,7 @@ import TestSuiteResult from './lib/results/testsuiteresult';
 import { setCwd } from './utils/shell';
 import { readFileSync } from 'fs';
 import dotenv from 'dotenv';
-import { isWebUri } from 'valid-url';
+import { isWebUri } from './utils/url';
 import * as fs from 'fs';
 import { isBase64 } from './utils/base64';
 import debug from 'debug';

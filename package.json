@@ -38,7 +38,6 @@
     "@types/jest": "^27.4.0",
     "@types/node": "^17.0.13",
     "@types/node-fetch": "^2.6.1",
-    "@types/valid-url": "^1.0.3",
     "eslint": "^8.22.0",
     "eslint-plugin-jest": "^26.0.0",
     "jest": "^27.4.7",
@@ -53,12 +52,10 @@
     "debug": "^4.3.3",
     "dotenv": "^16.0.0",
     "execa": "^5.1.1",
-    "get-urls": "^10.0.1",
     "github-api": "^3.4.0",
     "node-abort-controller": "^3.0.1",
     "node-fetch": "^2.6.7",
     "semver": "^7.3.5",
-    "strip-ansi": "^6.0.1",
-    "valid-url": "^1.0.9"
+    "strip-ansi": "^6.0.1"
   }
 }

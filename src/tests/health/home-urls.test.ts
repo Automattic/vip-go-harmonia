@@ -1,6 +1,6 @@
 import BaseHealthTest from './base.test';
-import getUrls from 'get-urls';
 import fetchWithTiming, { HarmoniaFetchError, TimedResponse } from '../../utils/http';
+import { extractUrls } from '../../utils/url';
 import Issue from '../../lib/issue';
 import chalk from 'chalk';
 
@@ -38,8 +38,7 @@ export default class HomeURLsTest extends BaseHealthTest {
 
 			const homepageContent = await homepageRequest.response.text();
 
-			const allURLs = this.filterPaths(
-				Array.from( getUrls( homepageContent, { extractFromQueryString: true, requireSchemeOrWww: true } ) ) );
+			const allURLs = this.filterPaths( Array.from( extractUrls( homepageContent ) ) );
 			return allURLs.slice( 0, limit );
 		} catch ( error ) {
 			if ( error instanceof HarmoniaFetchError ) {
