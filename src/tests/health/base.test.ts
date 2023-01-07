@@ -4,7 +4,7 @@ import Test from '../../lib/tests/test';
 import { executeShell } from '../../utils/shell';
 import fetchWithTiming, { HarmoniaFetchError, TimedResponse } from '../../utils/http';
 import Issue from '../../lib/issue';
-import { isWebUri } from 'valid-url';
+import { isWebUri } from '../../utils/url';
 
 /**
  * Maximum desired duration of a cache-healthcheck request, in ms.
