@@ -22,3 +22,6 @@ The command can be linked and installed on the environment using `npm link`:
 $ npm link
 $ harmonia --help
 ```
+## Contributing
+
+For details about contributing to this project (e.g. publishing a release), please see [CONTRIBUTING.md](CONTRIBUTING.md).
