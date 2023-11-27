@@ -16,7 +16,8 @@
 
     // Strict mode, but allow implicit any.
     "strict": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "skipLibCheck": true
   },
   "include": [ "src" ]
 }

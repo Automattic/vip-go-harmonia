@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 import * as fs from 'fs';
 import commandLineArgs from 'command-line-args';
-import GitHub from 'github-api';
+import { Octokit } from 'octokit';
 import { IssueType } from './lib/issue';
 import { TestResultType } from './lib/results/testresult';
 
@@ -24,17 +24,14 @@ const optionDefinitions = [
 const options = commandLineArgs( optionDefinitions );
 
 // Prepare GitHub connection
-const GITHUB_USER = options[ 'github-user' ] || process.env.GITHUB_USER;
 const GITHUB_TOKEN = options[ 'github-token' ] || process.env.GITHUB_TOKEN;
 
-const github = new GitHub( {
-	username: GITHUB_USER,
-	token: GITHUB_TOKEN,
+const octokit = new Octokit( {
+	auth: GITHUB_TOKEN,
 } );
 
 // Break repo owner and repo name
 const [ repoOwner, repoName ] = options.repo.split( '/' );
-const repository = github.getRepo( repoOwner, repoName );
 
 // Read the file
 let results;
@@ -49,11 +46,19 @@ if ( options.file ) {
 	}
 }
 
-function updateBuildStatus( commitSHA, state, description ) {
-	return repository.updateStatus( commitSHA, {
+type StatusState = 'error' | 'failure' | 'pending' | 'success';
+
+function updateBuildStatus( commitSHA: string, state: StatusState, description: string ): Promise<unknown> {
+	return octokit.request( 'POST /repos/{owner}/{repo}/statuses/{sha}', {
+		owner: repoOwner,
+		repo: repoName,
+		sha: commitSHA,
 		state,
 		description,
 		context: 'Harmonia',
+		headers: {
+			'X-GitHub-Api-Version': '2022-11-28',
+		},
 	} );
 }
 
@@ -300,8 +305,15 @@ async function main() {
 	//  Create the Pull Request comment
 	const pullRequestID = options[ 'pull-request' ] ?? false;
 	if ( pullRequestID ) {
-		const issues = github.getIssues( repoOwner, repoName );
-		await issues.createIssueComment( pullRequestID, createMarkdown() );
+		await octokit.request( 'POST /repos/{owner}/{repo}/issues/{issue_number}/comments', {
+			owner: repoOwner,
+			repo: repoName,
+			issue_number: pullRequestID,
+			body: createMarkdown(),
+			headers: {
+				'X-GitHub-Api-Version': '2022-11-28',
+			},
+		} );
 	}
 }
 
