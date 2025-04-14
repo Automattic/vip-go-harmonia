@@ -50,7 +50,7 @@ export default abstract class BaseHealthTest extends Test {
 			if ( error instanceof HarmoniaFetchError ) {
 				// Get logs
 				const subprocess = await executeShell( `docker logs ${ escapeShellArg( this.containerName ) } --since ${ escapeShellArg( error.getStartDate().toISOString() ) } ` +
-					`--until ${ error.getEndDate().toISOString() }` );
+					`--until ${ escapeShellArg( error.getEndDate().toISOString() ) }` );
 				const logs = subprocess.all;
 
 				this.error( `Error fetching ${ error.getURL() }: ${ error.message }`, undefined, { all: logs } );
