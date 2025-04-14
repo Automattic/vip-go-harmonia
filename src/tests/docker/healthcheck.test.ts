@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import Test from '../../lib/tests/test';
-import { executeShell } from '../../utils/shell';
+import { escapeShellArg, executeShell } from '../../utils/shell';
 import fetchWithTiming, { HarmoniaFetchError } from '../../utils/http';
 
 const CACHE_HEALTHCHECK_ROUTE = '/cache-healthcheck?';
@@ -57,7 +57,7 @@ export default class HealthcheckTest extends Test {
 
 		let logs;
 		try {
-			const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ this.startDate }` );
+			const subprocess = await executeShell( `docker logs ${ escapeShellArg( this.containerName ) } --since ${ escapeShellArg( this.startDate ) }` );
 			logs = subprocess.all;
 		} catch ( err ) {
 			this.log( 'Error getting docker logs: ' + ( err as Error ).message );
