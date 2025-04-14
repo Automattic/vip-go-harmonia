@@ -1,6 +1,6 @@
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
-import { executeShell } from '../../utils/shell';
+import { escapeShellArg, executeShell } from '../../utils/shell';
 import { createHash } from 'crypto';
 import { wait } from '../../utils/wait';
 import Harmonia from '../../harmonia';
@@ -51,7 +51,7 @@ export default class DockerRun extends Test {
 
 			// Build the `--env` string of options for Docker with the environment variable keys
 			const environmentVarDockerOption = Object.keys( environmentVars ).reduce( ( string, envVarName ) => {
-				return `${ string } -e ${ envVarName }`;
+				return `${ string } -e ${ escapeShellArg( envVarName ) }`;
 			}, '' );
 
 			let dockerNetwork = `-p ${ this.port }:${ this.port }`;
@@ -60,8 +60,8 @@ export default class DockerRun extends Test {
 				dockerNetwork = '--network host';
 			}
 
-			const dockerCommand = `docker run -t ${ dockerNetwork } --name ${ this.containerName } ${ environmentVarDockerOption } ${ this.imageTag }`;
-			const subprocess = executeShell( dockerCommand,	environmentVars );
+			const dockerCommand = `docker run -t ${ dockerNetwork } --name ${ escapeShellArg( this.containerName ) } ${ environmentVarDockerOption } ${ escapeShellArg( this.imageTag ) }`;
+			const subprocess = executeShell( dockerCommand, environmentVars );
 
 			if ( Harmonia.isVerbose() ) {
 				subprocess.stdout?.pipe( process.stdout );

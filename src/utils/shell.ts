@@ -1,9 +1,30 @@
-import execa, { ExecaChildProcess } from 'execa';
+import { platform } from 'node:os';
+import execa, { type ExecaChildProcess } from 'execa';
 
 const subprocesses: ExecaChildProcess[] = [];
 let cwd = process.cwd();
 
-export function executeShell( command, envVars = {} ) {
+export function escapeShellArg( arg: string ): string {
+	if ( ! arg ) {
+		return '""';
+	}
+
+	if ( platform() === 'win32' ) {
+		// For Windows cmd.exe, we need to handle several special characters
+		// First handle backslashes and double quotes
+		let escaped = arg.replace( /(\\*)"/g, '$1$1\\"' ).replace( /(\\*)$/, '$1$1' );
+
+		// Then handle special shell characters: ^ ! % ~ & < > | ' `
+		escaped = escaped.replace( /([&^|<>()!"%~])/g, '^$1' );
+
+		return `"${ escaped }"`;
+	}
+
+	// Unix/Linux/macOS: single quotes around the string and escape single quotes within
+	return `'${ arg.replace( /'/g, "'\\''" ) }'`;
+}
+
+export function executeShell( command: string, envVars = {} ) {
 	const envVariables = {
 		VIP_GO_APP_ID: 'unknown',
 	};
@@ -11,7 +32,7 @@ export function executeShell( command, envVars = {} ) {
 	const promise = execa.command( command, {
 		all: true,
 		cwd,
-		env: Object.assign( {}, envVariables, envVars ),
+		env: { ...envVariables, ...envVars },
 	} );
 
 	subprocesses.push( promise );
@@ -32,7 +53,7 @@ export function executeShell( command, envVars = {} ) {
 	return promise;
 }
 
-export function executeShellSync( command, envVars = {} ) {
+export function executeShellSync( command: string, envVars = {} ) {
 	const envVariables = {
 		VIP_GO_APP_ID: 'unknown',
 	};
@@ -40,7 +61,7 @@ export function executeShellSync( command, envVars = {} ) {
 	return execa.commandSync( command, {
 		all: true,
 		cwd,
-		env: Object.assign( {}, envVariables, envVars ),
+		env: { ...envVariables, ...envVars },
 	} );
 }
 
