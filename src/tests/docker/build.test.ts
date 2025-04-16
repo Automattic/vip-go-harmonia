@@ -1,7 +1,7 @@
 import path from 'path';
 import Test from '../../lib/tests/test';
 import chalk from 'chalk';
-import { executeShell, executeShellSync } from '../../utils/shell';
+import { escapeShellArg, executeShell, executeShellSync } from '../../utils/shell';
 import Harmonia from '../../harmonia';
 
 export default class DockerBuild extends Test {
@@ -70,7 +70,7 @@ export default class DockerBuild extends Test {
 	 */
 	private async buildApp(): Promise<string> {
 		const script = path.resolve( __dirname, '../../..', 'scripts/build-app/build.sh' );
-		const subprocess = executeShell( `bash ${ script }`, {
+		const subprocess = executeShell( `bash ${ escapeShellArg( script ) }`, {
 			...this.envVariables,
 			NODE_VERSION: this.nodeVersion,
 		} );
@@ -97,7 +97,7 @@ export default class DockerBuild extends Test {
 		this.notice( `Using a data-only image ${ chalk.yellow( dataImage ) } ` );
 
 		const script = path.resolve( __dirname, '../../..', 'scripts/data-only/build.sh' );
-		const subprocess = executeShell( `bash ${ script }`, {
+		const subprocess = executeShell( `bash ${ escapeShellArg( script ) }`, {
 			NODE_VERSION: this.nodeVersion,
 			DATAONLY_IMAGE: dataImage,
 		} );
@@ -123,7 +123,7 @@ export default class DockerBuild extends Test {
 	 */
 	private getDockerImage( dockerImage: string ): string | boolean {
 		try {
-			const subprocess = executeShellSync( `docker images --filter reference=${ dockerImage } --format {{.Repository}}:{{.Tag}}` );
+			const subprocess = executeShellSync( `docker images --filter reference=${ escapeShellArg( dockerImage ) } --format {{.Repository}}:{{.Tag}}` );
 
 			if ( subprocess.stdout === '' || subprocess.exitCode !== 0 ) {
 				return false;

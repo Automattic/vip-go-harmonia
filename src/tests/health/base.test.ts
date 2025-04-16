@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 
 import Test from '../../lib/tests/test';
-import { executeShell } from '../../utils/shell';
+import { escapeShellArg, executeShell } from '../../utils/shell';
 import fetchWithTiming, { HarmoniaFetchError, TimedResponse } from '../../utils/http';
 import Issue from '../../lib/issue';
 import { isWebUri } from '../../utils/url';
@@ -49,8 +49,8 @@ export default abstract class BaseHealthTest extends Test {
 		} catch ( error ) {
 			if ( error instanceof HarmoniaFetchError ) {
 				// Get logs
-				const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ error.getStartDate().toISOString() } ` +
-					`--until ${ error.getEndDate().toISOString() }` );
+				const subprocess = await executeShell( `docker logs ${ escapeShellArg( this.containerName ) } --since ${ escapeShellArg( error.getStartDate().toISOString() ) } ` +
+					`--until ${ escapeShellArg( error.getEndDate().toISOString() ) }` );
 				const logs = subprocess.all;
 
 				this.error( `Error fetching ${ error.getURL() }: ${ error.message }`, undefined, { all: logs } );
@@ -93,7 +93,7 @@ export default abstract class BaseHealthTest extends Test {
 		// Check for logs
 		let logs;
 		try {
-			const subprocess = await executeShell( `docker logs ${ this.containerName } --since ${ request.startDate.toISOString() }` );
+			const subprocess = await executeShell( `docker logs ${ escapeShellArg( this.containerName ) } --since ${ escapeShellArg( request.startDate.toISOString() ) }` );
 			logs = subprocess.all;
 		} catch ( err ) {
 			this.log( 'Error getting docker logs: ' + ( err as Error ).message );
