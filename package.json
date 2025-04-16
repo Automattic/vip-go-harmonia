@@ -47,8 +47,8 @@
   },
   "dependencies": {
     "chalk": "^4.1.2",
-    "command-line-args": "^5.2.1",
-    "command-line-usage": "^6.1.1",
+    "command-line-args": "^6.0.1",
+    "command-line-usage": "^7.0.3",
     "debug": "^4.3.3",
     "dotenv": "^16.0.0",
     "execa": "^5.1.1",
