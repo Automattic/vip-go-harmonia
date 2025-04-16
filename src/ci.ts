@@ -1,7 +1,7 @@
 #! /usr/bin/env node
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import commandLineArgs from 'command-line-args';
-import { Octokit } from 'octokit';
+import type { Octokit } from '@octokit/core';
 import { IssueType } from './lib/issue';
 import { TestResultType } from './lib/results/testresult';
 
@@ -26,10 +26,6 @@ const options = commandLineArgs( optionDefinitions );
 // Prepare GitHub connection
 const GITHUB_TOKEN = options[ 'github-token' ] || process.env.GITHUB_TOKEN;
 
-const octokit = new Octokit( {
-	auth: GITHUB_TOKEN,
-} );
-
 // Break repo owner and repo name
 const [ repoOwner, repoName ] = options.repo.split( '/' );
 
@@ -38,6 +34,7 @@ let results;
 if ( options.file ) {
 	const filepath = options.file;
 	try {
+		// eslint-disable-next-line security/detect-non-literal-fs-filename
 		const jsonfile = fs.readFileSync( filepath, 'utf-8' );
 		results = JSON.parse( jsonfile );
 	} catch ( error ) {
@@ -48,7 +45,15 @@ if ( options.file ) {
 
 type StatusState = 'error' | 'failure' | 'pending' | 'success';
 
-function updateBuildStatus( commitSHA: string, state: StatusState, description: string ): Promise<unknown> {
+async function buildOctokit(): Promise<Octokit> {
+	// eslint-disable-next-line import/no-unresolved
+	const { Octokit } = await import( 'octokit' );
+	return new Octokit( {
+		auth: GITHUB_TOKEN,
+	} );
+}
+
+function updateBuildStatus( octokit: Octokit, commitSHA: string, state: StatusState, description: string ): Promise<unknown> {
 	return octokit.request( 'POST /repos/{owner}/{repo}/statuses/{sha}', {
 		owner: repoOwner,
 		repo: repoName,
@@ -63,6 +68,7 @@ function updateBuildStatus( commitSHA: string, state: StatusState, description: 
 }
 
 function getResultBadge( resultType: string|TestResultType ) {
+	// eslint-disable-next-line security/detect-object-injection
 	switch ( TestResultType[ resultType ] ) {
 		case TestResultType.Skipped:
 			return ':next_track_button:';
@@ -80,6 +86,7 @@ function getResultBadge( resultType: string|TestResultType ) {
 }
 
 function getResultLabel( resultType: string|TestResultType ) {
+	// eslint-disable-next-line security/detect-object-injection
 	switch ( TestResultType[ resultType ] ) {
 		case TestResultType.Skipped:
 			return 'SKIPPED';
@@ -115,6 +122,7 @@ function getResultEmojis( resultType: TestResultType, numTests: number ) {
 }
 
 function formatIssueType( issueType: string|IssueType ) {
+	// eslint-disable-next-line security/detect-object-injection
 	switch ( IssueType[ issueType ] ) {
 		case IssueType.Blocker:
 			return 'Blocker';
@@ -275,13 +283,15 @@ function createMarkdown() {
  * START OF THE MAIN BLOCK
  */
 async function main() {
+	const octokit = await buildOctokit();
+
 	if ( options.start ) {
-		await updateBuildStatus( options.commit, 'pending', 'Preparing to run Harmonia tests' );
+		await updateBuildStatus( octokit, options.commit, 'pending', 'Preparing to run Harmonia tests' );
 		return;
 	}
 
 	if ( options.failed || ! options.file ) {
-		await updateBuildStatus( options.commit, 'failure', 'Unable to build application' );
+		await updateBuildStatus( octokit, options.commit, 'failure', 'Unable to build application' );
 		return;
 	}
 
@@ -290,16 +300,16 @@ async function main() {
 
 	if ( summary.Aborted && summary.Aborted > 1 ) {
 		// State: failure, message: aborted
-		await updateBuildStatus( options.commit, 'failure', 'Harmonia didn\'t finish running all the tests' );
+		await updateBuildStatus( octokit, options.commit, 'failure', 'Harmonia didn\'t finish running all the tests' );
 	} else if ( summary.Failed && summary.Failed > 1 ) {
 		// State: error, message: X errors found
-		await updateBuildStatus( options.commit, 'failure', `${ summary.Failed } tests failed` );
+		await updateBuildStatus( octokit, options.commit, 'failure', `${ summary.Failed } tests failed` );
 	} else if ( summary.PartialSuccess && summary.PartialSuccess > 1 ) {
 		// State: success, message: Partial success
-		await updateBuildStatus( options.commit, 'success', 'Passed, but there are warnings.' );
+		await updateBuildStatus( octokit, options.commit, 'success', 'Passed, but there are warnings.' );
 	} else {
 		// State: success, message: success
-		await updateBuildStatus( options.commit, 'success', 'Application passes all tests.' );
+		await updateBuildStatus( octokit, options.commit, 'success', 'Application passes all tests.' );
 	}
 
 	//  Create the Pull Request comment
