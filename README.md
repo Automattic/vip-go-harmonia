@@ -1,4 +1,11 @@
+> [!WARNING]
+> **This repository is unmaintained and has been archived.**
+>
+> No further updates, bug fixes, or security patches will be provided.
+
 # Harmonia
+
+###
 
 *Formely known as Preflight Checks.* The goal of this project is to provide a set of automated tests (or checks) that can test and validate the application functionality and responsiveness with an environment as close to production as possible, before the actual deployment to an environment.
 
